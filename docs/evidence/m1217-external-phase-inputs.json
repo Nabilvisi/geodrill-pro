@@ -1,0 +1,99 @@
+{
+  "study_name": "Synthetic external mud-gas study and batch replay",
+  "geometry_revision_id": "7d276451-b80f-4055-8575-d8b64d4ab76a",
+  "depth_datum": "RKB synthetic",
+  "evidence_state": "synthetic",
+  "source_note": "Generated research assumptions; no instrument, material or field qualification",
+  "mode": "external_mud_gas_review",
+  "fluid_system": "actual_mud_gas",
+  "characterization_note": "Manufactured external record, not actual-mud PVT qualification",
+  "components": [
+    {
+      "name": "Methane example",
+      "critical_temperature_k": 190.56,
+      "critical_pressure_pa": 4599200.0,
+      "acentric_factor": 0.011,
+      "mole_fraction": 0.5
+    },
+    {
+      "name": "Ethane example",
+      "critical_temperature_k": 305.32,
+      "critical_pressure_pa": 4872000.0,
+      "acentric_factor": 0.099,
+      "mole_fraction": 0.5
+    }
+  ],
+  "binary_interaction": 0.0,
+  "absolute_pressure_pa": 1000000.0,
+  "temperature_k": 200.0,
+  "external_model_reference": "Synthetic external phase-study fixture v1.0",
+  "external_review_state": "reviewed",
+  "external_review_note": "Manufactured review provenance, no laboratory or specialist approval",
+  "external_points": [
+    {
+      "md_m": 0.0,
+      "time_s": 0.0,
+      "absolute_pressure_pa": 2000000.0,
+      "temperature_k": 300.0,
+      "vapor_fraction": 0.2,
+      "vapor_composition": [
+        0.8,
+        0.2
+      ],
+      "liquid_composition": [
+        0.2,
+        0.8
+      ],
+      "dissolved_gas_mol": 8.0,
+      "vapor_molar_volume_m3_mol": 0.001,
+      "material_balance_residual_mol": 0.0,
+      "converged": true,
+      "phase_stability_checked": true
+    },
+    {
+      "md_m": 100.0,
+      "time_s": 10.0,
+      "absolute_pressure_pa": 1500000.0,
+      "temperature_k": 300.0,
+      "vapor_fraction": 0.5,
+      "vapor_composition": [
+        0.8,
+        0.2
+      ],
+      "liquid_composition": [
+        0.2,
+        0.8
+      ],
+      "dissolved_gas_mol": 6.0,
+      "vapor_molar_volume_m3_mol": 0.002,
+      "material_balance_residual_mol": 0.0,
+      "converged": true,
+      "phase_stability_checked": true
+    },
+    {
+      "md_m": 200.0,
+      "time_s": 20.0,
+      "absolute_pressure_pa": 1000000.0,
+      "temperature_k": 300.0,
+      "vapor_fraction": 0.8,
+      "vapor_composition": [
+        0.8,
+        0.2
+      ],
+      "liquid_composition": [
+        0.2,
+        0.8
+      ],
+      "dissolved_gas_mol": 2.0,
+      "vapor_molar_volume_m3_mol": 0.003,
+      "material_balance_residual_mol": 0.0,
+      "converged": true,
+      "phase_stability_checked": true
+    }
+  ],
+  "total_gas_inventory_mol": 10.0,
+  "initial_dissolved_gas_mol": 8.0,
+  "mass_transfer_time_s": 10.0,
+  "replay_step_s": 0.1,
+  "balance_tolerance_mol": 0.01
+}

@@ -1,0 +1,213 @@
+{
+  "verified_at": "2026-10-04T14:22:13.044177+00:00",
+  "release": "dist/release-9f8bb45481c74142a36dc2c5ccf66bc9",
+  "health": {
+    "status": "ok",
+    "version": "0.8.0",
+    "mode": "local-research",
+    "equipment_control": false,
+    "instance_id": "414377ad0a5b7729",
+    "pid": 40440
+  },
+  "assets": [
+    {
+      "url": "/assets/index-Bc7C4wL3.js",
+      "sha256": "3175fc09dcca124dd8aecb97e3c58e20982db8cfeba89c44fe4681e4d2261d6f",
+      "bytes": 380826
+    },
+    {
+      "url": "/assets/index-CH3NGfKJ.css",
+      "sha256": "ccff790a81d7ed9e8924bfe389510289134879ff65779c6e766b6010c8ba190a",
+      "bytes": 38187
+    }
+  ],
+  "reports": [
+    {
+      "id": "a05ef9f0-9e3b-4f8d-bc74-05422cb9ad3a",
+      "sha256": "781075331097c0fbd136593014cb4a000c35648fb5b174e52054dc5782eddedb",
+      "application_version": "0.8.0",
+      "download_bytes": 6162356
+    },
+    {
+      "id": "597ebab6-0dd3-466a-8420-698129eb30ce",
+      "sha256": "4d16ac076b8531da598b51203ca062523f66ab38289e27e4bcd98bfac354238b",
+      "application_version": "0.7.0",
+      "preserved": true
+    },
+    {
+      "id": "192073e1-671d-4587-a270-3046cda29c66",
+      "sha256": "4bef5c4be0213e1acb16d809f010533f4d8ce5f03b1da7501d6be6662e8f8ae0",
+      "application_version": "0.7.0",
+      "preserved": true
+    },
+    {
+      "id": "7a89c96a-ce8d-486c-8424-57e0e6779d1d",
+      "sha256": "d612f6c6fbe8bbb485ff1823e8882348c6e7734bace86eff9a2cf77feaecc21a",
+      "application_version": "0.6.0",
+      "preserved": true
+    },
+    {
+      "id": "c9516f97-7440-4e39-8479-fe6340aeaf6d",
+      "sha256": "ef84b610b8e6480a8230e7143d1ef143202ace529119de72cc58ab6aee2b9673",
+      "application_version": "0.8.0",
+      "modules": "M1 geometry and calculations through M17",
+      "calculation_models": [
+        "anomaly",
+        "bit-condition",
+        "buckling",
+        "casing",
+        "clustering",
+        "dynamics",
+        "em_vendor",
+        "gas-phase",
+        "hydraulics",
+        "mse",
+        "pressure",
+        "shaly_sand",
+        "stability",
+        "supervision",
+        "surge-swab",
+        "torque-drag",
+        "transport",
+        "wear-fatigue"
+      ]
+    }
+  ],
+  "saved_studies": {
+    "dynamics": {
+      "id": "6855ce4b-6477-4e36-95d9-0818378e26bb",
+      "name": "Verified synthetic BHA response and native samples",
+      "status": "research_scenario",
+      "calculation_sha256": "48c662478e9ae00a8c1d19c8d1b9fdbfe1cb4cf96e8f686918cf416c1783e4d9",
+      "geometry_sha256": "5c4568f400135e992c8ed795e04c010c9554d0561a009421479f328eca8ff3f4",
+      "input_document_sha256": "9e35b83f7fed1e878078d03e99915042fd92490996ac177cdf1c835240932c2a",
+      "input_document_matches_current": true
+    },
+    "bit-condition": {
+      "id": "dfbfd4ea-052c-4d7c-a313-60c728786760",
+      "name": "Synthetic inspected and censored bit runs",
+      "status": "research_scenario",
+      "calculation_sha256": "6aaffe1a7016ca91041b555948448b5d9731a13de2ed8b97ba4bfb85051630d2",
+      "geometry_sha256": "5c4568f400135e992c8ed795e04c010c9554d0561a009421479f328eca8ff3f4",
+      "input_document_sha256": "25696ae75fb26099a94b66a41f36c138c50afcec69c56ce9d813245d939cd77f",
+      "input_document_matches_current": true
+    },
+    "wear-fatigue": {
+      "id": "38660c51-b3f7-4767-bc12-f758c3785475",
+      "name": "Verified synthetic casing wear and fatigue",
+      "status": "research_scenario",
+      "calculation_sha256": "0feaeb224c63684959023fc80f0883f0db8a5461896f315ea39b15c7c78dc665",
+      "geometry_sha256": "5c4568f400135e992c8ed795e04c010c9554d0561a009421479f328eca8ff3f4",
+      "input_document_sha256": "d6f6f309287d988f4dc60cf67d1ec80a24d76b98ae302cafa4def34dacf68fb3",
+      "input_document_matches_current": true
+    },
+    "anomaly": {
+      "id": "1fdb012b-4687-4405-9b2f-af9d19470d7d",
+      "name": "Synthetic causal flow-balance replay",
+      "status": "research_scenario",
+      "calculation_sha256": "edaaeea968ea6361df03d59426e72987e2476f2db2714de7b3ad74a445b8f4bc",
+      "geometry_sha256": "5c4568f400135e992c8ed795e04c010c9554d0561a009421479f328eca8ff3f4",
+      "input_document_sha256": "153c550e4c92fc1d295281c54e991e3a24a1a84e6bf49f8746745bbd4c4c6255",
+      "input_document_matches_current": true
+    },
+    "gas-phase": {
+      "id": "423b9817-769a-4155-9e64-a5a66a81e72c",
+      "name": "Synthetic characterized binary equilibrium",
+      "status": "research_scenario",
+      "calculation_sha256": "df9f97e32fc5e96a78987b493a30faab9819fca5daf3814416bc3fee64a24bcd",
+      "geometry_sha256": "5c4568f400135e992c8ed795e04c010c9554d0561a009421479f328eca8ff3f4",
+      "input_document_sha256": "5f86626c9055a110787641a4c4481a4b12dda23cb973ce0bf97f67c8c51c9715",
+      "input_document_matches_current": true
+    },
+    "supervision": {
+      "id": "1690880f-c8e4-489c-9993-12ed117212c1",
+      "name": "Synthetic supervisory faults and fresh recovery",
+      "status": "research_scenario",
+      "calculation_sha256": "fd5da5af71a04fc33aa2bac01931dd2168fa03ab58d095d2ec6a87484320eb4a",
+      "geometry_sha256": "5c4568f400135e992c8ed795e04c010c9554d0561a009421479f328eca8ff3f4",
+      "input_document_sha256": "997d7585b3751d382b4ed7d7f95bc62c314fd117892cecc061530cf3c45670e1",
+      "input_document_matches_current": true
+    }
+  },
+  "withheld_studies": [
+    "2afc4ca7-40af-4b16-b0ac-b0ce08bcdbc4",
+    "5ab3ee5d-2afb-4208-bdde-153090a71d1d",
+    "cab07636-7974-41e5-9c46-d1b74581eddf"
+  ],
+  "live_checks": {
+    "six_imported_studies_preserved": true,
+    "source_hashes_verified": true,
+    "native_gap_unknown_intervals": 2,
+    "fault_simulation_accepted": 241,
+    "fault_simulation_rejected": 140,
+    "no_authority_accepted": 0,
+    "phase_material_balance_residual": 1.1102230246251565e-16,
+    "phase_fugacity_log_residual": 8.566406070609212e-09,
+    "browser_report_download_matches_fixed_snapshot": true,
+    "no_equipment_write_routes": true
+  },
+  "audit": {
+    "integrity": "verified",
+    "head": "cf18e736a8daab3785bd2dbc10066a3a099be5469331476b0d45dde567ac5cae",
+    "entries": 110
+  },
+  "after_service_restart": true,
+  "automated_regression": {
+    "passed": 406,
+    "warnings": 1
+  },
+  "previous_service_pid": 36056,
+  "browser_checks": {
+    "after_service_restart": true,
+    "studies": [
+      {
+        "status_text": "Verified synthetic BHA response and native samples6855ce4b-6477-4e36-95d9-0818378e26bb \u00b7 10/4/2026, 8:48:51 PM Research scenarioSimulated coupled axial/torsional/lateral coordinates of a uniform cantilever segment; native supplied sensor values are separate. Approval issued: false. Input evidence: Synthetic.Maximum energy balance residual (J)0.0000",
+        "study_id": "6855ce4b-6477-4e36-95d9-0818378e26bb",
+        "title": "Verified synthetic BHA response and native samples",
+        "viewport": 1440,
+        "width": 1440
+      },
+      {
+        "status_text": "Synthetic inspected and censored bit runsdfbfd4ea-052c-4d7c-a313-60c728786760 \u00b7 10/4/2026, 8:29:21 PM Research scenarioInspected run records and descriptive, right-censored within-family/formation Kaplan\u2013Meier cohort; conditional cost comparison. Approval issued: false.Cohort size4Confirmed failures2Censored cohort history4 retained points \u00b7 origin",
+        "study_id": "dfbfd4ea-052c-4d7c-a313-60c728786760",
+        "title": "Synthetic inspected and censored bit runs",
+        "viewport": 1440,
+        "width": 1440
+      },
+      {
+        "status_text": "Verified synthetic casing wear and fatigue38660c51-b3f7-4767-bc12-f758c3785475 \u00b7 10/4/2026, 8:49:53 PM Research scenarioMaterial-specific contact wear and separate Miner cycle exposure; uniform-wall Lam\u00e9 pressure/yield scenario only. Approval issued: false. Input evidence: Synthetic.Assessment conditionsPlanned casing: exposure and remaining-wall r",
+        "study_id": "38660c51-b3f7-4767-bc12-f758c3785475",
+        "title": "Verified synthetic casing wear and fatigue",
+        "viewport": 1440,
+        "width": 1440
+      },
+      {
+        "status_text": "Synthetic causal flow-balance replay1fdb012b-4687-4405-9b2f-af9d19470d7d \u00b7 10/4/2026, 8:33:17 PM Research scenarioRead-only causal mass-balance intervals; native flow/storage timing and transparent residual alarms. No influx/loss diagnosis. Approval issued: false.Valid monitoring duration (s)20Unknown intervals0Probabilities calibratedfalseActuatio",
+        "study_id": "1fdb012b-4687-4405-9b2f-af9d19470d7d",
+        "title": "Synthetic causal flow-balance replay",
+        "viewport": 1440,
+        "width": 1440
+      },
+      {
+        "status_text": "Synthetic characterized binary equilibrium423b9817-769a-4155-9e64-a5a66a81e72c \u00b7 10/4/2026, 8:36:37 PM Research scenarioBinary nonpolar Peng\u2013Robinson equilibrium or reviewed external mud/gas phase studies; prescribed-boundary batch mass-transfer replay. Approval issued: false. Input evidence: Synthetic.Native mud solubility predictionfalseCharacter",
+        "study_id": "423b9817-769a-4155-9e64-a5a66a81e72c",
+        "title": "Synthetic characterized binary equilibrium",
+        "viewport": 1440,
+        "width": 1440
+      },
+      {
+        "status_text": "Synthetic supervisory faults and fresh recovery1690880f-c8e4-489c-9993-12ed117212c1 \u00b7 10/4/2026, 8:39:45 PM Research scenarioSoftware-only pressure plant/PID tracking and independent simulated request validation; no rig network interface or equipment writes. Approval issued: false. Input evidence: Synthetic.Final pressure (MPa)21.697126Tracking rms",
+        "study_id": "1690880f-c8e4-489c-9993-12ed117212c1",
+        "title": "Synthetic supervisory faults and fresh recovery",
+        "viewport": 1440,
+        "width": 1440
+      }
+    ],
+    "mobile": {
+      "viewport": 390,
+      "width": 390
+    },
+    "errors": [],
+    "release": "dist/release-9f8bb45481c74142a36dc2c5ccf66bc9"
+  }
+}

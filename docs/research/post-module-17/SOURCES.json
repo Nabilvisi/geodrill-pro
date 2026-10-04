@@ -1,0 +1,133 @@
+{
+  "access_date": "2026-10-04",
+  "sources": [
+    [
+      "S01",
+      "Aramco — Senior Drilling Engineer, requisition 17894",
+      "https://careers.aramco.com/expat_uk/job/Senior-Drilling-Engineer/857223923/",
+      "Posted 2026-05-20; listed end 2026-12-31",
+      "Operator job description",
+      "Drilling-program preparation, operational engineering support, penetration-rate studies and complex wells. Establishes role tasks, not purchasing demand."
+    ],
+    [
+      "S02",
+      "IADC — DDR Plus v2",
+      "https://iadc.org/ddrplus/",
+      "Undated current page; includes v2.0 codeset and XML guide",
+      "Industry association",
+      "Standardized activity reporting with granular codes and an electronic schema. Implementation must check license and exact released schema; no purchase made."
+    ],
+    [
+      "S03",
+      "Energistics — WITSML Developers & Users",
+      "https://energistics.org/witsml-developers-users",
+      "WITSML 2.1 released May 2022; page inspected 2026-10-04",
+      "Standards publisher",
+      "Current top section specifies WITSML 2.1, ETP 1.2 and Energistics common 2.3. Older sections contain legacy guidance; JSON-schema availability must be checked in the released package."
+    ],
+    [
+      "S04",
+      "ISCWSA — Error Model Documentation",
+      "https://www.iscwsa.net/error-model-documentation/",
+      "Rev5 October 2019; supporting updates 2022–2023; rotating-template update 2026-06-08",
+      "Technical committee",
+      "Survey-error definitions, conservative generic toolcodes, covariance diagnostics and three test-well spreadsheets. These support benchmark construction, not automatic collision clearance."
+    ],
+    [
+      "S05",
+      "SLB — DrillPlan",
+      "https://www.slb.com/products-and-services/delivering-digital-at-scale/software/delfi/delfi-solutions/drillplan",
+      "Undated current product page",
+      "Vendor documentation",
+      "Describes concurrent design editing, shared data, dependency management, validation and reporting. Vendor performance or savings claims are not independently tested here."
+    ],
+    [
+      "S06",
+      "Halliburton — COMPASS",
+      "https://www.halliburton.com/en/products/engineers-desktop-suite/compass-software",
+      "Undated current product page",
+      "Vendor documentation",
+      "Documents trajectory planning, survey management, anti-collision, look-ahead and EDM integration. No independent accuracy, availability or price benchmark."
+    ],
+    [
+      "S07",
+      "Halliburton — WellPlan",
+      "https://www.halliburton.com/en/products/engineers-desktop-suite/wellplan-software",
+      "Undated current product page",
+      "Vendor documentation",
+      "Documents hydraulics/hole cleaning, torque and drag, BHA finite-element analysis, surge/swab, stuck-pipe and well-control workflows. No equivalence to GeoDrill established."
+    ],
+    [
+      "S08",
+      "Halliburton — OpenWells",
+      "https://www.halliburton.com/en/products/digital-well-operations/openwells-software",
+      "Undated current product page",
+      "Vendor documentation",
+      "Documents EDM integration, rulebooks, operations reporting, NPT and offset-section analysis, external imports and corporate synchronization."
+    ],
+    [
+      "S09",
+      "Peloton — WellView",
+      "https://www.peloton.com/products/well-data-lifecycle/wellview",
+      "Undated current product page",
+      "Vendor documentation",
+      "Describes lifecycle records, activity/cost linkage, schematics, role-specific views, reporting and integrations. Market-share/security/savings claims not independently assessed."
+    ],
+    [
+      "S10",
+      "DSABOK — Drilling Automation Pain Points and User Stories v0.1",
+      "https://dsabok.org/wp-content/uploads/2020/08/Drilling-Automation-Pain-Points-and-User-Stories-V0.1-released.pdf",
+      "Historical document hosted August 2020; not a current consensus standard",
+      "Industry working document",
+      "Discusses clocks, delayed channels, calibration, provenance, well identifiers and activity coding. Contains opposing views; reporting codes are not sufficient machine states. Treat as historical user-story evidence."
+    ],
+    [
+      "S11",
+      "Havtil — Activities Regulations §81, Well programme",
+      "https://www.havtil.no/en/regulations/all-acts/the-activities-regulations3/XV/81/",
+      "Section last changed 2018-01-01; current published page",
+      "Norwegian regulator",
+      "Norwegian example requires a programme describing activities/equipment and updating it. References D-010 and pore-pressure uncertainty guidance. No blanket applicability to other jurisdictions."
+    ],
+    [
+      "S12",
+      "Havtil — Activities Regulations §84, Monitoring well parameters",
+      "https://www.havtil.no/en/regulations/all-acts/the-activities-regulations3/XV/84/",
+      "Section last changed 2011-01-01; current published page",
+      "Norwegian regulator",
+      "Norwegian example links collecting/monitoring drilling data to checking prognoses and adjusting programmes. Product coverage does not establish regulatory compliance."
+    ],
+    [
+      "S13",
+      "Havtil — Activities Regulations §85, Well barriers",
+      "https://www.havtil.no/en/regulations/all-acts/the-activities-regulations3/XV/85/",
+      "Section last changed 2018-01-01; current published page",
+      "Norwegian regulator",
+      "Norwegian example addresses tested independent barriers and documented handover status. A casing-yield result or anomaly flag is not barrier verification."
+    ],
+    [
+      "S14",
+      "Equinor — Data sharing",
+      "https://www.equinor.com/energy/data-sharing",
+      "Undated current page; access route inspected 2026-10-04",
+      "Operator data provider",
+      "Lists open datasets and Databricks Marketplace access. Availability may change. No account, download, license acceptance or enrollment occurred."
+    ],
+    [
+      "S15",
+      "Equinor — Volve dataset",
+      "https://www.equinor.com/energy/volve-data-sharing",
+      "Historical 2008–2016 field; release announced June 2018",
+      "Operator data provider",
+      "Offers historical field data for research. Candidate integration/retrospective benchmark only; coverage and license suitability must be checked per proposed use."
+    ],
+    [
+      "S16",
+      "Equinor — Ask Volve, 2026 industrial hackathon brief",
+      "https://github.com/equinor/industrial-hackathon-2026/blob/main/ask-volve/README.md",
+      "2026 repository brief",
+      "Operator-authored project brief",
+      "Identifies scattered spreadsheets/PDFs as a retrieval problem and requests verifiable document/page citations. Supports an evidence-search experiment, not demonstrated production demand."
+    ]
+  ]
+}

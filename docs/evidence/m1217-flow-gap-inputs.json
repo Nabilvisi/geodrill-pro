@@ -1,0 +1,235 @@
+{
+  "study_name": "Synthetic flow gaps and interrupted persistence",
+  "geometry_revision_id": "7d276451-b80f-4055-8575-d8b64d4ab76a",
+  "depth_datum": "RKB synthetic",
+  "evidence_state": "synthetic",
+  "source_note": "Generated research assumptions; no instrument, material or field qualification",
+  "control_volume_note": "Manufactured fixed-mass control volume; inlet/outlet/known transfer all use this boundary",
+  "instrument_calibration_note": "Synthetic samples; no meter calibration claimed",
+  "maximum_gap_s": 2.0,
+  "meter_allowance_kg_s": 0.1,
+  "residual_threshold_kg_s": 1.0,
+  "persistence_s": 3.0,
+  "samples": [
+    {
+      "time_s": 0.0,
+      "inlet_kg_s": 10.0,
+      "outlet_kg_s": 10.0,
+      "transfer_into_kg_s": 0.0,
+      "contained_mass_kg": 10000.0,
+      "pump_on": true,
+      "operation": "circulating",
+      "quality": "accepted"
+    },
+    {
+      "time_s": 1.0,
+      "inlet_kg_s": 10.0,
+      "outlet_kg_s": 10.0,
+      "transfer_into_kg_s": 0.0,
+      "contained_mass_kg": 10000.0,
+      "pump_on": true,
+      "operation": "circulating",
+      "quality": "accepted"
+    },
+    {
+      "time_s": 2.0,
+      "inlet_kg_s": 10.0,
+      "outlet_kg_s": 10.0,
+      "transfer_into_kg_s": 0.0,
+      "contained_mass_kg": 10000.0,
+      "pump_on": true,
+      "operation": "circulating",
+      "quality": "accepted"
+    },
+    {
+      "time_s": 3.0,
+      "inlet_kg_s": 10.0,
+      "outlet_kg_s": 10.0,
+      "transfer_into_kg_s": 0.0,
+      "contained_mass_kg": 10000.0,
+      "pump_on": true,
+      "operation": "circulating",
+      "quality": "accepted"
+    },
+    {
+      "time_s": 4.0,
+      "inlet_kg_s": 10.0,
+      "outlet_kg_s": 10.0,
+      "transfer_into_kg_s": 0.0,
+      "contained_mass_kg": 10000.0,
+      "pump_on": true,
+      "operation": "circulating",
+      "quality": "accepted"
+    },
+    {
+      "time_s": 5.0,
+      "inlet_kg_s": 12.0,
+      "outlet_kg_s": 10.0,
+      "transfer_into_kg_s": 0.0,
+      "contained_mass_kg": 10000.0,
+      "pump_on": true,
+      "operation": "circulating",
+      "quality": "accepted"
+    },
+    {
+      "time_s": 6.0,
+      "inlet_kg_s": 12.0,
+      "outlet_kg_s": 10.0,
+      "transfer_into_kg_s": 0.0,
+      "contained_mass_kg": 10000.0,
+      "pump_on": true,
+      "operation": "circulating",
+      "quality": "accepted"
+    },
+    {
+      "time_s": 7.0,
+      "inlet_kg_s": null,
+      "outlet_kg_s": 10.0,
+      "transfer_into_kg_s": 0.0,
+      "contained_mass_kg": 10000.0,
+      "pump_on": true,
+      "operation": "circulating",
+      "quality": "accepted"
+    },
+    {
+      "time_s": 8.0,
+      "inlet_kg_s": 12.0,
+      "outlet_kg_s": 10.0,
+      "transfer_into_kg_s": 0.0,
+      "contained_mass_kg": 10000.0,
+      "pump_on": true,
+      "operation": "circulating",
+      "quality": "accepted"
+    },
+    {
+      "time_s": 9.0,
+      "inlet_kg_s": 12.0,
+      "outlet_kg_s": 10.0,
+      "transfer_into_kg_s": 0.0,
+      "contained_mass_kg": 10000.0,
+      "pump_on": true,
+      "operation": "circulating",
+      "quality": "accepted"
+    },
+    {
+      "time_s": 10.0,
+      "inlet_kg_s": 12.0,
+      "outlet_kg_s": 10.0,
+      "transfer_into_kg_s": 0.0,
+      "contained_mass_kg": 10000.0,
+      "pump_on": true,
+      "operation": "circulating",
+      "quality": "accepted"
+    },
+    {
+      "time_s": 11.0,
+      "inlet_kg_s": 12.0,
+      "outlet_kg_s": 10.0,
+      "transfer_into_kg_s": 0.0,
+      "contained_mass_kg": 10000.0,
+      "pump_on": true,
+      "operation": "circulating",
+      "quality": "accepted"
+    },
+    {
+      "time_s": 12.0,
+      "inlet_kg_s": 12.0,
+      "outlet_kg_s": 10.0,
+      "transfer_into_kg_s": 0.0,
+      "contained_mass_kg": 10000.0,
+      "pump_on": true,
+      "operation": "circulating",
+      "quality": "accepted"
+    },
+    {
+      "time_s": 13.0,
+      "inlet_kg_s": 12.0,
+      "outlet_kg_s": 10.0,
+      "transfer_into_kg_s": 0.0,
+      "contained_mass_kg": 10000.0,
+      "pump_on": true,
+      "operation": "circulating",
+      "quality": "accepted"
+    },
+    {
+      "time_s": 14.0,
+      "inlet_kg_s": 12.0,
+      "outlet_kg_s": 10.0,
+      "transfer_into_kg_s": 0.0,
+      "contained_mass_kg": 10000.0,
+      "pump_on": true,
+      "operation": "circulating",
+      "quality": "accepted"
+    },
+    {
+      "time_s": 15.0,
+      "inlet_kg_s": 10.0,
+      "outlet_kg_s": 10.0,
+      "transfer_into_kg_s": 0.0,
+      "contained_mass_kg": 10000.0,
+      "pump_on": true,
+      "operation": "circulating",
+      "quality": "accepted"
+    },
+    {
+      "time_s": 16.0,
+      "inlet_kg_s": 10.0,
+      "outlet_kg_s": 10.0,
+      "transfer_into_kg_s": 0.0,
+      "contained_mass_kg": 10000.0,
+      "pump_on": true,
+      "operation": "circulating",
+      "quality": "accepted"
+    },
+    {
+      "time_s": 17.0,
+      "inlet_kg_s": 10.0,
+      "outlet_kg_s": 10.0,
+      "transfer_into_kg_s": 0.0,
+      "contained_mass_kg": 10000.0,
+      "pump_on": true,
+      "operation": "circulating",
+      "quality": "accepted"
+    },
+    {
+      "time_s": 18.0,
+      "inlet_kg_s": 10.0,
+      "outlet_kg_s": 10.0,
+      "transfer_into_kg_s": 0.0,
+      "contained_mass_kg": 10000.0,
+      "pump_on": true,
+      "operation": "circulating",
+      "quality": "accepted"
+    },
+    {
+      "time_s": 19.0,
+      "inlet_kg_s": 10.0,
+      "outlet_kg_s": 10.0,
+      "transfer_into_kg_s": 0.0,
+      "contained_mass_kg": 10000.0,
+      "pump_on": true,
+      "operation": "circulating",
+      "quality": "accepted"
+    },
+    {
+      "time_s": 20.0,
+      "inlet_kg_s": 10.0,
+      "outlet_kg_s": 10.0,
+      "transfer_into_kg_s": 0.0,
+      "contained_mass_kg": 10000.0,
+      "pump_on": true,
+      "operation": "circulating",
+      "quality": "accepted"
+    }
+  ],
+  "adjudicated_events": [
+    {
+      "name": "Injected balance anomaly",
+      "onset_s": 5.0,
+      "end_s": 15.0,
+      "baseline_alarm_s": 10.0,
+      "evidence_note": "Synthetic independently specified injection"
+    }
+  ],
+  "adjudication_note": "Generated event reference; not a field well-control corpus"
+}

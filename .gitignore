@@ -1,0 +1,24 @@
+.venv/
+node_modules/
+dist/
+data/
+__pycache__/
+.pytest_cache/
+.hypothesis/
+*.log
+*.tsbuildinfo
+
+frontend-build.json
+frontend-build-*.tmp
+
+# Publication and session-only artifacts
+tools/verification*/
+.streamlit/secrets.toml
+.env
+.env.*
+!.env.example
+*.zip
+publication-bundle.json
+.cloud-session/
+
+/verification*/

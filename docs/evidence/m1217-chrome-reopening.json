@@ -1,0 +1,53 @@
+{
+  "after_service_restart": true,
+  "studies": [
+    {
+      "status_text": "Verified synthetic BHA response and native samples6855ce4b-6477-4e36-95d9-0818378e26bb · 10/4/2026, 8:48:51 PM Research scenarioSimulated coupled axial/torsional/lateral coordinates of a uniform cantilever segment; native supplied sensor values are separate. Approval issued: false. Input evidence: Synthetic.Maximum energy balance residual (J)0.0000",
+      "study_id": "6855ce4b-6477-4e36-95d9-0818378e26bb",
+      "title": "Verified synthetic BHA response and native samples",
+      "viewport": 1440,
+      "width": 1440
+    },
+    {
+      "status_text": "Synthetic inspected and censored bit runsdfbfd4ea-052c-4d7c-a313-60c728786760 · 10/4/2026, 8:29:21 PM Research scenarioInspected run records and descriptive, right-censored within-family/formation Kaplan–Meier cohort; conditional cost comparison. Approval issued: false.Cohort size4Confirmed failures2Censored cohort history4 retained points · origin",
+      "study_id": "dfbfd4ea-052c-4d7c-a313-60c728786760",
+      "title": "Synthetic inspected and censored bit runs",
+      "viewport": 1440,
+      "width": 1440
+    },
+    {
+      "status_text": "Verified synthetic casing wear and fatigue38660c51-b3f7-4767-bc12-f758c3785475 · 10/4/2026, 8:49:53 PM Research scenarioMaterial-specific contact wear and separate Miner cycle exposure; uniform-wall Lamé pressure/yield scenario only. Approval issued: false. Input evidence: Synthetic.Assessment conditionsPlanned casing: exposure and remaining-wall r",
+      "study_id": "38660c51-b3f7-4767-bc12-f758c3785475",
+      "title": "Verified synthetic casing wear and fatigue",
+      "viewport": 1440,
+      "width": 1440
+    },
+    {
+      "status_text": "Synthetic causal flow-balance replay1fdb012b-4687-4405-9b2f-af9d19470d7d · 10/4/2026, 8:33:17 PM Research scenarioRead-only causal mass-balance intervals; native flow/storage timing and transparent residual alarms. No influx/loss diagnosis. Approval issued: false.Valid monitoring duration (s)20Unknown intervals0Probabilities calibratedfalseActuatio",
+      "study_id": "1fdb012b-4687-4405-9b2f-af9d19470d7d",
+      "title": "Synthetic causal flow-balance replay",
+      "viewport": 1440,
+      "width": 1440
+    },
+    {
+      "status_text": "Synthetic characterized binary equilibrium423b9817-769a-4155-9e64-a5a66a81e72c · 10/4/2026, 8:36:37 PM Research scenarioBinary nonpolar Peng–Robinson equilibrium or reviewed external mud/gas phase studies; prescribed-boundary batch mass-transfer replay. Approval issued: false. Input evidence: Synthetic.Native mud solubility predictionfalseCharacter",
+      "study_id": "423b9817-769a-4155-9e64-a5a66a81e72c",
+      "title": "Synthetic characterized binary equilibrium",
+      "viewport": 1440,
+      "width": 1440
+    },
+    {
+      "status_text": "Synthetic supervisory faults and fresh recovery1690880f-c8e4-489c-9993-12ed117212c1 · 10/4/2026, 8:39:45 PM Research scenarioSoftware-only pressure plant/PID tracking and independent simulated request validation; no rig network interface or equipment writes. Approval issued: false. Input evidence: Synthetic.Final pressure (MPa)21.697126Tracking rms",
+      "study_id": "1690880f-c8e4-489c-9993-12ed117212c1",
+      "title": "Synthetic supervisory faults and fresh recovery",
+      "viewport": 1440,
+      "width": 1440
+    }
+  ],
+  "mobile": {
+    "viewport": 390,
+    "width": 390
+  },
+  "errors": [],
+  "release": "dist/release-9f8bb45481c74142a36dc2c5ccf66bc9"
+}

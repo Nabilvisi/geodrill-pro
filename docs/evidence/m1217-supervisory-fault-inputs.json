@@ -1,0 +1,54 @@
+{
+  "study_name": "Synthetic supervisory faults and fresh recovery",
+  "geometry_revision_id": "7d276451-b80f-4055-8575-d8b64d4ab76a",
+  "depth_datum": "RKB synthetic",
+  "evidence_state": "synthetic",
+  "source_note": "Generated research assumptions; no instrument, material or field qualification",
+  "authority_mode": "simulation_lease",
+  "plant_note": "Generated first-order pressure plant, isolated software simulation only",
+  "target_pressure_pa": 22000000.0,
+  "minimum_simulated_pressure_pa": 18000000.0,
+  "maximum_simulated_pressure_pa": 24000000.0,
+  "pressure_envelope_note": "Synthetic scenario pressure bounds, not rig-approved protection",
+  "initial_pressure_pa": 20000000.0,
+  "plant_zero_pressure_pa": 20000000.0,
+  "plant_gain_pa": 5000000.0,
+  "plant_time_constant_s": 2.0,
+  "proportional_per_pa": 1e-07,
+  "integral_per_pa_s": 2e-08,
+  "derivative_s_per_pa": 0.0,
+  "actuator_minimum": 0.0,
+  "actuator_maximum": 1.0,
+  "actuator_rate_per_s": 0.2,
+  "transport_delay_s": 0.2,
+  "request_ttl_s": 3.0,
+  "simulation_lease_expires_s": 30.0,
+  "maximum_requests_per_s": 100.0,
+  "manual_override_position": 0.3,
+  "duration_s": 20.0,
+  "time_step_s": 0.1,
+  "refinement_pressure_tolerance_pa": 100000.0,
+  "faults": [
+    {
+      "start_s": 3.0,
+      "end_s": 6.0,
+      "kind": "disconnect"
+    },
+    {
+      "start_s": 7.0,
+      "end_s": 8.0,
+      "kind": "interlock_open"
+    },
+    {
+      "start_s": 10.0,
+      "end_s": 12.0,
+      "kind": "manual_override"
+    },
+    {
+      "start_s": 15.0,
+      "end_s": 16.0,
+      "kind": "unknown_outcome"
+    }
+  ],
+  "request_examples": []
+}

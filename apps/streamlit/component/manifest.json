@@ -1,0 +1,14 @@
+{
+  "version": "0.8.0",
+  "source_release": "dist/release-c8c61a2ff49a422391806ac405a2bf06",
+  "assets": [
+    {
+      "path": "assets/index-CH3NGfKJ.css",
+      "sha256": "ccff790a81d7ed9e8924bfe389510289134879ff65779c6e766b6010c8ba190a"
+    },
+    {
+      "path": "assets/index-DsGZyZgt.js",
+      "sha256": "ae6eb83dd521609e938ac3f708f925d9b9b92e9ac12d2293be73d446ae6a12d9"
+    }
+  ]
+}

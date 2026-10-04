@@ -1,0 +1,38 @@
+{
+  "study_name": "Synthetic characterized binary equilibrium",
+  "geometry_revision_id": "7d276451-b80f-4055-8575-d8b64d4ab76a",
+  "depth_datum": "RKB synthetic",
+  "evidence_state": "synthetic",
+  "source_note": "Generated research assumptions; no instrument, material or field qualification",
+  "mode": "native_binary_flash",
+  "fluid_system": "characterized_nonpolar_binary",
+  "characterization_note": "Rounded methane/ethane critical properties for EOS verification; not drilling-mud characterization",
+  "components": [
+    {
+      "name": "Methane example",
+      "critical_temperature_k": 190.56,
+      "critical_pressure_pa": 4599200.0,
+      "acentric_factor": 0.011,
+      "mole_fraction": 0.5
+    },
+    {
+      "name": "Ethane example",
+      "critical_temperature_k": 305.32,
+      "critical_pressure_pa": 4872000.0,
+      "acentric_factor": 0.099,
+      "mole_fraction": 0.5
+    }
+  ],
+  "binary_interaction": 0.0,
+  "absolute_pressure_pa": 1000000.0,
+  "temperature_k": 200.0,
+  "external_model_reference": null,
+  "external_review_state": "unknown",
+  "external_review_note": null,
+  "external_points": [],
+  "total_gas_inventory_mol": 10.0,
+  "initial_dissolved_gas_mol": 8.0,
+  "mass_transfer_time_s": 10.0,
+  "replay_step_s": 1.0,
+  "balance_tolerance_mol": 0.01
+}

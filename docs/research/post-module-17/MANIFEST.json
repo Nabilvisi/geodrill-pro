@@ -1,0 +1,42 @@
+{
+  "BACKLOG.csv": {
+    "bytes": 14904,
+    "sha256": "97b14d04130f5dffc2d3ca64efe90d91430bc70a30bbc791914d59d64e3f4e51"
+  },
+  "BACKLOG.md": {
+    "bytes": 20825,
+    "sha256": "31cf2f5bbb8c2afd3b20ae6eef619316aacf18549dd1c87a03481c3046d7ac61"
+  },
+  "flow-research.png": {
+    "bytes": 56403,
+    "sha256": "9d71652bb04364898880132fee84283fa325619b62dfa4a0bc2dd1967bea44c8"
+  },
+  "IMPLEMENTATION-SEQUENCE.md": {
+    "bytes": 4864,
+    "sha256": "3c4b9eb28a8d68efde6b96f69268caada46f15d52c4aed4cc5f86c21c0c80f29"
+  },
+  "INTERVIEW-GUIDE.md": {
+    "bytes": 4727,
+    "sha256": "1a5705ec41f809e6cef0aa66b90358c9cb721e716fde5df8d1e80950b917ec3b"
+  },
+  "README.md": {
+    "bytes": 511,
+    "sha256": "e6f292efaf66ed25ef9824fef4dcd847918d7cb3728f506c086ce4fbce53e54b"
+  },
+  "REPORT.md": {
+    "bytes": 30715,
+    "sha256": "8725a90d5df484b57a13b8ef66fbe6105020c4c82c165111b5550defd92517e9"
+  },
+  "RESEARCH-EVIDENCE.json": {
+    "bytes": 1744,
+    "sha256": "e78ce64ca8e442ece7c9fd42a8344a5e5051e8a58f10aedb9cd181988f1f6513"
+  },
+  "SOURCES.json": {
+    "bytes": 6787,
+    "sha256": "85cf2ac290c347ba96724d36943a6358a68480213432016f5966e3daa67681c3"
+  },
+  "SOURCES.md": {
+    "bytes": 9799,
+    "sha256": "45d7f3e9a47dba80d9eb6d3bf25c27f42a2b02810b88547a31e0f086dc8ad598"
+  }
+}

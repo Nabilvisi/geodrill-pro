@@ -1,0 +1,52 @@
+{
+  "study_name": "Verified synthetic casing wear and fatigue",
+  "geometry_revision_id": "7d276451-b80f-4055-8575-d8b64d4ab76a",
+  "depth_datum": "RKB synthetic",
+  "evidence_state": "synthetic",
+  "source_note": "Generated research assumptions; no instrument, material or field qualification",
+  "casing_name": "Synthetic planned casing",
+  "geometry_assumption": "uniform_wall_loss",
+  "wear_coefficient_m2_n": 1e-13,
+  "wear_coefficient_relative_delta": 0.25,
+  "wear_material_fluid_note": "Generated wear coefficient in m\u00b2/N; no material/fluid qualification",
+  "contact_patch_area_m2": 1.0,
+  "initial_minimum_wall_m": 0.014,
+  "unobserved_exposure": false,
+  "exposures": [
+    {
+      "name": "Synthetic contact window",
+      "normal_force_n": 10000.0,
+      "sliding_distance_m": 100000.0,
+      "duration_s": 1000.0,
+      "evidence_note": "Generated constant contact exposure"
+    }
+  ],
+  "fatigue_material_note": "Generated zero-mean fatigue spectrum; not a material certificate",
+  "fatigue_curve": [
+    {
+      "stress_amplitude_pa": 50000000.0,
+      "failure_cycles": 10000000.0
+    },
+    {
+      "stress_amplitude_pa": 100000000.0,
+      "failure_cycles": 1000000.0
+    },
+    {
+      "stress_amplitude_pa": 200000000.0,
+      "failure_cycles": 100000.0
+    }
+  ],
+  "cycle_exposures": [
+    {
+      "stress_amplitude_pa": 100000000.0,
+      "mean_stress_pa": 0.0,
+      "cycles": 10000.0,
+      "evidence_note": "Synthetic cycle count; no inferred unmeasured cycles"
+    }
+  ],
+  "internal_gauge_pa": 5000000.0,
+  "external_gauge_pa": 0.0,
+  "observed_minimum_wall_m": null,
+  "inspection_uncertainty_m": 0.0001,
+  "inspection_note": null
+}

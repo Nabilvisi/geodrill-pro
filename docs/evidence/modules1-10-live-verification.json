@@ -1,0 +1,237 @@
+{
+  "health": {
+    "status": "ok",
+    "version": "0.6.0",
+    "mode": "local-research",
+    "equipment_control": false,
+    "instance_id": "414377ad0a5b7729",
+    "pid": 4596
+  },
+  "frontend_directory": "dist\\release-6fe102c62455492293e1874fb57f8915",
+  "assets": {
+    "/assets/index-DgYH0hfj.js": "f97e69ec9eb7b64eab34b92eab706a055c46839199de46ebdedab7e4aeaceb96",
+    "/assets/index-COztpBjD.css": "556b9b79d44041b0a6a073cf5c65c47a8d412b8f3dcde254d04e4009dbeefe93"
+  },
+  "audit": {
+    "integrity": "verified",
+    "head": "98789ed763fc79027ad09f5d7f363aceee3d4d00c85c1c9e1d6743adfd55b4be",
+    "entries": 51
+  },
+  "projects": [
+    {
+      "id": "d90493d2-48ab-4205-8733-2e213b5f90d1",
+      "name": "Modules 7–10 · Vertical verification",
+      "studies": [
+        {
+          "id": "a4db0596-8df4-46c8-8c30-c4bbb29eb208",
+          "model": "torque-drag",
+          "name": "Synthetic supplied limit exceeded",
+          "status": "research_scenario"
+        },
+        {
+          "id": "38c5d09e-c2b6-4f89-aef2-f04054f996ec",
+          "model": "surge-swab",
+          "name": "Synthetic strict transient tolerance",
+          "status": "incomplete_assessment"
+        },
+        {
+          "id": "4ed455e9-b42b-430b-9b2e-0f99410b0a79",
+          "model": "surge-swab",
+          "name": "Synthetic swab motion verified",
+          "status": "research_scenario"
+        },
+        {
+          "id": "5979dfee-a6a7-4edd-aea5-59c03060d421",
+          "model": "torque-drag",
+          "name": "Synthetic torque-drag scenario",
+          "status": "research_scenario"
+        },
+        {
+          "id": "c3f4699a-16bf-4213-a402-9a71d04af89b",
+          "model": "surge-swab",
+          "name": "Synthetic surge-swab scenario",
+          "status": "research_scenario"
+        },
+        {
+          "id": "b0dc5fb3-840f-4daf-b585-0ec0ed6abb6d",
+          "model": "transport",
+          "name": "Synthetic transport scenario",
+          "status": "research_scenario"
+        },
+        {
+          "id": "becd10e3-786f-4996-b2ac-82f8cad53df2",
+          "model": "hydraulics",
+          "name": "Synthetic Newtonian source for M8/M9",
+          "status": "scenario_only"
+        }
+      ]
+    },
+    {
+      "id": "e5fbd0e2-018a-4459-8389-73ef8e01d86c",
+      "name": "North Sea · Research",
+      "studies": [
+        {
+          "id": "eeed4ad1-7082-4246-ba22-98ed214f9184",
+          "model": "mse",
+          "name": null,
+          "status": "calculated"
+        },
+        {
+          "id": "3b66fa9b-8618-4632-9cc3-c6088ac6501b",
+          "model": "surge-swab",
+          "name": "Synthetic surge-swab scenario",
+          "status": "research_scenario"
+        },
+        {
+          "id": "0b9fba3b-c781-401e-ba02-8bb0e3bdad5a",
+          "model": "torque-drag",
+          "name": "Synthetic deviated rotating string",
+          "status": "research_scenario"
+        },
+        {
+          "id": "bf9ccf92-3cc8-4494-ae37-b786c95bf344",
+          "model": "transport",
+          "name": "Synthetic transport scenario",
+          "status": "withheld"
+        },
+        {
+          "id": "75dce1cc-b917-4724-827a-7eff1affd47b",
+          "model": "hydraulics",
+          "name": "Synthetic Newtonian source for M8/M9",
+          "status": "scenario_only"
+        },
+        {
+          "id": "6b5dc764-bcf8-486a-8886-26ab9f3f7b98",
+          "model": "stability",
+          "name": "Synthetic coupled model withheld",
+          "status": "withheld"
+        },
+        {
+          "id": "b3b1dcd2-e723-49de-9cfe-4f5f49abcf8a",
+          "model": "stability",
+          "name": "Synthetic stability scenario",
+          "status": "research_scenario"
+        },
+        {
+          "id": "97a2b697-cdce-4a33-b74a-70403c705847",
+          "model": "hydraulics",
+          "name": "Synthetic absent rating verified",
+          "status": "incomplete_assessment"
+        },
+        {
+          "id": "64e74ee0-65a0-4e4f-9427-2b0f4db9c815",
+          "model": "hydraulics",
+          "name": "Synthetic missing surface rating",
+          "status": "scenario_only"
+        },
+        {
+          "id": "065d503a-e395-446e-bfbd-a976929e4db1",
+          "model": "hydraulics",
+          "name": "Synthetic unsupported multiphase",
+          "status": "withheld"
+        },
+        {
+          "id": "6403c410-3c7a-4666-a511-a5f57e21bf0c",
+          "model": "hydraulics",
+          "name": "Synthetic steady HB circulation",
+          "status": "scenario_only"
+        },
+        {
+          "id": "181e0875-7ad5-40fc-b585-fc3473a57106",
+          "model": "em_vendor",
+          "name": "Synthetic vendor-result review",
+          "status": "withheld"
+        },
+        {
+          "id": "33ca531d-9b2d-4f26-bb4e-a144daa38bd3",
+          "model": "em_vendor",
+          "name": "Synthetic vendor-result review",
+          "status": "vendor_result_display"
+        },
+        {
+          "id": "71d622c4-eb31-44d3-a6e6-203b1da48e39",
+          "model": "shaly_sand",
+          "name": "Synthetic Thomas-Stieber volume scenarios",
+          "status": "withheld"
+        },
+        {
+          "id": "fb6b4e1e-ecf9-4374-87f1-d4e21a6e12e3",
+          "model": "shaly_sand",
+          "name": "Synthetic Thomas-Stieber volume scenarios",
+          "status": "scenario_only"
+        },
+        {
+          "id": "876eef69-a7f1-41f0-a7c5-1a0baf025497",
+          "model": "clustering",
+          "name": "Synthetic GR-density response study",
+          "status": "insufficient_data"
+        },
+        {
+          "id": "9c2cb867-5308-4f51-8333-d308fa51ed72",
+          "model": "clustering",
+          "name": "Synthetic GR-density response study",
+          "status": "exploratory"
+        },
+        {
+          "id": "9b49204a-964c-4973-bf84-bb72a7bbf01d",
+          "model": "casing",
+          "name": null,
+          "status": "conditional"
+        },
+        {
+          "id": "24c32d86-2334-4bf8-82f6-89eb88820b63",
+          "model": "pressure",
+          "name": null,
+          "status": "scenario_only"
+        },
+        {
+          "id": "f149630b-1b8b-445c-92c5-c76a5f655a80",
+          "model": "mse",
+          "name": null,
+          "status": "calculated"
+        },
+        {
+          "id": "a8cb59b7-1f97-4df9-9386-91e7c311a00f",
+          "model": "mse",
+          "name": null,
+          "status": "calculated"
+        },
+        {
+          "id": "0e2005ad-d4b3-45b4-b681-354b0bd340e4",
+          "model": "pressure",
+          "name": null,
+          "status": "scenario_only"
+        },
+        {
+          "id": "533e36df-9353-46e4-9559-4c59059a09b4",
+          "model": "mse",
+          "name": null,
+          "status": "withheld"
+        },
+        {
+          "id": "6b4c09f7-7532-409b-93af-bb88496065c8",
+          "model": "mse",
+          "name": null,
+          "status": "calculated"
+        }
+      ]
+    }
+  ],
+  "final_report": {
+    "id": "7a89c96a-ce8d-486c-8424-57e0e6779d1d",
+    "sha256": "d612f6c6fbe8bbb485ff1823e8882348c6e7734bace86eff9a2cf77feaecc21a",
+    "calculation_models": [
+      "casing",
+      "clustering",
+      "em_vendor",
+      "hydraulics",
+      "mse",
+      "shaly_sand",
+      "stability",
+      "surge-swab",
+      "torque-drag",
+      "transport"
+    ]
+  },
+  "standard_build_command": "pnpm run build: passed"
+}

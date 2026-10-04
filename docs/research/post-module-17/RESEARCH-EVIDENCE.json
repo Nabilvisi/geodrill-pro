@@ -1,0 +1,50 @@
+{
+  "checked_at_utc": "2026-10-04T16:14:47.144342+00:00",
+  "mode": "read-only research",
+  "original_thread": "01a0e1de-6f67-7831-b058-523182f788ed",
+  "completion_record_test_count": 406,
+  "full_tests_rerun_this_research": false,
+  "app_code_modified": false,
+  "service_restarted": false,
+  "original_browser_session_used": false,
+  "research_browser_session": "geodrill-post17-research",
+  "research_browser_closed": true,
+  "live_health": {
+    "status": "ok",
+    "version": "0.8.0",
+    "mode": "local-research",
+    "equipment_control": false,
+    "instance_id": "414377ad0a5b7729",
+    "pid": 40440
+  },
+  "served_assets": [
+    {
+      "url": "/assets/index-Bc7C4wL3.js",
+      "bytes": 380826,
+      "sha256": "3175fc09dcca124dd8aecb97e3c58e20982db8cfeba89c44fe4681e4d2261d6f",
+      "matches_recorded_release": true
+    },
+    {
+      "url": "/assets/index-CH3NGfKJ.css",
+      "bytes": 38187,
+      "sha256": "ccff790a81d7ed9e8924bfe389510289134879ff65779c6e766b6010c8ba190a",
+      "matches_recorded_release": true
+    }
+  ],
+  "fresh_browser_workflows": [
+    {
+      "module": "M15",
+      "saved_study": "Synthetic flow gaps and interrupted persistence",
+      "study_id_prefix": "ad2298bb",
+      "result": "Saved result reopened; candidate onset 8 s, alarm 11 s, end 14 s",
+      "mutation": false
+    },
+    {
+      "workflow": "Reports",
+      "report_id": "a05ef9f0-9e3b-4f8d-bc74-05422cb9ad3a",
+      "result": "Existing fixed report opened; source inventory, calculations, revisions, limitations and export controls visible",
+      "new_report_generated": false
+    }
+  ],
+  "inspection_image_sha256": "9d71652bb04364898880132fee84283fa325619b62dfa4a0bc2dd1967bea44c8"
+}

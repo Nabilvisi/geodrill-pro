@@ -1,0 +1,435 @@
+{
+  "project": {
+    "id": "b11e1337-6762-437e-a071-372cd5c9f1de",
+    "created_at": "2026-10-04T11:54:30.938876+00:00",
+    "bit_diameter_m": 0.3,
+    "datum": "RKB synthetic",
+    "name": "Module 11 \u00b7 Horizontal verification",
+    "north_reference": "true",
+    "origin": "synthetic",
+    "well_name": "Synthetic confined pipe well"
+  },
+  "geometry_revision": {
+    "base_revision_id": null,
+    "change_note": "M11 independent horizontal verification interval",
+    "created_at": "2026-10-04T11:54:31.045682+00:00",
+    "id": "e375b684-eded-4011-8fff-590ce916d070",
+    "input": {
+      "casings": [],
+      "coordinate_reference": "Synthetic local North East Down frame",
+      "datum": "RKB synthetic",
+      "formations": [],
+      "hole_sections": [
+        {
+          "bottom_md_m": 1000.0,
+          "diameter_m": 0.3,
+          "name": "Uniform synthetic bore",
+          "source": "Manufactured 300 mm bore; no field caliper",
+          "top_md_m": 0.0
+        }
+      ],
+      "survey_dataset_id": "da2198a9-a70f-487a-99c3-46083ac37d67",
+      "survey_quality_note": "Manufactured horizontal interval; software checks only",
+      "tool_to_bit_offset_m": 0.0,
+      "wellhead_east_m": 0.0,
+      "wellhead_elevation_m": 0.0,
+      "wellhead_north_m": 0.0
+    },
+    "module": "M1",
+    "result": {
+      "assumptions": [
+        "Formation boundaries are interpreted horizontal TVD surfaces; bands are supplied pick uncertainty, not confidence intervals.",
+        "Coordinates are translated into the declared frame; no CRS, magnetic or grid-convergence transformation.",
+        "Survey uncertainty is not quantified; interpreted geology does not confirm isolation or collision clearance."
+      ],
+      "cost": {
+        "currency": null,
+        "scope": "Pipe-length costs only; excludes connections, installation, cement and logistics.",
+        "status": "insufficient_data",
+        "value": null
+      },
+      "formation_intersections": [],
+      "model": "minimum-curvature-geometry",
+      "north_reference": "true",
+      "samples": [
+        {
+          "east_m": 0.0,
+          "elevation_m": 0.0,
+          "md_m": 0.0,
+          "north_m": 0.0,
+          "reference_east_m": 0.0,
+          "reference_north_m": 0.0,
+          "tvd_m": 0.0
+        },
+        {
+          "east_m": 0.0,
+          "elevation_m": -1.5308084989341915e-15,
+          "md_m": 25.0,
+          "north_m": 25.0,
+          "reference_east_m": 0.0,
+          "reference_north_m": 25.0,
+          "tvd_m": 1.5308084989341915e-15
+        },
+        {
+          "east_m": 0.0,
+          "elevation_m": -3.061616997868383e-15,
+          "md_m": 50.0,
+          "north_m": 50.0,
+          "reference_east_m": 0.0,
+          "reference_north_m": 50.0,
+          "tvd_m": 3.061616997868383e-15
+        },
+        {
+          "east_m": 0.0,
+          "elevation_m": -4.592425496802574e-15,
+          "md_m": 75.0,
+          "north_m": 75.0,
+          "reference_east_m": 0.0,
+          "reference_north_m": 75.0,
+          "tvd_m": 4.592425496802574e-15
+        },
+        {
+          "east_m": 0.0,
+          "elevation_m": -6.123233995736766e-15,
+          "md_m": 100.0,
+          "north_m": 100.0,
+          "reference_east_m": 0.0,
+          "reference_north_m": 100.0,
+          "tvd_m": 6.123233995736766e-15
+        },
+        {
+          "east_m": 0.0,
+          "elevation_m": -7.654042494670958e-15,
+          "md_m": 125.0,
+          "north_m": 125.0,
+          "reference_east_m": 0.0,
+          "reference_north_m": 125.0,
+          "tvd_m": 7.654042494670958e-15
+        },
+        {
+          "east_m": 0.0,
+          "elevation_m": -9.184850993605149e-15,
+          "md_m": 150.0,
+          "north_m": 150.0,
+          "reference_east_m": 0.0,
+          "reference_north_m": 150.0,
+          "tvd_m": 9.184850993605149e-15
+        },
+        {
+          "east_m": 0.0,
+          "elevation_m": -1.071565949253934e-14,
+          "md_m": 175.0,
+          "north_m": 175.0,
+          "reference_east_m": 0.0,
+          "reference_north_m": 175.0,
+          "tvd_m": 1.071565949253934e-14
+        },
+        {
+          "east_m": 0.0,
+          "elevation_m": -1.2246467991473532e-14,
+          "md_m": 200.0,
+          "north_m": 200.0,
+          "reference_east_m": 0.0,
+          "reference_north_m": 200.0,
+          "tvd_m": 1.2246467991473532e-14
+        },
+        {
+          "east_m": 0.0,
+          "elevation_m": -1.3777276490407723e-14,
+          "md_m": 225.0,
+          "north_m": 225.0,
+          "reference_east_m": 0.0,
+          "reference_north_m": 225.0,
+          "tvd_m": 1.3777276490407723e-14
+        },
+        {
+          "east_m": 0.0,
+          "elevation_m": -1.5308084989341916e-14,
+          "md_m": 250.0,
+          "north_m": 250.0,
+          "reference_east_m": 0.0,
+          "reference_north_m": 250.0,
+          "tvd_m": 1.5308084989341916e-14
+        },
+        {
+          "east_m": 0.0,
+          "elevation_m": -1.6838893488276108e-14,
+          "md_m": 275.0,
+          "north_m": 275.0,
+          "reference_east_m": 0.0,
+          "reference_north_m": 275.0,
+          "tvd_m": 1.6838893488276108e-14
+        },
+        {
+          "east_m": 0.0,
+          "elevation_m": -1.8369701987210297e-14,
+          "md_m": 300.0,
+          "north_m": 300.0,
+          "reference_east_m": 0.0,
+          "reference_north_m": 300.0,
+          "tvd_m": 1.8369701987210297e-14
+        },
+        {
+          "east_m": 0.0,
+          "elevation_m": -1.9900510486144493e-14,
+          "md_m": 325.0,
+          "north_m": 325.0,
+          "reference_east_m": 0.0,
+          "reference_north_m": 325.0,
+          "tvd_m": 1.9900510486144493e-14
+        },
+        {
+          "east_m": 0.0,
+          "elevation_m": -2.143131898507868e-14,
+          "md_m": 350.0,
+          "north_m": 350.0,
+          "reference_east_m": 0.0,
+          "reference_north_m": 350.0,
+          "tvd_m": 2.143131898507868e-14
+        },
+        {
+          "east_m": 0.0,
+          "elevation_m": -2.2962127484012872e-14,
+          "md_m": 375.0,
+          "north_m": 375.0,
+          "reference_east_m": 0.0,
+          "reference_north_m": 375.0,
+          "tvd_m": 2.2962127484012872e-14
+        },
+        {
+          "east_m": 0.0,
+          "elevation_m": -2.4492935982947064e-14,
+          "md_m": 400.0,
+          "north_m": 400.0,
+          "reference_east_m": 0.0,
+          "reference_north_m": 400.0,
+          "tvd_m": 2.4492935982947064e-14
+        },
+        {
+          "east_m": 0.0,
+          "elevation_m": -2.6023744481881254e-14,
+          "md_m": 425.0,
+          "north_m": 425.0,
+          "reference_east_m": 0.0,
+          "reference_north_m": 425.0,
+          "tvd_m": 2.6023744481881254e-14
+        },
+        {
+          "east_m": 0.0,
+          "elevation_m": -2.7554552980815446e-14,
+          "md_m": 450.0,
+          "north_m": 450.0,
+          "reference_east_m": 0.0,
+          "reference_north_m": 450.0,
+          "tvd_m": 2.7554552980815446e-14
+        },
+        {
+          "east_m": 0.0,
+          "elevation_m": -2.9085361479749636e-14,
+          "md_m": 475.0,
+          "north_m": 475.0,
+          "reference_east_m": 0.0,
+          "reference_north_m": 475.0,
+          "tvd_m": 2.9085361479749636e-14
+        },
+        {
+          "east_m": 0.0,
+          "elevation_m": -3.061616997868383e-14,
+          "md_m": 500.0,
+          "north_m": 500.0,
+          "reference_east_m": 0.0,
+          "reference_north_m": 500.0,
+          "tvd_m": 3.061616997868383e-14
+        },
+        {
+          "east_m": 0.0,
+          "elevation_m": -3.214697847761803e-14,
+          "md_m": 525.0,
+          "north_m": 525.0,
+          "reference_east_m": 0.0,
+          "reference_north_m": 525.0,
+          "tvd_m": 3.214697847761803e-14
+        },
+        {
+          "east_m": 0.0,
+          "elevation_m": -3.3677786976552216e-14,
+          "md_m": 550.0,
+          "north_m": 550.0,
+          "reference_east_m": 0.0,
+          "reference_north_m": 550.0,
+          "tvd_m": 3.3677786976552216e-14
+        },
+        {
+          "east_m": 0.0,
+          "elevation_m": -3.52085954754864e-14,
+          "md_m": 575.0,
+          "north_m": 575.0,
+          "reference_east_m": 0.0,
+          "reference_north_m": 575.0,
+          "tvd_m": 3.52085954754864e-14
+        },
+        {
+          "east_m": 0.0,
+          "elevation_m": -3.6739403974420595e-14,
+          "md_m": 600.0,
+          "north_m": 600.0,
+          "reference_east_m": 0.0,
+          "reference_north_m": 600.0,
+          "tvd_m": 3.6739403974420595e-14
+        },
+        {
+          "east_m": 0.0,
+          "elevation_m": -3.827021247335479e-14,
+          "md_m": 625.0,
+          "north_m": 625.0,
+          "reference_east_m": 0.0,
+          "reference_north_m": 625.0,
+          "tvd_m": 3.827021247335479e-14
+        },
+        {
+          "east_m": 0.0,
+          "elevation_m": -3.9801020972288986e-14,
+          "md_m": 650.0,
+          "north_m": 650.0,
+          "reference_east_m": 0.0,
+          "reference_north_m": 650.0,
+          "tvd_m": 3.9801020972288986e-14
+        },
+        {
+          "east_m": 0.0,
+          "elevation_m": -4.133182947122317e-14,
+          "md_m": 675.0,
+          "north_m": 675.0,
+          "reference_east_m": 0.0,
+          "reference_north_m": 675.0,
+          "tvd_m": 4.133182947122317e-14
+        },
+        {
+          "east_m": 0.0,
+          "elevation_m": -4.286263797015736e-14,
+          "md_m": 700.0,
+          "north_m": 700.0,
+          "reference_east_m": 0.0,
+          "reference_north_m": 700.0,
+          "tvd_m": 4.286263797015736e-14
+        },
+        {
+          "east_m": 0.0,
+          "elevation_m": -4.4393446469091554e-14,
+          "md_m": 725.0,
+          "north_m": 725.0,
+          "reference_east_m": 0.0,
+          "reference_north_m": 725.0,
+          "tvd_m": 4.4393446469091554e-14
+        },
+        {
+          "east_m": 0.0,
+          "elevation_m": -4.5924254968025744e-14,
+          "md_m": 750.0,
+          "north_m": 750.0,
+          "reference_east_m": 0.0,
+          "reference_north_m": 750.0,
+          "tvd_m": 4.5924254968025744e-14
+        },
+        {
+          "east_m": 0.0,
+          "elevation_m": -4.745506346695994e-14,
+          "md_m": 775.0,
+          "north_m": 775.0,
+          "reference_east_m": 0.0,
+          "reference_north_m": 775.0,
+          "tvd_m": 4.745506346695994e-14
+        },
+        {
+          "east_m": 0.0,
+          "elevation_m": -4.898587196589413e-14,
+          "md_m": 800.0,
+          "north_m": 800.0,
+          "reference_east_m": 0.0,
+          "reference_north_m": 800.0,
+          "tvd_m": 4.898587196589413e-14
+        },
+        {
+          "east_m": 0.0,
+          "elevation_m": -5.051668046482832e-14,
+          "md_m": 825.0,
+          "north_m": 825.0,
+          "reference_east_m": 0.0,
+          "reference_north_m": 825.0,
+          "tvd_m": 5.051668046482832e-14
+        },
+        {
+          "east_m": 0.0,
+          "elevation_m": -5.204748896376251e-14,
+          "md_m": 850.0,
+          "north_m": 850.0,
+          "reference_east_m": 0.0,
+          "reference_north_m": 850.0,
+          "tvd_m": 5.204748896376251e-14
+        },
+        {
+          "east_m": 0.0,
+          "elevation_m": -5.35782974626967e-14,
+          "md_m": 875.0,
+          "north_m": 875.0,
+          "reference_east_m": 0.0,
+          "reference_north_m": 875.0,
+          "tvd_m": 5.35782974626967e-14
+        },
+        {
+          "east_m": 0.0,
+          "elevation_m": -5.510910596163089e-14,
+          "md_m": 900.0,
+          "north_m": 900.0,
+          "reference_east_m": 0.0,
+          "reference_north_m": 900.0,
+          "tvd_m": 5.510910596163089e-14
+        },
+        {
+          "east_m": 0.0,
+          "elevation_m": -5.663991446056509e-14,
+          "md_m": 925.0,
+          "north_m": 925.0,
+          "reference_east_m": 0.0,
+          "reference_north_m": 925.0,
+          "tvd_m": 5.663991446056509e-14
+        },
+        {
+          "east_m": 0.0,
+          "elevation_m": -5.817072295949927e-14,
+          "md_m": 950.0,
+          "north_m": 950.0,
+          "reference_east_m": 0.0,
+          "reference_north_m": 950.0,
+          "tvd_m": 5.817072295949927e-14
+        },
+        {
+          "east_m": 0.0,
+          "elevation_m": -5.970153145843346e-14,
+          "md_m": 975.0,
+          "north_m": 975.0,
+          "reference_east_m": 0.0,
+          "reference_north_m": 975.0,
+          "tvd_m": 5.970153145843346e-14
+        },
+        {
+          "east_m": 0.0,
+          "elevation_m": -6.123233995736766e-14,
+          "md_m": 1000.0,
+          "north_m": 1000.0,
+          "reference_east_m": 0.0,
+          "reference_north_m": 1000.0,
+          "tvd_m": 6.123233995736766e-14
+        }
+      ],
+      "status": "conditional",
+      "survey_filename": "synthetic-horizontal.csv",
+      "survey_source_sha256": "e9c80bc772444acfc6ee69e525a42bbd2f5cbb165164ea198efba41327337f39",
+      "survey_station_count": 2,
+      "total_depth_md_m": 1000.0,
+      "version": "0.2.0",
+      "warnings": []
+    },
+    "sha256": "1ecbfdd9b6a823e66834e868dacdfc1d310b6bce0ed5390c5ecb0cfb5a212db1"
+  }
+}
