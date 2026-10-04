@@ -6,6 +6,14 @@
 
 This completes the audited MVP/research software scope. Field qualification, the proposal's unsupported prediction claims, live rig integration and a signed native installer are outside this release.
 
+## Hosted Streamlit app
+
+Open **[GeoDrill Pro on Streamlit](https://geodrill-pro.streamlit.app/)**. The hosted app retains all 17 workstation pages and uses the existing deterministic Python API through an isolated browser-session workspace. Start with North Sea · Research for telemetry/survey/log replay. Switch to Cloud verification · Synthetic for saved M12–M17 studies. The in-app Start here guide explains imports, geometry revisions and fixed report downloads.
+
+The hosted workspace is temporary. Download complete evidence reports before leaving; reports are not a restorable project backup. Use the local workstation when persistent project storage is required. All included examples are synthetic and equipment control remains unavailable.
+
+The private source repository is [Nabilvisi/geodrill-pro](https://github.com/Nabilvisi/geodrill-pro). See [CLOUD-DEPLOYMENT.md](docs/CLOUD-DEPLOYMENT.md) for runtime/deployment details and [VERIFICATION.md](docs/VERIFICATION.md) for test and live-release evidence.
+
 ## Open the app
 
 On this computer, double-click **Start GeoDrill Pro.cmd**. It starts a hidden local service and opens `http://127.0.0.1:8765` in your default browser. If the service is already running, it opens the existing instance. **Stop GeoDrill Pro.cmd** stops only the responding installation and retains all data.

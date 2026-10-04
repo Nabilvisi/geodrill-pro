@@ -1,5 +1,20 @@
 # Verification record — 4 October 2026 / version 0.8.0
 
+## Streamlit cloud release verification — 2026-10-05
+
+The source was published to the private Nabilvisi/geodrill-pro repository. The user deployed https://geodrill-pro.streamlit.app/. The cloud interface retains the existing 17-module workstation and deterministic backend, with separate temporary browser-session workspaces.
+
+- Full regression suite: 422 passed in 52.66 seconds against the pinned cloud requirements (Python 3.12, Streamlit 1.65.0, PyArrow 24.0.0).
+- After the onboarding change, the 16 cloud checks passed again in 11.86 seconds. One existing Starlette/httpx deprecation warning remains.
+- Production TypeScript/Vite build and Streamlit component packaging succeeded.
+- Actual local Streamlit UI checks covered a new study save, reopening the same calculation identity/results, and exact exported SI input bytes submitted through the rendered File/change handler. This is not a file-chooser automation claim.
+- Original API report bytes are prepared as a native download link. Re-serializing parsed report numbers in JavaScript was rejected after its downloaded snapshot failed the canonical fingerprint check.
+- The corrected complete browser download passed an independent canonical SHA-256 check; evidence is in evidence/streamlit-browser-report-verification.json.
+- Local layout at an outer width of 390 px had outer scroll width 390 px and inner width/scroll width 358 px. The browser application-error list was empty.
+
+Final live checks and selected release hashes are recorded in evidence/streamlit-live-verification.json when available. Temporary cloud workspaces and fixed reports are not a persistent account database or a restorable project backup.
+
+
 ## Completed audited research software through Module 17
 
 **406 automated tests pass**, including 102 new numerical, contract, eligibility, authorization and persistence cases for Modules 12–17. The 304 prior cases remain passing. One existing Starlette/httpx TestClient deprecation warning remains. TypeScript compilation and the final production Vite build pass; a final visual correction labels gas molar volume as m³/mol without changing its stored SI value.

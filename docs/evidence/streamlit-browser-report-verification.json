@@ -1,0 +1,11 @@
+{
+  "kind": "local-streamlit-browser-report",
+  "filename": "geodrill-report-968fb53c-cb7d-4913-98fb-940691e32ba0 (2).json",
+  "bytes": 112246,
+  "report_id": "968fb53c-cb7d-4913-98fb-940691e32ba0",
+  "sha256": "2b9513c4a7d9a80bbc7115824f107eeb37807a26e801aaba1edcd733c1d91c2d",
+  "source_datasets": 3,
+  "calculations": 0,
+  "canonical_snapshot_verified": true,
+  "actual_browser_download_completed": true
+}
