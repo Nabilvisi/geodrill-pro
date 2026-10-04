@@ -1,0 +1,45 @@
+{
+  "url": "https://geodrill-pro.streamlit.app/",
+  "tested_code_commit": "b41e6fa",
+  "actual_browser_download": true,
+  "report_id": "47dba677-7508-4137-b04e-7b230cd1709a",
+  "report_bytes": 2253207,
+  "report_sha256": "81db38959080c3c347625ab07a9f68d78d3cf7a28cc4eeca0828ed42935c8cd3",
+  "canonical_snapshot_verified": true,
+  "source_import": {
+    "filename": "live-synthetic-survey.csv",
+    "bytes": 58,
+    "sha256": "51002babbd608a18338bf756b15573ad42b47b5d16f8343f12d7e53bb692600e",
+    "rows": 3,
+    "exact_bytes_verified": true,
+    "method": "File object submitted through rendered input change handler"
+  },
+  "saved_live_calculation_id": "9a0b0734-c9d8-4aa0-9d7a-40992fa23c5b",
+  "models": [
+    "anomaly",
+    "bit-condition",
+    "dynamics",
+    "gas-phase",
+    "supervision",
+    "wear-fatigue"
+  ],
+  "calculation_count": 7,
+  "equipment_control": false,
+  "network_adapter_available": false,
+  "mobile": {
+    "outer_width": 390,
+    "outer_scroll_width": 390,
+    "streamlit_width": 390,
+    "streamlit_scroll_width": 390,
+    "workstation_width": 358,
+    "workstation_scroll_width": 358
+  },
+  "browser_errors": [],
+  "final_mobile_navigation": {
+    "local_choices": 24,
+    "local_module_cards": 17,
+    "local_width": 358,
+    "local_scroll_width": 358,
+    "final_live_check": "pending"
+  }
+}

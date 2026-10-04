@@ -12,7 +12,7 @@ The source was published to the private Nabilvisi/geodrill-pro repository. The u
 - The corrected complete browser download passed an independent canonical SHA-256 check; evidence is in evidence/streamlit-browser-report-verification.json.
 - Local layout at an outer width of 390 px had outer scroll width 390 px and inner width/scroll width 358 px. The browser application-error list was empty.
 
-Final live checks and selected release hashes are recorded in evidence/streamlit-live-verification.json when available. Temporary cloud workspaces and fixed reports are not a persistent account database or a restorable project backup.
+The public app returned a healthy 200/ok response and served JavaScript/CSS identical to the tested build. A new live supervisory calculation was saved, and a 58-byte synthetic survey was imported through the rendered File/change handler. The actual 2,253,207-byte browser report download contains seven calculations across six research models and matches canonical SHA-256 81db38959080c3c347625ab07a9f68d78d3cf7a28cc4eeca0828ed42935c8cd3. The imported source hash matches the exact supplied bytes. Live workflow evidence is in evidence/streamlit-live-verification.json; asset checks are in evidence/streamlit-live-assets.json. The final mobile selector provides 24 named pages and opens a roadmap with all 17 module cards without horizontal overflow. Temporary cloud workspaces and fixed reports are not a persistent account database or a restorable project backup.
 
 
 ## Completed audited research software through Module 17

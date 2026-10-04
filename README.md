@@ -8,7 +8,7 @@ This completes the audited MVP/research software scope. Field qualification, the
 
 ## Hosted Streamlit app
 
-Open **[GeoDrill Pro on Streamlit](https://geodrill-pro.streamlit.app/)**. The hosted app retains all 17 workstation pages and uses the existing deterministic Python API through an isolated browser-session workspace. Start with North Sea · Research for telemetry/survey/log replay. Switch to Cloud verification · Synthetic for saved M12–M17 studies. The in-app Start here guide explains imports, geometry revisions and fixed report downloads.
+Open **[GeoDrill Pro on Streamlit](https://geodrill-pro.streamlit.app/)**. The hosted app retains all 17 workstation pages and uses the existing deterministic Python API through an isolated browser-session workspace. Start with North Sea · Research for telemetry/survey/log replay. Switch to Cloud verification · Synthetic for saved M12–M17 studies. The in-app Start here guide explains imports, geometry revisions and fixed report downloads. On phones, the Open page selector provides named navigation to all 24 workspace pages.
 
 The hosted workspace is temporary. Download complete evidence reports before leaving; reports are not a restorable project backup. Use the local workstation when persistent project storage is required. All included examples are synthetic and equipment control remains unavailable.
 

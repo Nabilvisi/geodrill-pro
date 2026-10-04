@@ -1,0 +1,20 @@
+{
+  "assets": [
+    {
+      "path": "assets/index-CfOmAGsZ.js",
+      "status": 200,
+      "bytes": 382088,
+      "sha256": "19344568a913061172cc7543c9265605bbe84117011f5ae23f60eed6e0974c60",
+      "matches": true
+    },
+    {
+      "path": "assets/index-CH3NGfKJ.css",
+      "status": 200,
+      "bytes": 38187,
+      "sha256": "ccff790a81d7ed9e8924bfe389510289134879ff65779c6e766b6010c8ba190a",
+      "matches": true
+    }
+  ],
+  "health_status": 200,
+  "health_body": "ok"
+}
