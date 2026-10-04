@@ -2,7 +2,7 @@
 
 ## Streamlit cloud release verification — 2026-10-05
 
-The source was published to the private Nabilvisi/geodrill-pro repository. The user deployed https://geodrill-pro.streamlit.app/. The cloud interface retains the existing 17-module workstation and deterministic backend, with separate temporary browser-session workspaces.
+The source was published to Nabilvisi/geodrill-pro. GitHub currently reports the repository as public; visibility was verified directly from its metadata on 2026-10-05. The user deployed https://geodrill-pro.streamlit.app/. The cloud interface retains the existing 17-module workstation and deterministic backend, with separate temporary browser-session workspaces.
 
 - Full regression suite: 422 passed in 52.66 seconds against the pinned cloud requirements (Python 3.12, Streamlit 1.65.0, PyArrow 24.0.0).
 - After the onboarding change, the 16 cloud checks passed again in 11.86 seconds. One existing Starlette/httpx deprecation warning remains.

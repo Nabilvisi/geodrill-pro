@@ -12,7 +12,7 @@ Open **[GeoDrill Pro on Streamlit](https://geodrill-pro.streamlit.app/)**. The h
 
 The hosted workspace is temporary. Download complete evidence reports before leaving; reports are not a restorable project backup. Use the local workstation when persistent project storage is required. All included examples are synthetic and equipment control remains unavailable.
 
-The private source repository is [Nabilvisi/geodrill-pro](https://github.com/Nabilvisi/geodrill-pro). See [CLOUD-DEPLOYMENT.md](docs/CLOUD-DEPLOYMENT.md) for runtime/deployment details and [VERIFICATION.md](docs/VERIFICATION.md) for test and live-release evidence.
+The source repository is [Nabilvisi/geodrill-pro](https://github.com/Nabilvisi/geodrill-pro). See [CLOUD-DEPLOYMENT.md](docs/CLOUD-DEPLOYMENT.md) for runtime/deployment details and [VERIFICATION.md](docs/VERIFICATION.md) for test and live-release evidence.
 
 ## Open the app
 
