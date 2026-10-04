@@ -36,10 +36,14 @@
   },
   "browser_errors": [],
   "final_mobile_navigation": {
-    "local_choices": 24,
-    "local_module_cards": 17,
-    "local_width": 358,
-    "local_scroll_width": 358,
-    "final_live_check": "pending"
+    "code_commit": "82604b9",
+    "live_choices": 24,
+    "live_module_cards": 17,
+    "outer_width": 390,
+    "outer_scroll_width": 390,
+    "workstation_width": 358,
+    "workstation_scroll_width": 358,
+    "final_live_check": "passed",
+    "browser_errors": []
   }
 }

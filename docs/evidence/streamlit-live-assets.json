@@ -1,17 +1,19 @@
 {
+  "code_commit": "82604b9",
+  "source_release": "dist/release-d2095f7f226e403a893eb729bc017780",
   "assets": [
     {
-      "path": "assets/index-CfOmAGsZ.js",
+      "path": "assets/index-CG2D8Y8e.js",
       "status": 200,
-      "bytes": 382088,
-      "sha256": "19344568a913061172cc7543c9265605bbe84117011f5ae23f60eed6e0974c60",
+      "bytes": 382545,
+      "sha256": "e488e856987958f7d23356a74c50232b7f41b4c0bb00ae987d44731269733a93",
       "matches": true
     },
     {
-      "path": "assets/index-CH3NGfKJ.css",
+      "path": "assets/index-DQfLpxdr.css",
       "status": 200,
-      "bytes": 38187,
-      "sha256": "ccff790a81d7ed9e8924bfe389510289134879ff65779c6e766b6010c8ba190a",
+      "bytes": 38581,
+      "sha256": "aef49db358eabb760ad692bb7f65f9e370c9fcf6ea66d380980caabfb4a0d87f",
       "matches": true
     }
   ],
