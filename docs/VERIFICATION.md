@@ -1,8 +1,8 @@
 # Verification record — 5 October 2026 / version 0.8.0
 
-## Tranche 1 Backlog Advancements & Full Platform Verification — 2026-10-05
+## Tranche 1 & Tranche 2 (GD-A06) Advancements & Full Platform Verification — 2026-10-05
 
-All 5 Tranche 1 advancement capabilities (GD-A05, GD-A01, GD-A02, GD-A03, GD-A04) have been implemented, tested, and pushed to origin main:
+All 5 Tranche 1 advancement capabilities (GD-A05, GD-A01, GD-A02, GD-A03, GD-A04) and Tranche 2 initial capability (GD-A06) have been implemented, verified, and synchronized to origin main:
 
 1. **GD-A05 Qualification Ledger & Benchmarks** (`packages/engineering/qualification.py`, `tests/test_qualification.py`):
    - M01 to M17 qualification status cards, governing physics, applicability boundaries, withholding conditions, and analytical benchmark targets.
@@ -23,14 +23,18 @@ All 5 Tranche 1 advancement capabilities (GD-A05, GD-A01, GD-A02, GD-A03, GD-A04
    - Bi-directional unit conversion with guaranteed IEEE-754 round-trip precision and preservation of missing/null values (null never coerced to 0).
    - Preconfigured unit profiles: SI Metric, Oilfield US/Imperial, and Canadian/North Sea Metric Oilfield.
    - Endpoints: `GET /api/units/profiles`, `POST /api/units/convert`.
+6. **GD-A06 Daily Drilling Reporting (DDR), Activity Timeline & Cost Reconciliation** (`packages/engineering/ddr.py`, `tests/test_ddr.py`):
+   - 24-hour activity timeline reconciliation detecting interval gaps and activity overlaps.
+   - NPT classification tracking reason, author, and severity.
+   - Category cost ledger with planned vs actual variance tracking.
+   - WITSML-compliant standard XML exchange generator.
+   - Endpoints: `POST /api/projects/{project_id}/ddr`, `POST /api/projects/{project_id}/ddr/export/xml`.
 
 **Automated Test Suite Results**:
-- **481 automated tests pass** (100% passing across all 17 engineering modules, API routes, migrations, multi-user governance, and cloud adapters) in 170.93 seconds.
-- Zero failures, zero broken snapshots, strict adherence to SI canonical physics and withholding boundaries.
+- **485 automated tests pass** (100% passing across all 17 engineering modules, API routes, migrations, multi-user governance, and cloud adapters) in 157.56 seconds.
+- Zero failures, zero broken snapshots, strict adherence to SI canonical physics and withholding boundaries (`equipment_control: false`).
 
 ---
-
-# Verification record — 4 October 2026 / version 0.8.0
 
 ## Streamlit cloud release verification — 2026-10-05
 
