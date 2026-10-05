@@ -13,7 +13,10 @@ from starlette.concurrency import run_in_threadpool
 from packages.engineering.models import ProjectCreate, MSEInput, PressureInput, Acknowledgement
 from packages.engineering.physics import mse, pressure
 from packages.engineering.ingestion import telemetry_csv, survey_csv, las2
-from .storage import Store, RevisionConflict, digest, canonical
+from .storage import Store, RevisionConflict, digest, canonical, current_actor
+from .auth import user_for_token
+from .access import role_denial, project_id_from_path, is_member, visible_projects, add_member
+from .team import build_router, bearer
 from packages.engineering.geometry import GeometryInput, GeometryRevisionRequest, geometry_result
 from packages.engineering.casing import CasingCheckInput, casing_check
 from packages.engineering.clustering import ClusteringInput, cluster_logs
@@ -36,25 +39,31 @@ from packages.engineering.supervision import SupervisionInput, supervision
 from packages.frontend import frontend_dist
 from . import demo
 
-ROOT = Path(__file__).resolve().parents[2]
+import sys
+ROOT = Path(sys._MEIPASS).resolve() if getattr(sys, "frozen", False) and hasattr(sys, "_MEIPASS") else Path(__file__).resolve().parents[2]
 MAX_FILE_BYTES = 2 * 1024 * 1024
 ALLOWED_HOSTS = {"127.0.0.1:8765", "localhost:8765", "127.0.0.1:5173", "localhost:5173", "testserver"}
 
 
-def create_app(data_dir: Path | None = None):
+def create_app(data_dir: Path | None = None, mode: str | None = None):
     app = FastAPI(title="GeoDrill Pro", version="0.8.0", docs_url=None, redoc_url=None, openapi_url=None)
     store = Store(data_dir or Path(os.environ.get("GEODRILL_DATA_DIR", ROOT / "data")))
     app.state.store = store
     session = secrets.token_urlsafe(32)
     lock = threading.RLock()
+    team_mode = (mode or os.environ.get("GEODRILL_MODE", "local")).lower() == "team"
+    allowed_hosts = set(ALLOWED_HOSTS)
+    if team_mode:
+        allowed_hosts |= {h.strip() for h in os.environ.get("GEODRILL_ALLOWED_HOSTS", "").split(",") if h.strip()}
+    app.state.team_mode = team_mode
 
     @app.middleware("http")
     async def boundary(request: Request, call_next):
         host = request.headers.get("host", "")
-        if host not in ALLOWED_HOSTS:
+        if host not in allowed_hosts:
             return JSONResponse({"detail": "Untrusted host"}, status_code=403)
         origin = request.headers.get("origin")
-        if origin and origin != f"http://{host}":
+        if origin and origin not in ({f"http://{host}", f"https://{host}"} if team_mode else {f"http://{host}"}):
             return JSONResponse({"detail": "Cross-origin requests are not allowed"}, status_code=403)
         if request.url.path.startswith("/api/") and request.headers.get("sec-fetch-site") == "cross-site":
             return JSONResponse({"detail": "Cross-site requests are not allowed"}, status_code=403)
@@ -66,12 +75,32 @@ def create_app(data_dir: Path | None = None):
         except ValueError:
             return JSONResponse({"detail": "Invalid content length"}, status_code=400)
         path = request.url.path
-        if path.startswith("/api/") and path not in {"/api/session", "/api/health"}:
+        actor_token = None
+        if team_mode:
+            # Per-user Bearer auth replaces the single-user loopback cookie. Browsers never attach
+            # Authorization headers automatically, so cookie-style CSRF does not apply here.
+            if path.startswith("/api/") and path not in {"/api/health", "/api/team/login"}:
+                user = await run_in_threadpool(user_for_token, store, bearer(request))
+                if user is None:
+                    return JSONResponse({"detail": "Sign in required"}, status_code=401, headers={"WWW-Authenticate": "Bearer"})
+                request.state.user = user
+                denial = role_denial(request.method, path, user)
+                if denial:
+                    return JSONResponse({"detail": denial}, status_code=403)
+                scoped = project_id_from_path(path)
+                if scoped is not None and not await run_in_threadpool(is_member, store, user, scoped):
+                    return JSONResponse({"detail": "Project not found"}, status_code=404)
+                actor_token = current_actor.set(f"user:{user['username']}")
+        elif path.startswith("/api/") and path not in {"/api/session", "/api/health"}:
             if not secrets.compare_digest(request.cookies.get("gd_session", ""), session):
                 return JSONResponse({"detail": "Open the workstation to start a local session."}, status_code=401)
             if request.method not in {"GET", "HEAD"} and request.headers.get("x-geodrill-client") != "workstation":
                 return JSONResponse({"detail": "Missing workstation request header"}, status_code=403)
-        response = await call_next(request)
+        try:
+            response = await call_next(request)
+        finally:
+            if actor_token is not None:
+                current_actor.reset(actor_token)
         response.headers["X-Content-Type-Options"] = "nosniff"
         response.headers["X-Frame-Options"] = "DENY"
         response.headers["Referrer-Policy"] = "no-referrer"
@@ -87,6 +116,13 @@ def create_app(data_dir: Path | None = None):
     async def invalid(request, error):
         return JSONResponse({"detail": str(error)}, status_code=422)
 
+    @app.exception_handler(PermissionError)
+    async def forbidden(request, error):
+        return JSONResponse({"detail": str(error)}, status_code=403)
+
+    if team_mode:
+        app.include_router(build_router(store))
+
     @app.get("/api/session")
     def bootstrap(response: Response):
         response.set_cookie("gd_session", session, httponly=True, samesite="strict", path="/")
@@ -98,13 +134,18 @@ def create_app(data_dir: Path | None = None):
                 "instance_id": hashlib.sha256(str(ROOT).encode()).hexdigest()[:16], "pid": os.getpid()}
 
     @app.get("/api/projects")
-    def projects():
+    def projects(request: Request):
+        if team_mode:
+            return visible_projects(store, request.state.user)
         return store.projects()
 
     @app.post("/api/projects", status_code=201)
-    def create_project(value: ProjectCreate):
+    def create_project(value: ProjectCreate, request: Request):
         with lock:
-            return store.create_project(value.model_dump())
+            proj = store.create_project(value.model_dump())
+            if team_mode:
+                add_member(store, proj["id"], request.state.user["id"], request.state.user)
+            return proj
 
     @app.get("/api/projects/{project_id}")
     def project(project_id: str):
@@ -144,14 +185,18 @@ def create_app(data_dir: Path | None = None):
         return await run_in_threadpool(execute)
 
     @app.post("/api/demo", status_code=201)
-    def load_demo():
+    def load_demo(request: Request):
         with lock:
             existing = next((p for p in store.projects() if p.get("demo_key") == "demo-v1"), None)
             if existing:
+                if team_mode:
+                    add_member(store, existing["id"], request.state.user["id"], request.state.user, quiet=True)
                 return existing
             payload = ProjectCreate(name="North Sea · Research", well_name="GD-01 / Demonstration", datum="Local rig datum (synthetic)", bit_diameter_m=0.2159, origin="synthetic").model_dump()
             payload.update(demo_key="demo-v1", formations=[{"name": "Nordland Group", "top_tvd_m": 0, "uncertainty_m": 25}, {"name": "Hordaland Group", "top_tvd_m": 750, "uncertainty_m": 35}, {"name": "Rogaland Group", "top_tvd_m": 1550, "uncertainty_m": 40}, {"name": "Chalk interval", "top_tvd_m": 2100, "uncertainty_m": 30}])
             project = store.create_project(payload)
+            if team_mode:
+                add_member(store, project["id"], request.state.user["id"], request.state.user, quiet=True)
             ingest(project["id"], "telemetry", "synthetic-drilling.csv", demo.telemetry())
             ingest(project["id"], "survey", "synthetic-survey.csv", demo.SURVEY)
             ingest(project["id"], "las", "synthetic-logs.las", demo.LAS)

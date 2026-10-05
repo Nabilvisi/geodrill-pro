@@ -3,11 +3,16 @@ import json
 import os
 import sqlite3
 from contextlib import contextmanager
+from contextvars import ContextVar
 from datetime import datetime, timezone
 from pathlib import Path
 from uuid import uuid4
 import duckdb
 import polars as pl
+from .migrations import migrate
+
+# Acting user for audit entries written during the current request (set by team-mode middleware).
+current_actor: ContextVar[str] = ContextVar("current_actor", default="local-workstation-user")
 
 
 def now():
@@ -30,24 +35,7 @@ class Store:
             (root / name).mkdir(exist_ok=True)
         self.db = root / "geodrill.sqlite3"
         with self.connect() as db:
-            db.executescript('''
-                PRAGMA journal_mode=WAL;
-                CREATE TABLE IF NOT EXISTS projects(id TEXT PRIMARY KEY, payload TEXT NOT NULL, created_at TEXT NOT NULL);
-                CREATE TABLE IF NOT EXISTS datasets(id TEXT PRIMARY KEY, project_id TEXT NOT NULL REFERENCES projects(id), kind TEXT NOT NULL, source_hash TEXT NOT NULL, payload TEXT NOT NULL, created_at TEXT NOT NULL, UNIQUE(project_id,kind,source_hash));
-                CREATE TABLE IF NOT EXISTS events(id TEXT PRIMARY KEY, project_id TEXT NOT NULL REFERENCES projects(id), dataset_id TEXT NOT NULL REFERENCES datasets(id), payload TEXT NOT NULL, acknowledgement TEXT);
-                CREATE TABLE IF NOT EXISTS calculations(id TEXT PRIMARY KEY, project_id TEXT NOT NULL REFERENCES projects(id), payload TEXT NOT NULL, created_at TEXT NOT NULL);
-                CREATE TABLE IF NOT EXISTS reports(id TEXT PRIMARY KEY, project_id TEXT NOT NULL REFERENCES projects(id), payload TEXT NOT NULL, sha256 TEXT NOT NULL, created_at TEXT NOT NULL);
-                CREATE TABLE IF NOT EXISTS audit(sequence INTEGER PRIMARY KEY AUTOINCREMENT, payload TEXT NOT NULL, previous_hash TEXT NOT NULL, hash TEXT NOT NULL);
-                CREATE TRIGGER IF NOT EXISTS audit_no_update BEFORE UPDATE ON audit BEGIN SELECT RAISE(ABORT,'Audit records are append-only'); END;
-                CREATE TRIGGER IF NOT EXISTS audit_no_delete BEFORE DELETE ON audit BEGIN SELECT RAISE(ABORT,'Audit records are append-only'); END;
-                CREATE TRIGGER IF NOT EXISTS reports_no_update BEFORE UPDATE ON reports BEGIN SELECT RAISE(ABORT,'Reports are immutable'); END;
-                CREATE TABLE IF NOT EXISTS engineering_revisions(id TEXT PRIMARY KEY, project_id TEXT NOT NULL REFERENCES projects(id), module TEXT NOT NULL, payload TEXT NOT NULL, sha256 TEXT NOT NULL, created_at TEXT NOT NULL);
-                CREATE TRIGGER IF NOT EXISTS revisions_no_update BEFORE UPDATE ON engineering_revisions BEGIN SELECT RAISE(ABORT,'Engineering revisions are immutable'); END;
-                CREATE TRIGGER IF NOT EXISTS revisions_no_delete BEFORE DELETE ON engineering_revisions BEGIN SELECT RAISE(ABORT,'Engineering revisions are immutable'); END;
-                CREATE TRIGGER IF NOT EXISTS calculations_no_update BEFORE UPDATE ON calculations BEGIN SELECT RAISE(ABORT,'Calculations are immutable'); END;
-                CREATE TRIGGER IF NOT EXISTS calculations_no_delete BEFORE DELETE ON calculations BEGIN SELECT RAISE(ABORT,'Calculations are immutable'); END;
-                PRAGMA user_version=2;
-            ''')
+            migrate(db)
 
     @contextmanager
     def connect(self):
@@ -63,10 +51,10 @@ class Store:
         finally:
             db.close()
 
-    def audit(self, db, action, project_id, details):
+    def audit(self, db, action, project_id, details, actor=None):
         previous = db.execute("SELECT hash FROM audit ORDER BY sequence DESC LIMIT 1").fetchone()
         previous = previous[0] if previous else "0" * 64
-        payload = canonical({"at": now(), "actor": "local-workstation-user", "action": action, "project_id": project_id, "details": details})
+        payload = canonical({"at": now(), "actor": actor or current_actor.get(), "action": action, "project_id": project_id, "details": details})
         hashed = digest((previous + payload).encode())
         db.execute("INSERT INTO audit(payload,previous_hash,hash) VALUES(?,?,?)", (payload, previous, hashed))
 

@@ -8,23 +8,53 @@ import streamlit.components.v1 as components
 from apps.streamlit.cloud import Workspace
 
 st.set_page_config(page_title="GeoDrill Pro",page_icon="🛢️",layout="wide",initial_sidebar_state="collapsed")
+st.markdown(
+    """
+    <style>
+    .block-container {
+        padding-top: 1rem !important;
+        padding-bottom: 1rem !important;
+        padding-left: 1.5rem !important;
+        padding-right: 1.5rem !important;
+        max-width: 100% !important;
+    }
+    iframe[title="apps.streamlit.component.geodrill_workstation"],
+    div[data-testid="stCustomComponentV1"] iframe {
+        width: 100% !important;
+        min-height: 1000px !important;
+        border: none !important;
+        overflow: visible !important;
+    }
+    header[data-testid="stHeader"] {
+        background: transparent !important;
+    }
+    </style>
+    """,
+    unsafe_allow_html=True
+)
 st.title("GeoDrill Pro")
 st.caption("Version 0.8.0 · Audited engineering research through Module 17")
 st.info("This cloud workspace belongs to this browser session. Download fixed reports to retain evidence. Use the local workstation for persistent project storage. Examples are synthetic; equipment control is unavailable.")
-with st.expander("Start here · projects, studies and saving your work"):
+with st.expander("Desktop application (.exe) · Offline workstation like COMPASS / DrillPlan"):
     st.markdown(
-        "**Explore the example:** North Sea · Research opens with synthetic telemetry, "
-        "survey and log data. Use the replay controls and the Data workspace to inspect original sources.\n\n"
-        "**Try a saved study:** choose Cloud verification · Synthetic in the project selector, "
-        "open a page from BHA dynamics through Supervisory research, then select a saved study. "
-        "Review its assumptions and applicability before calculating a new record.\n\n"
-        "**Use your own inputs:** create a project, declare datum and units, import supported files "
-        "in Data workspace, and preserve geometry revisions before running geometry-bound studies.\n\n"
-        "**Keep your evidence:** choose Create report, then Download complete JSON. "
-        "Reports preserve the complete fixed snapshot; the print view is a summary. "
-        "This hosted workspace is temporary and a report is not a restorable project backup. "
-        "Use the local workstation when you need persistent project storage."
+        "For offline production use, heavy trajectory planning, and local persistence without browser session limits, "
+        "download the standalone GeoDrill Pro desktop application.\n\n"
+        "- **Zero-Installation Portable Bundle**: Run locally with full offline calculation capabilities.\n"
+        "- **Local Persistence**: Permanent SQLite + Parquet evidence vault in your Windows user profile.\n"
+        "- **Engineering Limits**: Comprehensive Modules 1–17 (Survey, Hydraulics, BHA dynamics, Casing wear, Torque & Drag)."
     )
+    zip_path = ROOT / "dist" / "GeoDrillPro-Windows-x64.zip"
+    if zip_path.exists():
+        st.download_button(
+            label="⬇️ Download GeoDrill Pro (.exe bundle for Windows)",
+            data=zip_path.read_bytes(),
+            file_name="GeoDrillPro-Windows-x64.zip",
+            mime="application/zip",
+            help="Download standalone Windows desktop build containing GeoDrillPro.exe"
+        )
+    else:
+        st.info("Desktop build is generated locally via `python tools/build_exe.py`.")
+
 if "_geodrill_workspace" not in st.session_state:
     with st.spinner("Preparing an isolated engineering workspace…"):
         st.session_state["_geodrill_workspace"]=Workspace()

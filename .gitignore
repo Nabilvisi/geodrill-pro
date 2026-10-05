@@ -22,3 +22,7 @@ publication-bundle.json
 .cloud-session/
 
 /verification*/
+build/
+*.spec
+dist/*.exe
+
