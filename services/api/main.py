@@ -40,6 +40,7 @@ from packages.engineering.qualification import list_qualification_cards, get_qua
 from packages.engineering.readiness import inspect_readiness
 from packages.engineering.scenarios import build_lineage_graph, compare_scenarios
 from packages.engineering.review_pack import build_programme_pack, export_pack_to_html, export_pack_to_csv
+from packages.engineering.usability import convert_unit, paginate_and_search_records, UNIT_PROFILES
 from packages.frontend import frontend_dist
 from . import demo
 
@@ -658,6 +659,19 @@ def create_app(data_dir: Path | None = None, mode: str | None = None):
             csv_data = export_pack_to_csv(payload.get("pack", payload), component=component)
             return Response(csv_data, media_type="text/csv", headers={"Content-Disposition": f'attachment; filename="programme-{component}-{project_id}.csv"'})
         raise HTTPException(400, "Unsupported export format")
+
+    @app.get("/api/units/profiles")
+    def list_unit_profiles():
+        return UNIT_PROFILES
+
+    @app.post("/api/units/convert")
+    def api_convert_unit(payload: dict = Body(...)):
+        val = payload.get("value")
+        dim = payload.get("dimension", "")
+        from_u = payload.get("from_unit", "")
+        to_u = payload.get("to_unit", "")
+        converted = convert_unit(val, dim, from_u, to_u)
+        return {"value": val, "dimension": dim, "from_unit": from_u, "to_unit": to_u, "converted_value": converted}
 
     @app.get("/api/templates/{kind}")
     def template(kind: Literal["telemetry", "survey", "las"]):
