@@ -36,6 +36,9 @@ from packages.engineering.wear_fatigue import WearInput, wear_fatigue
 from packages.engineering.anomaly import AnomalyInput, anomaly
 from packages.engineering.gas_phase import GasInput, gas_phase
 from packages.engineering.supervision import SupervisionInput, supervision
+from packages.engineering.qualification import list_qualification_cards, get_qualification_card
+from packages.engineering.readiness import inspect_readiness
+from packages.engineering.scenarios import build_lineage_graph, compare_scenarios
 from packages.frontend import frontend_dist
 from . import demo
 
@@ -337,6 +340,52 @@ def create_app(data_dir: Path | None = None, mode: str | None = None):
     @app.get("/api/research/schemas")
     def research_schemas():
         return {key:model.model_json_schema() for key,model in research_models.items()}
+
+    @app.get("/api/qualification/cards")
+    def qualification_cards():
+        return list_qualification_cards()
+
+    @app.get("/api/qualification/cards/{module_id}")
+    def qualification_card(module_id: str):
+        card = get_qualification_card(module_id)
+        if card is None:
+            raise HTTPException(404, f"Qualification card for module '{module_id}' not found.")
+        return card
+
+    @app.post("/api/readiness/inspect")
+    async def check_data_readiness(kind: Literal["telemetry", "survey"] = Form(...), file: UploadFile = File(...)):
+        raw = await file.read(MAX_FILE_BYTES + 1)
+        await file.close()
+        if len(raw) > MAX_FILE_BYTES:
+            raise HTTPException(413, "File exceeds the 2 MiB release limit.")
+        try:
+            text = raw.decode("utf-8-sig")
+            import csv, io
+            reader = csv.DictReader(io.StringIO(text))
+            headers = reader.fieldnames or []
+            rows = [r for _, r in zip(range(100), reader)]
+            return inspect_readiness(headers, rows, kind)
+        except Exception as err:
+            raise HTTPException(422, f"Could not inspect CSV: {str(err)}")
+
+    @app.get("/api/projects/{project_id}/lineage")
+    def project_lineage(project_id: str):
+        store.project(project_id)
+        ds = store.datasets(project_id)
+        revs = store.revisions(project_id, "M1")
+        calcs = store.calculations(project_id)
+        return build_lineage_graph(project_id, ds, revs, calcs)
+
+    @app.post("/api/projects/{project_id}/scenarios/compare")
+    def scenario_compare(project_id: str, baseline_id: str = Form(...), alternative_id: str = Form(...)):
+        store.project(project_id)
+        calcs = {c["id"]: c for c in store.calculations(project_id)}
+        if baseline_id not in calcs or alternative_id not in calcs:
+            raise HTTPException(404, "One or both scenario calculations not found in this project.")
+        try:
+            return compare_scenarios(calcs[baseline_id], calcs[alternative_id])
+        except ValueError as err:
+            raise HTTPException(422, str(err))
 
     @app.get("/api/projects/{project_id}/research/{model}/template/{revision_id}")
     def research_template(project_id: str, model: str, revision_id: str):
