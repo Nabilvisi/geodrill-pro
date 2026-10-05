@@ -41,6 +41,7 @@ from packages.engineering.readiness import inspect_readiness
 from packages.engineering.scenarios import build_lineage_graph, compare_scenarios
 from packages.engineering.review_pack import build_programme_pack, export_pack_to_html, export_pack_to_csv
 from packages.engineering.usability import convert_unit, paginate_and_search_records, UNIT_PROFILES
+from packages.engineering.ddr import create_daily_drilling_report, export_ddr_to_xml
 from packages.frontend import frontend_dist
 from . import demo
 
@@ -672,6 +673,28 @@ def create_app(data_dir: Path | None = None, mode: str | None = None):
         to_u = payload.get("to_unit", "")
         converted = convert_unit(val, dim, from_u, to_u)
         return {"value": val, "dimension": dim, "from_unit": from_u, "to_unit": to_u, "converted_value": converted}
+
+    @app.post("/api/projects/{project_id}/ddr")
+    def create_ddr(project_id: str, payload: dict = Body(...)):
+        project = store.project(project_id)
+        report = create_daily_drilling_report(
+            project_id=project_id,
+            well_name=project.get("well_name", payload.get("well_name", "Well")),
+            report_date=payload.get("report_date", "2026-10-05"),
+            report_no=int(payload.get("report_no", 1)),
+            current_depth_m=float(payload.get("current_depth_m", 0.0)),
+            previous_depth_m=float(payload.get("previous_depth_m", 0.0)),
+            activities=payload.get("activities", []),
+            costs=payload.get("costs", []),
+            currency=payload.get("currency", "USD"),
+        )
+        return report
+
+    @app.post("/api/projects/{project_id}/ddr/export/xml")
+    def export_ddr_xml(project_id: str, payload: dict = Body(...)):
+        store.project(project_id)
+        xml_data = export_ddr_to_xml(payload)
+        return Response(xml_data, media_type="application/xml", headers={"Content-Disposition": f'attachment; filename="ddr-{project_id}-day{payload.get("report_no", 1)}.xml"'})
 
     @app.get("/api/templates/{kind}")
     def template(kind: Literal["telemetry", "survey", "las"]):
