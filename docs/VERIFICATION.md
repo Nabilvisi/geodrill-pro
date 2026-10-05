@@ -1,3 +1,35 @@
+# Verification record — 5 October 2026 / version 0.8.0
+
+## Tranche 1 Backlog Advancements & Full Platform Verification — 2026-10-05
+
+All 5 Tranche 1 advancement capabilities (GD-A05, GD-A01, GD-A02, GD-A03, GD-A04) have been implemented, tested, and pushed to origin main:
+
+1. **GD-A05 Qualification Ledger & Benchmarks** (`packages/engineering/qualification.py`, `tests/test_qualification.py`):
+   - M01 to M17 qualification status cards, governing physics, applicability boundaries, withholding conditions, and analytical benchmark targets.
+   - Endpoints: `GET /api/qualification/cards`, `GET /api/qualification/cards/{module_id}`.
+2. **GD-A01 Data Readiness & Source Mapping** (`packages/engineering/readiness.py`, `tests/test_readiness.py`):
+   - Standard alias dictionaries, unit factor resolution, header parsing (`wob[kN]`, `torque_kft.lbf`), null-fraction analysis, and data completeness scoring.
+   - Endpoint: `POST /api/readiness/inspect`.
+3. **GD-A02 Study Dependencies, Lineage Graph & Scenario Comparison** (`packages/engineering/scenarios.py`, `tests/test_scenarios.py`):
+   - Dependency graph across datasets, geometry revisions, and calculations. Identifies superseded dependencies and stale calculations without mutating historical data.
+   - Baseline vs alternative scenario delta comparisons across scalar metrics with boolean discrimination.
+   - Endpoints: `GET /api/projects/{project_id}/lineage`, `POST /api/projects/{project_id}/scenarios/compare`.
+4. **GD-A03 Drilling Programme & Review Pack** (`packages/engineering/review_pack.py`, `tests/test_review_pack.py`):
+   - Section plan, operational activity sequence, well-control hazard register, engineering assumptions, scenario delta comparison, and model qualification ledger.
+   - Paginated HTML and tabular CSV exports with prominent research-only watermarks.
+   - Endpoints: `POST /api/projects/{project_id}/review-pack`, `POST /api/projects/{project_id}/review-pack/export/{fmt}`.
+5. **GD-A04 Record Usability, Pagination & Unit Roundtrip Conversions** (`packages/engineering/usability.py`, `tests/test_usability.py`):
+   - Searchable, filterable, and paginated record table navigation with row-level error tagging for rapid jump navigation.
+   - Bi-directional unit conversion with guaranteed IEEE-754 round-trip precision and preservation of missing/null values (null never coerced to 0).
+   - Preconfigured unit profiles: SI Metric, Oilfield US/Imperial, and Canadian/North Sea Metric Oilfield.
+   - Endpoints: `GET /api/units/profiles`, `POST /api/units/convert`.
+
+**Automated Test Suite Results**:
+- **481 automated tests pass** (100% passing across all 17 engineering modules, API routes, migrations, multi-user governance, and cloud adapters) in 170.93 seconds.
+- Zero failures, zero broken snapshots, strict adherence to SI canonical physics and withholding boundaries.
+
+---
+
 # Verification record — 4 October 2026 / version 0.8.0
 
 ## Streamlit cloud release verification — 2026-10-05
