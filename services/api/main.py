@@ -6,7 +6,7 @@ import secrets
 import threading
 from pathlib import Path
 from typing import Literal
-from fastapi import FastAPI, File, Form, HTTPException, Request, Response, UploadFile
+from fastapi import Body, FastAPI, File, Form, HTTPException, Request, Response, UploadFile
 from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from starlette.concurrency import run_in_threadpool
@@ -39,6 +39,7 @@ from packages.engineering.supervision import SupervisionInput, supervision
 from packages.engineering.qualification import list_qualification_cards, get_qualification_card
 from packages.engineering.readiness import inspect_readiness
 from packages.engineering.scenarios import build_lineage_graph, compare_scenarios
+from packages.engineering.review_pack import build_programme_pack, export_pack_to_html, export_pack_to_csv
 from packages.frontend import frontend_dist
 from . import demo
 
@@ -628,6 +629,35 @@ def create_app(data_dir: Path | None = None, mode: str | None = None):
     def report_download(project_id: str, report_id: str):
         value = store.report(project_id, report_id)
         return JSONResponse(value, headers={"Content-Disposition": f'attachment; filename="geodrill-report-{value["snapshot"]["id"]}.json"'})
+
+    @app.post("/api/projects/{project_id}/review-pack")
+    def create_review_pack(project_id: str, payload: dict = Body(...)):
+        store.project(project_id)
+        pack = build_programme_pack(
+            project_id=project_id,
+            programme_title=payload.get("title", "Drilling Programme Review Pack"),
+            sections=payload.get("sections", []),
+            activities=payload.get("activities", []),
+            hazards=payload.get("hazards", []),
+            assumptions=payload.get("assumptions", []),
+            selected_studies=payload.get("selected_studies", []),
+            baseline_study=payload.get("baseline_study"),
+            alternative_study=payload.get("alternative_study"),
+            metadata=payload.get("metadata"),
+        )
+        return pack
+
+    @app.post("/api/projects/{project_id}/review-pack/export/{fmt}")
+    def export_review_pack(project_id: str, fmt: Literal["html", "csv"], payload: dict = Body(...)):
+        store.project(project_id)
+        if fmt == "html":
+            html = export_pack_to_html(payload)
+            return Response(html, media_type="text/html", headers={"Content-Disposition": f'attachment; filename="programme-pack-{project_id}.html"'})
+        elif fmt == "csv":
+            component = payload.get("component", "activities")
+            csv_data = export_pack_to_csv(payload.get("pack", payload), component=component)
+            return Response(csv_data, media_type="text/csv", headers={"Content-Disposition": f'attachment; filename="programme-{component}-{project_id}.csv"'})
+        raise HTTPException(400, "Unsupported export format")
 
     @app.get("/api/templates/{kind}")
     def template(kind: Literal["telemetry", "survey", "las"]):
