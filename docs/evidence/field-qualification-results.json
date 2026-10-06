@@ -1,0 +1,277 @@
+{
+  "suite": "GeoDrill Pro provisional Gate 3 benchmark review",
+  "qualification_gate": "Gate 3",
+  "overall_status": "INDEPENDENT_QUALIFICATION_PENDING",
+  "field_qualified": false,
+  "all_passed": false,
+  "benchmarks": {
+    "volve_directional_survey": {
+      "source_provenance": "unverified_embedded_example",
+      "reference_license": null,
+      "independent_validation": false,
+      "field_qualified": false,
+      "numerical_check_only": true,
+      "validation_status": "withheld",
+      "validation_reason": "Original observations, extraction provenance and independent review have not been verified.",
+      "benchmark": "Equinor Volve 15/9-F-12 Directional Survey",
+      "reference_source": "Claimed Volve 15/9-F-12 survey; original extraction and license unverified",
+      "data_sha256": "08f36ba5ddbdcf39ee7940fc110622b4f92bf1b246eb2e389f16921ec6cfcf80",
+      "passed": true,
+      "max_tvd_error_pct": 0.001,
+      "max_horizontal_error_pct": 0.1412,
+      "tolerance_pct": 1.5,
+      "stations_evaluated": 7,
+      "comparisons": [
+        {
+          "md_m": 450.0,
+          "ref_tvd_m": 449.99,
+          "calc_tvd_m": 449.99,
+          "tvd_err_pct": 0.001,
+          "ref_horiz_m": 3.14,
+          "calc_horiz_m": 3.14,
+          "horiz_err_pct": 0.1412,
+          "horizontal_vector_error_m": 0.004436554556694304
+        },
+        {
+          "md_m": 920.0,
+          "ref_tvd_m": 914.69,
+          "calc_tvd_m": 914.69,
+          "tvd_err_pct": 0.0004,
+          "ref_horiz_m": 65.55,
+          "calc_horiz_m": 65.55,
+          "horiz_err_pct": 0.0086,
+          "horizontal_vector_error_m": 0.005637519251922926
+        },
+        {
+          "md_m": 1450.0,
+          "ref_tvd_m": 1386.26,
+          "calc_tvd_m": 1386.26,
+          "tvd_err_pct": 0.0001,
+          "ref_horiz_m": 299.06,
+          "calc_horiz_m": 299.06,
+          "horiz_err_pct": 0.0011,
+          "horizontal_vector_error_m": 0.0033257611648379944
+        },
+        {
+          "md_m": 2100.0,
+          "ref_tvd_m": 1866.23,
+          "calc_tvd_m": 1866.23,
+          "tvd_err_pct": 0.0001,
+          "ref_horiz_m": 736.43,
+          "calc_horiz_m": 736.44,
+          "horiz_err_pct": 0.0002,
+          "horizontal_vector_error_m": 0.0016330313429485032
+        },
+        {
+          "md_m": 2850.0,
+          "ref_tvd_m": 2407.79,
+          "calc_tvd_m": 2407.79,
+          "tvd_err_pct": 0.0002,
+          "ref_horiz_m": 1254.74,
+          "calc_horiz_m": 1254.74,
+          "horiz_err_pct": 0.0001,
+          "horizontal_vector_error_m": 0.0007836177485848588
+        },
+        {
+          "md_m": 3400.0,
+          "ref_tvd_m": 2882.87,
+          "calc_tvd_m": 2882.87,
+          "tvd_err_pct": 0.0001,
+          "ref_horiz_m": 1524.52,
+          "calc_horiz_m": 1524.51,
+          "horiz_err_pct": 0.0003,
+          "horizontal_vector_error_m": 0.003919297448864639
+        },
+        {
+          "md_m": 3800.0,
+          "ref_tvd_m": 3273.61,
+          "calc_tvd_m": 3273.61,
+          "tvd_err_pct": 0.0001,
+          "ref_horiz_m": 1606.06,
+          "calc_horiz_m": 1606.06,
+          "horiz_err_pct": 0.0003,
+          "horizontal_vector_error_m": 0.004747420583765261
+        }
+      ],
+      "equipment_control": false,
+      "clearance_generated": false
+    },
+    "volve_hydraulics_ecd": {
+      "source_provenance": "unverified_embedded_example",
+      "reference_license": null,
+      "independent_validation": false,
+      "field_qualified": false,
+      "numerical_check_only": true,
+      "validation_status": "withheld",
+      "validation_reason": "Original observations, extraction provenance and independent review have not been verified.",
+      "benchmark": "Equinor Volve 15/9-F-12 Hydraulics & ECD",
+      "reference_source": "Claimed Volve DDR ECD; original observations and operating conditions unverified",
+      "data_sha256": "955d2a6d68ed4cee065d79aec59461e8044ac46584be4ffecd24e6baebe3a21e",
+      "passed": true,
+      "calculated_ecd_kg_m3": 1409.17,
+      "recorded_ddr_ecd_kg_m3": 1418.0,
+      "annular_pressure_loss_bar": 6.89,
+      "effective_mud_density_kg_m3": 1380.0,
+      "ecd_error_pct": 0.622,
+      "tolerance_pct": 1.5,
+      "equipment_control": false
+    },
+    "utah_forge_dynamics": {
+      "source_provenance": "unverified_embedded_example",
+      "reference_license": null,
+      "independent_validation": false,
+      "field_qualified": false,
+      "numerical_check_only": true,
+      "validation_status": "withheld",
+      "validation_reason": "Original observations, extraction provenance and independent review have not been verified.",
+      "benchmark": "Utah FORGE 16A(78)-32 Geothermal Hard-Rock Dynamics",
+      "reference_source": "Claimed FORGE dynamics; native observations and extraction unverified",
+      "data_sha256": "f9aea960bc9e522b198281ae26ec646dc5cb4058e5c8920099a229f5d4a80790",
+      "passed": false,
+      "calculated_torsional_frequency_hz": 0.2868,
+      "observed_torsional_frequency_hz": 0.28,
+      "torsional_frequency_error_pct": 2.43,
+      "torsional_stick_slip_propensity": 149.68,
+      "severe_stick_slip_indicated": true,
+      "bha_axial_resonance_modes_hz": [
+        12.9,
+        25.9
+      ],
+      "observed_bit_bounce_band_hz": [
+        14.0,
+        18.0
+      ],
+      "axial_band_matched": false,
+      "equipment_control": false
+    },
+    "tudrp_flowloop_cuttings": {
+      "source_provenance": "unverified_embedded_example",
+      "reference_license": null,
+      "independent_validation": false,
+      "field_qualified": false,
+      "numerical_check_only": true,
+      "validation_status": "withheld",
+      "validation_reason": "Original observations, extraction provenance and independent review have not been verified.",
+      "benchmark": "Tulsa University (TUDRP) Flow-Loop Cuttings Bed Calibration",
+      "reference_source": "Claimed Tulsa flow-loop targets; original experiment and paper mapping unverified",
+      "data_sha256": "b65031f65495ec9756f4d45c3ac784529754bcd9cd27f86396bd06a2ce073c4f",
+      "passed": true,
+      "mean_bed_fraction_abs_error": 0.0236,
+      "mean_vcrit_error_pct": 3.02,
+      "points_evaluated": 7,
+      "results": [
+        {
+          "inclination_deg": 0.0,
+          "fluid_velocity_m_s": 0.9,
+          "calc_vcrit_m_s": 0.42,
+          "obs_vcrit_m_s": 0.42,
+          "vcrit_error_pct": 0.0,
+          "calc_bed_fraction": 0.001,
+          "obs_bed_fraction": 0.0,
+          "bed_fraction_abs_diff": 0.001
+        },
+        {
+          "inclination_deg": 30.0,
+          "fluid_velocity_m_s": 0.9,
+          "calc_vcrit_m_s": 0.88,
+          "obs_vcrit_m_s": 0.88,
+          "vcrit_error_pct": 0.0,
+          "calc_bed_fraction": 0.019,
+          "obs_bed_fraction": 0.08,
+          "bed_fraction_abs_diff": 0.061
+        },
+        {
+          "inclination_deg": 45.0,
+          "fluid_velocity_m_s": 0.9,
+          "calc_vcrit_m_s": 1.08,
+          "obs_vcrit_m_s": 1.15,
+          "vcrit_error_pct": 6.09,
+          "calc_bed_fraction": 0.125,
+          "obs_bed_fraction": 0.16,
+          "bed_fraction_abs_diff": 0.035
+        },
+        {
+          "inclination_deg": 60.0,
+          "fluid_velocity_m_s": 0.9,
+          "calc_vcrit_m_s": 1.23,
+          "obs_vcrit_m_s": 1.28,
+          "vcrit_error_pct": 4.19,
+          "calc_bed_fraction": 0.2,
+          "obs_bed_fraction": 0.22,
+          "bed_fraction_abs_diff": 0.02
+        },
+        {
+          "inclination_deg": 75.0,
+          "fluid_velocity_m_s": 0.9,
+          "calc_vcrit_m_s": 1.28,
+          "obs_vcrit_m_s": 1.2,
+          "vcrit_error_pct": 6.67,
+          "calc_bed_fraction": 0.223,
+          "obs_bed_fraction": 0.19,
+          "bed_fraction_abs_diff": 0.033
+        },
+        {
+          "inclination_deg": 90.0,
+          "fluid_velocity_m_s": 0.9,
+          "calc_vcrit_m_s": 1.12,
+          "obs_vcrit_m_s": 1.12,
+          "vcrit_error_pct": 0.0,
+          "calc_bed_fraction": 0.171,
+          "obs_bed_fraction": 0.17,
+          "bed_fraction_abs_diff": 0.001
+        },
+        {
+          "inclination_deg": 60.0,
+          "fluid_velocity_m_s": 1.6,
+          "calc_vcrit_m_s": 1.23,
+          "obs_vcrit_m_s": 1.28,
+          "vcrit_error_pct": 4.19,
+          "calc_bed_fraction": 0.005,
+          "obs_bed_fraction": 0.02,
+          "bed_fraction_abs_diff": 0.015
+        }
+      ],
+      "equipment_control": false
+    },
+    "downhole_sub_friction": {
+      "source_provenance": "unverified_embedded_example",
+      "reference_license": null,
+      "independent_validation": false,
+      "field_qualified": false,
+      "numerical_check_only": true,
+      "validation_status": "withheld",
+      "validation_reason": "Original observations, extraction provenance and independent review have not been verified.",
+      "benchmark": "Provisional downhole friction example",
+      "reference_source": "Unverified embedded campaign values",
+      "data_sha256": "2ae7095c8768905b14f8999abcf33848754bf679eadbce8e2b03aca0bf2f4df3",
+      "passed": false,
+      "status": "withheld",
+      "reason": "Original survey, string, native tension/torque records and disjoint calibration/holdout data are missing.",
+      "calibrated_cased_friction": null,
+      "calibrated_open_friction": null,
+      "pickup_hookload_err_pct": null,
+      "slackoff_hookload_err_pct": null,
+      "rotating_hookload_err_pct": null,
+      "max_hookload_err_pct": null,
+      "tolerance_pct": 2.0,
+      "equipment_control": false
+    }
+  },
+  "missing_evidence": [
+    "Original source files, license records and extraction locations with file SHA-256 digests",
+    "Independent targets and declared applicability, tolerances and uncertainty",
+    "Production-model execution and disjoint calibration/holdout observations",
+    "Named independent engineering reviewer and signed scope-specific assessment"
+  ],
+  "governing_constraints": {
+    "si_physics_foundation": true,
+    "equipment_control": false,
+    "clearance_generated": false
+  },
+  "third_party_engineering_sign_off": {
+    "qualified_for_commercial_advisory": false,
+    "reviewer": null,
+    "signed_assessment": null,
+    "certification_level": null
+  }
+}
