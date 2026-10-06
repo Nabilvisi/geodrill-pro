@@ -23,6 +23,9 @@ if not (dist_dir / "index.html").is_file():
 # Relative path for frontend inside bundle
 frontend_rel = dist_dir.relative_to(ROOT)
 
+# Clean previous build artifacts if present
+shutil.rmtree(ROOT / "dist" / "GeoDrillPro", ignore_errors=True)
+
 pyinstaller_cmd = [
     str(ROOT / ".venv" / "Scripts" / "pyinstaller.exe"),
     "--noconfirm",
@@ -32,6 +35,8 @@ pyinstaller_cmd = [
     "--add-data", f"{dist_dir};{frontend_rel}",
     "--add-data", f"{ROOT / 'frontend-build.json'};.",
     "--add-data", f"{ROOT / 'public'};public",
+    "--collect-submodules", "packages",
+    "--collect-submodules", "services",
     "--hidden-import", "uvicorn.logging",
     "--hidden-import", "uvicorn.loops",
     "--hidden-import", "uvicorn.loops.auto",
@@ -58,3 +63,9 @@ if code != 0:
 
 print("\nPyInstaller build completed successfully!")
 print(f"Standalone executable is located at: {ROOT / 'dist' / 'GeoDrillPro' / 'GeoDrillPro.exe'}")
+
+zip_dest = ROOT / "dist" / "GeoDrillPro-Windows-x64"
+print(f"Packaging standalone bundle into {zip_dest}.zip...")
+shutil.make_archive(str(zip_dest), "zip", root_dir=ROOT / "dist", base_dir="GeoDrillPro")
+print(f"Standalone zip package created at: {zip_dest}.zip")
+
