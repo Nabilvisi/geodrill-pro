@@ -1,5 +1,5 @@
 ; Inno Setup Script for GeoDrill Pro Engineering Workstation
-; Commercial Distribution Packaging Wizard (Gate 2)
+; Per-user installer. Packaging does not establish engineering qualification.
 
 #define MyAppName "GeoDrill Pro Engineering Workstation"
 #define MyAppVersion "0.8.0"
@@ -26,7 +26,6 @@ DisableProgramGroupPage=yes
 ; Output Configuration
 OutputDir=..\..\dist
 OutputBaseFilename=GeoDrillPro-Setup
-SetupIconFile=..\..\public\favicon.ico
 UninstallDisplayIcon={app}\{#MyAppExeName}
 
 ; Compression & Architecture
@@ -35,7 +34,6 @@ SolidCompression=yes
 ArchitecturesInstallIn64BitMode=x64compatible
 ArchitecturesAllowed=x64compatible
 PrivilegesRequired=lowest
-PrivilegesRequiredOverridesAllowed=dialog
 
 ; Wizard Appearance
 WizardStyle=modern
@@ -62,5 +60,4 @@ Name: "{autodesktop}\GeoDrill Pro"; Filename: "{app}\{#MyAppExeName}"; Tasks: de
 [Run]
 Filename: "{app}\{#MyAppExeName}"; Description: "{cm:LaunchProgram,{#StringChange(MyAppName, '&', '&&')}}"; Flags: nowait postinstall skipifsilent
 
-[UninstallDelete]
-Type: filesandordirs; Name: "{app}"
+; Inno removes only installed files. Preserve additional user files on uninstall.

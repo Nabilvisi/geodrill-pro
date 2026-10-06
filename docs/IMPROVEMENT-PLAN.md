@@ -38,9 +38,19 @@ Software completion, release readiness, and independent engineering qualificatio
 
 ## 3. Separate Verification, Release & Qualification Gates
 
-| Gate | Description | Current Status |
+The previous PASSED & CLOSED declarations for Gates 2–4 are withdrawn.
+See [REPAIR-STATUS.md](REPAIR-STATUS.md) and [current machine-readable evidence](evidence/repair-verification.json).
+
+| Gate | Evidence required | Current status |
 |---|---|---|
-| **Software Verification** | Automated unit, regression, integration, and property tests (555/555 tests pass in ~3.3 minutes). Production Vite and Streamlit component builds verified. | **PASSED (100% — 555/555 tests)** |
-| **Gate 2: Release Packaging & Distribution** | Professional Windows wizard installer (`tools/installer/setup.iss`), Authenticode code-signing pipeline (`tools/sign_windows_binary.py`), automated GitHub Actions release workflow (`.github/workflows/release.yml`), in-app Streamlit updater synchronization, and signed Windows distribution bundle (`dist/GeoDrillPro-Windows-x64.zip`, SHA-256: `11B527B81C2D1FA5BC2B06CB77D010FBEB59B9F92CADFF903C1E36669C3DB242`). | **PASSED & CLOSED** |
-| **Gate 3: Independent Engineering Field Qualification** | Equinor Volve Field 15/9-F-12 definitive survey (<0.1% error) and hydraulics ECD (<1.5% margin) calibration; Utah FORGE Well 16A(78)-32 geothermal hard-rock stick-slip & bit-bounce validation; Tulsa University (TUDRP) empirical flow-loop cuttings bed calibration; downhole sub friction factor inversion; automated qualification dossier (`docs/evidence/FIELD-QUALIFICATION-DOSSIER.md`). | **PASSED & CLOSED (Field Qualified)** |
-| **Gate 4: Security & Compliance Audit** | OWASP API Top 10 automated penetration test suite (`tests/test_security_audit.py`), Ed25519 cryptographic attestation bit-flip tamper-resistance audit, fresh-archive `.gdpz` tamper rejection, SAST scan (`bandit` 0 issues), SCA scan (`pip-audit` 0 CVEs), and SOC 2 / ISO 27001 readiness report (`docs/compliance/SECURITY-AUDIT-REPORT.md`). | **PASSED & CLOSED (Audited & Compliant)** |
+| Software verification | Full regression, frontend build, cloud session/report tests | Current command results recorded in repair evidence; historical counts superseded |
+| Windows research packaging | Executable smoke, installer build, isolated install/uninstall, matching ZIP executable and hashes | Tracked separately from publisher signing |
+| Trusted publisher distribution | Publisher certificate, timestamp and trusted verification on both EXE and installer | Pending publisher certificate; development fallback removed |
+| Hosted app repair | Reviewed merge, final cloud build and rendered live interaction | Tested repair branch prepared; live main currently fails startup |
+| Independent engineering qualification | Original datasets, extraction provenance, applicability and holdout evidence, named independent reviewer | Pending; provisional examples cannot close this gate |
+| External security/compliance audit | Scoped external assessment and actual certification evidence if claimed | Pending; automated test/scanner results are internal software evidence |
+
+The source-backed FORGE survey check supplements the existing ISCWSA analytical diagnostics.
+Volve ECD, FORGE downhole dynamics, Tulsa flow-loop and downhole friction qualification
+still require original observations and independently reviewed production-model comparisons.
+No rig actuation or automated drilling clearance is introduced.

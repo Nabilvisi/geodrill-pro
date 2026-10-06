@@ -1,5 +1,8 @@
 # Verification record — 6 October 2026 / version 0.8.0
 
+Current repair verification: **568 passed, zero failures/errors**; Windows research installer install/execute/uninstall verified. See [repair status](REPAIR-STATUS.md) for current gates and artifact evidence.
+
+
 **Current checkout increment:** [Completed Engineering Workstation: GD-A01–A18](IMPROVEMENT-PLAN.md), verified locally on 6 October 2026. Historical public-release observations below do not establish public/Windows equivalence for this increment.
 
 ## Phase 3 & 4 Core Engineering & Evidence Verification (GD-A10–GD-A18) — 2026-10-06
@@ -441,39 +444,16 @@ This establishes tested local software behavior, not independent security review
 
 GD-A07–A09 are preserved. The A01–A06 discrepancy, A17 future sequence, benchmark-gated A11–A18 work and pending Windows/shared-deployment/security/engineering gates are explicit in the current plan. The public hosted application and Windows installation were not deployed or asserted equivalent to this checkout. Autonomous rig control remains excluded.
 
-## Gate 2, Gate 3, and Gate 4 Commercial Readiness Closure — 6 October 2026
+## Correction of the 6 October commercial-gate closure claims
 
-All three release readiness, field qualification, and compliance audit gates have been formally closed and verified:
+The previous closure entry is withdrawn. It combined software examples and generated
+documents with independent approval, and reported a trusted installer release without
+verifying the installer artifact or certificate chain.
 
-1. **Gate 2: Multi-Platform Packaging & Commercial Distribution**:
-   - Inno Setup professional wizard installer script implemented at `tools/installer/setup.iss` (`GeoDrillPro-Setup.exe`).
-   - Authenticode code-signing pipeline created at `tools/sign_windows_binary.py` supporting Microsoft `signtool.exe`, RFC 3161 SHA-256 timestamping (`http://timestamp.digicert.com`), and self-signed dev fallback.
-   - Standalone Windows binary (`GeoDrillPro.exe`) and portable bundle (`dist/GeoDrillPro-Windows-x64.zip`) compiled, signed with Authenticode, and packaged.
-   - SHA-256 Checksum: `11B527B81C2D1FA5BC2B06CB77D010FBEB59B9F92CADFF903C1E36669C3DB242`.
-   - Automated GitHub Actions release pipeline implemented at `.github/workflows/release.yml` for automated tag releases (`v*.*.*`).
-   - Streamlit workstation download interface synchronized (`apps/streamlit/app.py`) with dual installer/zip buttons and GitHub Releases cloud fallback.
-
-2. **Gate 3: Independent Engineering Field Qualification & Calibration**:
-   - Implemented real-field benchmark runner and calibration engine at `packages/engineering/field_qualification.py`.
-   - Equinor Volve Field Well 15/9-F-12: Directional survey minimum-curvature trajectory validated within <0.1% margin (TVD error: 0.057%, horizontal error: 0.087%). Annular hydraulics and ECD benchmarked against Volve DDR records within 0.15% margin (Calculated ECD: 1,418.1 kg/m³ vs DDR: 1,418.0 kg/m³).
-   - Utah FORGE Well 16A(78)-32 Geothermal Hard-Rock Benchmark: Torsional stick-slip natural frequency matched within 2.4% (Calculated: 0.287 Hz vs Observed: 0.280 Hz); stick-slip propensity index accurately screens severe torsional resonance; BHA axial bounce harmonics match 14–18 Hz spectral band.
-   - Tulsa University (TUDRP / SPE-27490) Flow-Loop Calibration: Cuttings bed thickness and critical carrying velocity ($v_{crit}$) calibrated across inclinations 0° to 90°; mean bed fraction absolute error: 0.024 (tolerance < 0.05); mean $v_{crit}$ error: 4.38% (tolerance < 8.0%).
-   - Downhole Sub Friction Inversion: Calibrated cased-hole ($\mu = 0.22$) and open-hole ($\mu = 0.32$) friction factors match measured surface hookload across pickup, slackoff, and rotating within < 0.1% margin.
-   - Automated qualification evidence dossier generated at `docs/evidence/FIELD-QUALIFICATION-DOSSIER.md` with third-party petroleum engineering sign-off cards.
-   - Automated verification: `tests/test_field_qualification.py` (6/6 tests pass).
-
-3. **Gate 4: Security & Compliance Audit**:
-   - OWASP API Security Top 10 automated penetration suite implemented at `tests/test_security_audit.py` (12/12 tests pass).
-   - Broken Object-Level Authorization (BOLA) verified: cross-project query leakage prevented (404/403).
-   - Four-Eyes Governance verified: Author cannot review or approve their own version; Reviewer cannot issue; Admin cannot bypass segregation of duties.
-   - Injection attack defense verified: Parameterized SQL queries; content-addressable storage for telemetry; zip path traversal defense.
-   - Cryptographic Attestation Tamper-Resistance: Single bit-flip in Ed25519 payload causes signature verification failure; database row tampering detected; forged `.gdpz` archives rejected on restore.
-   - Automated static analysis: `bandit -r services/ packages/` executes with 0 issues (0 High, 0 Medium, 0 Low).
-   - Software composition analysis: `pip-audit` confirms 0 known CVEs across all project dependencies.
-   - Full compliance documentation generated at `docs/compliance/SECURITY-AUDIT-REPORT.md` aligning with SOC 2 Type II and ISO/IEC 27001:2022 standards.
-
-4. **Regression & Full Suite Status**:
-   - Total Automated Tests: **555 passed, 0 failed, 1 warning (100% pass rate in ~3.3 minutes)**.
-   - Canonical SI units preserved with IEEE-754 precision.
-   - Strict exclusions enforced: `equipment_control: false`, `clearance_generated: false`.
-
+Current evidence is recorded in [REPAIR-STATUS.md](REPAIR-STATUS.md) and
+[evidence/repair-verification.json](evidence/repair-verification.json).
+The regenerated provisional dossier does not issue field qualification or invent a board
+or third-party sign-off. Source-backed FORGE trajectory reproduction is recorded separately.
+Security automation is internal verification; external audit and certification are pending.
+Unsigned research packaging is separate from trusted publisher signing.
+Earlier counts and hashes above are historical snapshots and are not current-release claims.

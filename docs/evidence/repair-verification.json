@@ -1,0 +1,138 @@
+{
+  "date_utc": "2026-10-06T08:28:04.034395+00:00",
+  "regression": {
+    "command": "python -m pytest -q --tb=short --junitxml=build/final-tests.xml",
+    "tests": 568,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "seconds": 220.544,
+    "warning": "Starlette/httpx TestClient deprecation"
+  },
+  "frontend": {
+    "command": "python tools/build.py; python tools/build_streamlit.py",
+    "passed": true,
+    "manifest": {
+      "version": "0.8.0",
+      "source_release": "dist/release-a37a6617c6c3443480881980f2aae84f",
+      "assets": [
+        {
+          "path": "assets/index-CG2D8Y8e.js",
+          "sha256": "e488e856987958f7d23356a74c50232b7f41b4c0bb00ae987d44731269733a93"
+        },
+        {
+          "path": "assets/index-DQfLpxdr.css",
+          "sha256": "aef49db358eabb760ad692bb7f65f9e370c9fcf6ea66d380980caabfb4a0d87f"
+        }
+      ]
+    }
+  },
+  "bandit": {
+    "command": "python -m bandit -r services packages -f json",
+    "issues": 0,
+    "existing_suppressions": 6,
+    "scope": [
+      "services",
+      "packages"
+    ]
+  },
+  "dependency_audit": {
+    "command": "python -m pip_audit -r requirements-lock.txt --no-deps --disable-pip --cache-dir build/audit-cache",
+    "dependencies": 93,
+    "known_vulnerabilities": 0,
+    "skipped": [],
+    "scope": "Every pinned applicable dependency in the recorded local environment"
+  },
+  "windows_release": {
+    "version": "0.8.0",
+    "created_at_utc": "2026-10-06T08:22:56.765858+00:00",
+    "source_commit": "5ec7ca5652b5bd7f354c498119ab2f2131c349c8",
+    "source_has_uncommitted_changes": true,
+    "signing_mode": "unsigned",
+    "trusted_signature_verification": {
+      "GeoDrillPro.exe": false,
+      "GeoDrillPro-Setup.exe": false
+    },
+    "independent_engineering_qualification": "pending",
+    "external_security_audit": "pending",
+    "equipment_control": false,
+    "clearance_generated": false,
+    "assets": [
+      {
+        "name": "GeoDrillPro-Setup.exe",
+        "size_bytes": 111432954,
+        "sha256": "7138e50d189cc224e96b33af53d0f3697ecb7ee8e95ebdda49bbec30a09ba601"
+      },
+      {
+        "name": "GeoDrillPro-Windows-x64.zip",
+        "size_bytes": 173730468,
+        "sha256": "ae5cdb2f4ba531bcb9dc5157f97ecae7624baf974bcc243eac9deb61483627d2"
+      }
+    ],
+    "executable_sha256": "247460f1552d2233ed9736522e504cba32da5f91142e0d736b88959fb09cbea0"
+  },
+  "packaged_smoke": {
+    "exit_code": 0,
+    "api_health": "ok",
+    "projects_status": 200,
+    "diagnostic_cases": 3,
+    "diagnostics_passed": true
+  },
+  "installer_recovery": {
+    "install_exit_code": 0,
+    "installed_executable_sha256": "247460f1552d2233ed9736522e504cba32da5f91142e0d736b88959fb09cbea0",
+    "signing_mode": "unsigned_research",
+    "smoke_exit_code": 0,
+    "persistent_evidence_preserved": true,
+    "passed": true,
+    "uninstall_exit_code": 0,
+    "extra_user_file_preserved": true,
+    "clearance_generated": false,
+    "installer_sha256": "7138e50d189cc224e96b33af53d0f3697ecb7ee8e95ebdda49bbec30a09ba601",
+    "equipment_control": false
+  },
+  "forge_survey": {
+    "benchmark": "FORGE 16A(78)-32 published trajectory reproduction",
+    "source_url": "https://gdr.openei.org/files/1283/16A%2878%29-32%20Survey.xlsx",
+    "source_sha256": "ad03773329769f702f748c96244a9e1cba16cd1d762d4e8b93b8c8fea9d36b8d",
+    "doi": "10.15121/1776602",
+    "license": "CC BY 4.0",
+    "attribution": "McLennan, John, University of Utah Energy and Geoscience Institute, 2021. Utah FORGE: Well 16A(78)-32 Drilling Data. Geothermal Data Repository.",
+    "sheet": "Sheet1",
+    "source_rows": "77-498",
+    "source_columns": "C:MD,D:Incl,E:Az,G:TVD,I:North,J:East",
+    "native_length_unit": "US survey foot (usft declared in source report)",
+    "length_conversion_m_per_unit": 0.3048006096012192,
+    "absolute_3d_tolerance_m": 1.0,
+    "stations_evaluated": 422,
+    "stations_excluded": 0,
+    "max_3d_error_m": 0.0025573096208818887,
+    "passed": true,
+    "field_qualified": false,
+    "equipment_control": false,
+    "clearance_generated": false
+  },
+  "browser_verification": {
+    "local": {
+      "url": "http://127.0.0.1:8765",
+      "synthetic_project_loaded": true,
+      "overview_values_and_charts_rendered": true,
+      "hydraulics_navigation_and_withholding_rendered": true,
+      "console_errors": 0
+    },
+    "public": {
+      "url": "https://geodrill-pro.streamlit.app/",
+      "observed_status": "startup_failed_missing_cryptography",
+      "repair_branch": "codex/repair-verification-and-distribution",
+      "deployed_fix_verified": false
+    }
+  },
+  "pending_gates": [
+    "Reviewed merge and rendered hosted-app verification",
+    "Trusted publisher certificate and signed artifact verification",
+    "Independent source-backed engineering qualification and reviewer sign-off",
+    "External security/compliance audit"
+  ],
+  "equipment_control": false,
+  "clearance_generated": false
+}

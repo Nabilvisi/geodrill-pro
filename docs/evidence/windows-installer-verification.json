@@ -1,0 +1,13 @@
+{
+  "install_exit_code": 0,
+  "installed_executable_sha256": "247460f1552d2233ed9736522e504cba32da5f91142e0d736b88959fb09cbea0",
+  "signing_mode": "unsigned_research",
+  "smoke_exit_code": 0,
+  "persistent_evidence_preserved": true,
+  "passed": true,
+  "uninstall_exit_code": 0,
+  "extra_user_file_preserved": true,
+  "clearance_generated": false,
+  "installer_sha256": "7138e50d189cc224e96b33af53d0f3697ecb7ee8e95ebdda49bbec30a09ba601",
+  "equipment_control": false
+}
