@@ -45,7 +45,15 @@
     "tvd_m": 897.082,
     "geometry_id_prefix": "2ae6efa1",
     "geometry_sha256_prefix": "646d3118bf919bd5",
-    "missing_geomagnetic_metadata": "withheld, observed in UI"
+    "missing_geomagnetic_metadata": "withheld, observed in UI",
+    "report_download": {
+      "path": "C:\\Users\\HP\\Downloads\\geodrill-report-0498c979-6faf-47ce-a55c-260802d48d03.json",
+      "size_bytes": 140917,
+      "download_sha256": "c52a83928b94cede505a58bfeed5ed1dda6f19e783c7aeb07d5a7e95a46e8350",
+      "snapshot_sha256": "18954082b6a1ea8fda35dfe2abd86d58a4ecd1d9865b71890a777aba6b71150c",
+      "canonical_integrity_verified": true,
+      "application_version": "0.9.0-alpha.1"
+    }
   },
   "github": {
     "status": "publication pending",
