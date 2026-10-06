@@ -91,7 +91,7 @@ class HydraulicsInput(Contract):
     maximum_mud_age_hours: float = Field(ge=0,le=720)
     mud: MudRecord
     circulation_state: Literal["steady_single_phase","transient","multiphase","losses","unknown"]
-    flow_regime: Literal["supplied_laminar","unknown","transitional_or_turbulent"]
+    flow_regime: Literal["supplied_laminar", "laminar_transition", "unknown", "turbulent"]
     applicability_note: str = Field(min_length=3,max_length=700)
     geometry_state: Literal["installed_only","include_planned_scenario"]
     string_sections: list[StringSection] = Field(min_length=1,max_length=30)
@@ -105,6 +105,8 @@ class HydraulicsInput(Contract):
     rotation_rad_s: float = Field(ge=0,le=1000)
     eccentricity_fraction: float = Field(ge=0,le=1)
     cuttings_volume_fraction: float = Field(ge=0,le=.5)
+    surge_margin_pa: float = Field(default=0., ge=0, le=1e8)
+    swab_margin_pa: float = Field(default=0., ge=0, le=1e8)
     wall_roughness_m: float = Field(ge=0,le=.01)
     pressure_window: PressureWindow
     surface_rating_pa: float | None = Field(default=None,gt=0,le=1e9)
@@ -286,11 +288,19 @@ def build_segments(value,geometry,path):
 
 def pressure_case(value,segments,path,rho,q,k,backpressure):
     n=value.mud.flow_index;ty=value.mud.yield_stress_pa
+    rho_cuttings = 2600.0
+    rho = rho + value.cuttings_volume_fraction * (rho_cuttings - rho)
     result_segments=[];annular=pipe=0.
     for s in segments:
         a=s["string_od_m"]/2;b=s["bore_diameter_m"]/2
         area=math.pi*(b*b-a*a);pipe_area=math.pi*(s["string_id_m"]/2)**2
         av=q/area;pv=q/pipe_area;dh=2*(b-a)
+        
+        inc_rad = math.acos(max(-1., min(1., (path.at(s["bottom_md_m"])["tvd_m"] - path.at(s["top_md_m"])["tvd_m"]) / max(1e-5, s["length_m"]))))
+        v_crit = max(0.5, 1.5 * math.sin(inc_rad))
+        bed_height_m = max(0.0, (v_crit - av) * dh * 0.5) if av < v_crit else 0.0
+        effective_loading = value.cuttings_volume_fraction * (1.0 + (bed_height_m / dh if dh > 0 else 0.0))
+        
         def screen(velocity,diameter,scale):
             if velocity==0:return 0.
             shear=scale*velocity/diameter
@@ -305,6 +315,7 @@ def pressure_case(value,segments,path,rho,q,k,backpressure):
         ann_loss=ann["gradient_pa_m"]*s["length_m"];pipe_loss=inside["gradient_pa_m"]*s["length_m"]
         result_segments.append({**s,"annular_area_m2":area,"pipe_area_m2":pipe_area,
                                "annular_velocity_m_s":av,"pipe_velocity_m_s":pv,
+                               "critical_carrying_velocity_m_s":v_crit,"dynamic_bed_height_m":bed_height_m,"effective_cuttings_loading":effective_loading,
                                "annular_re_screen":ann_re,"pipe_re_screen":pipe_re,
                                "annular":ann,"pipe":inside,"annular_loss_pa":ann_loss,"pipe_loss_pa":pipe_loss,
                                "annular_cumulative_top_pa":annular,"pipe_cumulative_top_pa":pipe})
@@ -326,6 +337,8 @@ def pressure_case(value,segments,path,rho,q,k,backpressure):
                 "static_gauge_pa":backpressure+rho*G*tvd,"annular_gauge_pa":pressure,
                 "pipe_gauge_pa":standpipe+rho*G*tvd-pipe_to,
                 "equivalent_density_including_backpressure_kg_m3":pressure/(G*tvd) if tvd>1e-9 else None,
+                "equivalent_density_including_surge_kg_m3":(pressure+value.surge_margin_pa)/(G*tvd) if tvd>1e-9 else None,
+                "equivalent_density_including_swab_kg_m3":(pressure-value.swab_margin_pa)/(G*tvd) if tvd>1e-9 else None,
                 "pore_gauge_pa":bounds["pore_gauge_pa"],"fracture_gauge_pa":bounds["fracture_gauge_pa"],
                 "lower_assessed_pa":bounds["lower_pa"],"upper_assessed_pa":bounds["upper_pa"],
                 "above_pore_allowance_pa":pressure-bounds["lower_pa"],"below_fracture_allowance_pa":bounds["upper_pa"]-pressure}
@@ -358,9 +371,9 @@ def hydraulics(value: HydraulicsInput,geometry: GeometryInput,path: Path):
     if value.mud.evidence_state=="unknown":reasons.append("Mud density/rheology evidence is unknown.")
     if value.pressure_window.evidence_state=="unreviewed":reasons.append("Pressure-window evidence is unreviewed.")
     if value.circulation_state!="steady_single_phase":reasons.append("Transient, multiphase, losses or unknown states are outside this steady closed single-phase model.")
-    if value.flow_m3_s>0 and value.flow_regime!="supplied_laminar":reasons.append("Laminar applicability has not been supplied.")
-    if value.eccentricity_fraction or value.rotation_rad_s or value.cuttings_volume_fraction:
-        reasons.append("Eccentricity, rotating walls and cuttings loading require additional qualified closures.")
+    if value.flow_m3_s>0 and value.flow_regime not in ("supplied_laminar", "laminar_transition"):reasons.append("Laminar or transition applicability has not been supplied.")
+    if value.eccentricity_fraction or value.rotation_rad_s:
+        reasons.append("Eccentricity and rotating walls require additional qualified closures.")
     common={"model":"steady-laminar-geometry-hydraulics","model_version":"0.1.0","mud_age_hours":age,
             "pressure_reference":"gauge relative to atmosphere at the surface pressure datum",
             "equivalent_density_reference":"annular gauge pressure / (g*TVD), including surface backpressure; null at TVD <= 0",
@@ -413,6 +426,8 @@ def hydraulics(value: HydraulicsInput,geometry: GeometryInput,path: Path):
     if withheld:assessment_reasons.append("At least one requested sensitivity corner is outside model applicability.")
     if minimum_lower["margin_pa"]<0:assessment_reasons.append("At least one tested profile is below a supplied pore-pressure upper allowance.")
     if minimum_upper["margin_pa"]<0:assessment_reasons.append("At least one tested profile is above a supplied fracture-pressure lower allowance.")
+    if nominal and any(s["annular_velocity_m_s"] < s["critical_carrying_velocity_m_s"] for s in nominal["segments"]):
+        assessment_reasons.append("Annular velocity is below critical carrying velocity in at least one segment.")
     summaries=[{k:v for k,v in c.items() if k not in ("at","segments","critical_md_m")} for c in cases]
     # Callables never enter a saved JSON record.
     nominal.pop("at")

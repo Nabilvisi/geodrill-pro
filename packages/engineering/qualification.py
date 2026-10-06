@@ -79,13 +79,37 @@ QUALIFICATION_LEDGER: dict[str, QualificationCard] = {
             "Thermal per-degree casing derating without certified mill tests"
         ],
         "qualification_status": "software_verified",
-        "evidence_basis": "API TR 5C3 / ISO 10400 elastic Lamé equations",
+        "evidence_basis": "API TR 5C3 / ISO 10400 comprehensive collapse, burst, and biaxial load equations",
         "benchmarks": [
             {
                 "name": "API 5C3 Lamé Elastic Yield",
                 "description": "Thick-walled 9-5/8 inch casing under 50 MPa differential burst",
                 "reference_source": "ISO 10400 Section 6.2",
                 "analytical_or_published_target": {"hoop_stress_pa": 412.5e6},
+                "numerical_tolerance": "1e-5 relative",
+                "validation_level": "analytical"
+            },
+            {
+                "name": "API 5C3 K-55 Plastic Collapse",
+                "description": "K-55 casing (55,000 psi yield) at D/t = 18.0 plastic collapse regime",
+                "reference_source": "API Bulletin 5C3 Table 1 / ISO 10400 Section 7.2",
+                "analytical_or_published_target": {"collapse_pressure_psi": 4957.8, "regime": "plastic_collapse"},
+                "numerical_tolerance": "1e-4 relative",
+                "validation_level": "analytical"
+            },
+            {
+                "name": "API 5C3 Barlow Burst with Mill Tolerance",
+                "description": "N-80 casing (80,000 psi yield, OD 9.625 in, wall 0.472 in) under 0.875 Barlow rating",
+                "reference_source": "API TR 5C3 Section 6.1 / ISO 10400",
+                "analytical_or_published_target": {"burst_pressure_psi": 6868.0},
+                "numerical_tolerance": "1e-4 relative",
+                "validation_level": "analytical"
+            },
+            {
+                "name": "ISO 10400 Biaxial Collapse Reduction",
+                "description": "Biaxial yield reduction factor under axial tension ratio Sa/Yp = 0.5",
+                "reference_source": "API TR 5C3 Section 8 / ISO 10400 Eq. 32",
+                "analytical_or_published_target": {"reduction_factor": 0.651384},
                 "numerical_tolerance": "1e-5 relative",
                 "validation_level": "analytical"
             }

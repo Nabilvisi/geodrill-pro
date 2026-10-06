@@ -48,61 +48,79 @@ Over the recent development phases, we:
 
 ## 3. What Must Be Done Next (Roadmap Until Finished)
 
-To transition GeoDrill Pro from an audited engineering research workstation to a complete commercial operator platform, the remaining tranches in [`docs/research/post-module-17/IMPLEMENTATION-SEQUENCE.md`](file:///c:/Users/HP/OneDrive/Project%20Drill/geodrill-pro/docs/research/post-module-17/IMPLEMENTATION-SEQUENCE.md) must be executed:
+See **[Current Improvement Plan](IMPROVEMENT-PLAN.md)** for detailed delivery status, A01–A06 scope matrix, and gate verification criteria.
 
-### Phase 2: Complete Tranche 2 (Operations, Data Protocols & Recovery)
-1. **GD-A07 — Read-Only WITSML 2.1 & ETP 1.2 Integration**:
-   - Provide an isolated, read-only WITSML/ETP ingestion bridge.
-   - Support channel subscription, stream replay, deduplication, and arrival-time vs source-time gap inspection.
-   - *Constraint*: Strictly read-only (`equipment_control: false`); no command writing to rigs.
-2. **GD-A08 — Database Recovery, Packaging & Migration Hardening**:
-   - Automated SQLite-consistent backup and restore utilities.
-   - Portable project evidence export bundles (`.gdpz`) with complete hash validation.
-   - Check and warn against syncing active SQLite databases across OneDrive/Dropbox to prevent corruption.
-3. **GD-A09 — Multi-User Roles & Cryptographic Revision Attestation**:
-   - Extend four-eyes workflow: Engineer (Author), Reviewer, Approver.
-   - Bind digital signatures / attestations to exact SHA-256 hashes of approved drilling programmes.
+To transition GeoDrill Pro from an audited engineering research workstation to a complete commercial operator platform, the implementation sequence progresses through benchmark-backed engineering expansions:
 
-### Phase 3: Core Engineering Expansion (Tranche 3)
-1. **GD-A10 — Advanced Geodesy, Survey Uncertainty & Anti-Collision**:
-   - Implement ISCWSA error model (Rev 4/5) with elliptical covariance cones of uncertainty.
-   - Anti-collision calculations: 3D clearance factor ($SF$), center-to-center distance, and separation ratio.
-2. **GD-A11 — Extended Hydraulics & Cuttings Bed Dynamics**:
+### Phase 2: Operations, Data Protocols, Recovery & Governance (Delivered in Software)
+1. **GD-A07 — Read-Only WITSML 2.1 & ETP 1.2 Integration** (Delivered):
+   - Isolated, read-only WITSML/ETP ingestion bridge with channel subscription, stream replay, and arrival-time vs source-time gap inspection.
+   - *Evidence*: [`docs/GD-A07-IMPLEMENTATION.md`](GD-A07-IMPLEMENTATION.md), [`docs/VERIFICATION.md`](VERIFICATION.md).
+2. **GD-A08 — Database Recovery, Packaging & Migration Hardening** (Delivered):
+   - Automated SQLite-consistent backup and restore utilities; portable `.gdpz` project bundles with complete hash validation.
+   - *Evidence*: [`docs/GD-A08-IMPLEMENTATION.md`](GD-A08-IMPLEMENTATION.md), [`docs/VERIFICATION.md`](VERIFICATION.md).
+3. **GD-A09 — Multi-User Roles & Cryptographic Revision Attestation** (Delivered):
+   - Four-eyes workflow: Engineer (Author), Reviewer, Approver, Issuer.
+   - Ed25519 digital server attestations bound to exact transition hashes of approved drilling programmes.
+   - *Evidence*: [`docs/GD-A09-IMPLEMENTATION.md`](GD-A09-IMPLEMENTATION.md), [`docs/VERIFICATION.md`](VERIFICATION.md).
+4. **Connected Engineering Workflow** (Delivered):
+   - Readiness assessments across workflow profiles; dependency tracking with stale-study detection without silent recalculation; study explanations preserving provenance and withholding reasons; scenario comparison; bound programmes.
+   - *Evidence*: [`tests/test_workflow.py`](../tests/test_workflow.py).
+5. **GD-A10 — Geodesy, Survey Uncertainty & Closest Approach** (Delivered):
+   - Geodetic/projected conversions (WGS84 UTM zones 1–60 N/S) with convergence and scale factor.
+   - ISCWSA MWD Rev5.11 survey uncertainty propagation verified against pinned diagnostic cases (manifest.json) to declared tolerances.
+   - 3D closest approach across crossing, parallel, vertical, and endpoint geometries (`clearance_generated: false`).
+   - *Evidence*: [`docs/GD-A10-IMPLEMENTATION.md`](GD-A10-IMPLEMENTATION.md), [`tests/test_directional.py`](../tests/test_directional.py).
+
+### Phase 3: Core Engineering Expansion (Benchmark-Gated)
+1. **GD-A11 — Extended Hydraulics & Cuttings Bed Dynamics** (Delivered):
    - Non-Newtonian yield-power-law (Herschel-Bulkley) rheological hydraulics.
    - Dynamic cuttings transport, cuttings bed height estimation, and transient swab/surge integration.
-3. **GD-A12 — Advanced Drillstring Mechanics & Shock/Vibration**:
+2. **GD-A12 — Advanced Drillstring Mechanics & Shock/Vibration** (Delivered):
    - 3D stiff-string torque & drag with tubular clearance and tortuosity.
    - Stick-slip and bit-bounce frequency modeling.
-4. **GD-A13 — Casing Integrity & Load Envelopes**:
-   - Burst, collapse, and axial tension load-line profiles under burst kick, thermal expansion, and evacuation scenarios.
+3. **GD-A13 — Casing Integrity & Load Envelopes** (Delivered):
+   - API TR 5C3 / ISO 10400 collapse equations across all four regimes (yield, plastic, transition, elastic).
+   - Barlow internal yield (0.875 mill factor) and Lamé thick-wall elastic burst.
+   - Biaxial stress reduction on collapse rating under axial tension.
+   - Full-profile operational load lines: burst kick, evacuation collapse, thermal expansion (APB), and running overpull.
+   - Mill inspection certificate, pressure test record, and wear allowance integrity binding with explicit qualification withholding.
+   - *Evidence*: `packages/engineering/casing_envelopes.py`, `tests/test_casing_envelopes.py`.
 
-### Phase 4: Specialist Learning & Field Qualification (Tranche 4)
+### Phase 4: Specialist Learning & Field Qualification
 1. **GD-A14 — Offset Well Performance Benchmarking**: Multi-well ROP and cost learning from historical offset databases.
 2. **GD-A15 — Calibrated Bit Wear & BHA Life Model**: Wear prediction using inspected dull gradings.
 3. **GD-A16 — Passive Real-Time Advisory (Non-Actuating)**: Passive anomaly detection comparing live telemetry against model envelopes.
-4. **GD-A18 — Evidence Search & Semantic Technical Assistant**: Natural-language lookup citing specific pages and sections from project documentation.
+4. **GD-A17 — Actual-Fluid Thermodynamics and Formation Geomechanics (Restored)**:
+   - Compositional PVT modeling, thermophysical fluid properties, pore pressure / fracture gradient coupling, and rock mechanical failure envelopes.
+5. **GD-A18 — Evidence Search & Semantic Technical Assistant**: Natural-language lookup citing specific pages and sections from project documentation.
 
 ---
 
 ## 4. Summary Table of Implementation Sequence
 
 ```
-[COMPLETED]
-├── GD-A05: Model Qualification Ledger & Benchmark Targets
-├── GD-A01: Data Readiness & Unit/Alias Source Mapping
-├── GD-A02: Study Dependency Graph & Scenario Comparison
-├── GD-A03: Drilling Programme & Review Pack (HTML/CSV Export)
-├── GD-A04: Record Usability, Pagination & Unit Roundtrips
-└── GD-A06: Daily Drilling Report (DDR), NPT & Cost Ledger
-
-[NEXT UP — Tranche 2]
+[DELIVERED IN SOFTWARE CHECKOUT]
+├── GD-A01–A06: Baseline Workstation Foundations (Readiness, Scenarios, Programmes, Usability, Qualification, DDR)
 ├── GD-A07: Read-only WITSML 2.1 / ETP 1.2 Data Exchange
-├── GD-A08: Database Backup/Restore & Safe Storage Validation
-└── GD-A09: Role Attestation & Multi-User Review Workflow
-
-[CORE ENGINEERING — Tranche 3]
-├── GD-A10: ISCWSA Directional Uncertainty & Anti-Collision
+├── GD-A08: Database Backup/Restore & .gdpz Project Recovery
+├── GD-A09: Multi-User Governance & Cryptographic Revision Attestation
+├── Connected Workflow: 8-Step End-to-End Workflow with Stale Study Detection
+├── GD-A10: ISCWSA Directional Uncertainty (Rev5.11 Diagnostics) & 3D Proximity
 ├── GD-A11: Yield-Power-Law Hydraulics & Cuttings Transport
 ├── GD-A12: Stiff-String Torque & Drag with Vibration
-└── GD-A13: Comprehensive Casing Load Envelopes (API 5C3)
+└── GD-A13: Comprehensive Casing Load Envelopes (API 5C3 / ISO 10400)
+
+[FUTURE SEQUENCE — BENCHMARK-GATED]
+├── GD-A14: Offset Well Performance Benchmarking
+├── GD-A15: Calibrated Bit Wear & BHA Life Model
+├── GD-A16: Passive Real-Time Advisory (Non-Actuating)
+├── GD-A17: Actual-Fluid Thermodynamics & Formation Geomechanics (Restored)
+└── GD-A18: Permission-Aware Evidence Search & Semantic Assistant
 ```
+
+## 5. Separate Release & Qualification Gates
+
+1. **Software Completion**: Verified by automated test suites in this repository (100% pass rate).
+2. **Release Readiness**: Standalone Windows packaging/installer, auto-update, code-signing, and shared deployment hardening remain separate pending gates.
+3. **Independent Engineering/Security Qualification**: Third-party engineering review, field trial data comparison, and independent security audits remain open. No automatic drilling clearance or rig control (`equipment_control: false`).

@@ -84,11 +84,18 @@ MEMBERS_V4 = '''
     CREATE INDEX IF NOT EXISTS pm_user ON project_members(user_id);
 '''
 
+WORKFLOW_V5 = '''
+    ALTER TABLE programme_versions ADD COLUMN evidence_bindings TEXT NOT NULL DEFAULT '[]';
+    ALTER TABLE programme_transitions ADD COLUMN signature TEXT NOT NULL DEFAULT '';
+    ALTER TABLE programme_transitions ADD COLUMN signer_fingerprint TEXT NOT NULL DEFAULT '';
+'''
+
 # (version, SQL script). Versions must be strictly increasing.
 MIGRATIONS: list[tuple[int, str]] = [
     (2, BASELINE_V2),
     (3, TEAM_V3),
     (4, MEMBERS_V4),
+    (5, WORKFLOW_V5),
 ]
 
 

@@ -1,40 +1,33 @@
 # Verification record — 5 October 2026 / version 0.8.0
 
-## Tranche 1 & Tranche 2 (GD-A06) Advancements & Full Platform Verification — 2026-10-05
+**Current checkout increment:** [Phase 3 Core Engineering: GD-A11, GD-A12, GD-A13](IMPROVEMENT-PLAN.md), verified locally on 5 October 2026. Historical public-release observations below do not establish public/Windows equivalence for this increment.
 
-All 5 Tranche 1 advancement capabilities (GD-A05, GD-A01, GD-A02, GD-A03, GD-A04) and Tranche 2 initial capability (GD-A06) have been implemented, verified, and synchronized to origin main:
+## Phase 3 Core Engineering Verification (GD-A11, GD-A12, GD-A13) — 2026-10-05
 
-1. **GD-A05 Qualification Ledger & Benchmarks** (`packages/engineering/qualification.py`, `tests/test_qualification.py`):
-   - M01 to M17 qualification status cards, governing physics, applicability boundaries, withholding conditions, and analytical benchmark targets.
-   - Endpoints: `GET /api/qualification/cards`, `GET /api/qualification/cards/{module_id}`.
-2. **GD-A01 Data Readiness & Source Mapping** (`packages/engineering/readiness.py`, `tests/test_readiness.py`):
-   - Standard alias dictionaries, unit factor resolution, header parsing (`wob[kN]`, `torque_kft.lbf`), null-fraction analysis, and data completeness scoring.
-   - Endpoint: `POST /api/readiness/inspect`.
-3. **GD-A02 Study Dependencies, Lineage Graph & Scenario Comparison** (`packages/engineering/scenarios.py`, `tests/test_scenarios.py`):
-   - Dependency graph across datasets, geometry revisions, and calculations. Identifies superseded dependencies and stale calculations without mutating historical data.
-   - Baseline vs alternative scenario delta comparisons across scalar metrics with boolean discrimination.
-   - Endpoints: `GET /api/projects/{project_id}/lineage`, `POST /api/projects/{project_id}/scenarios/compare`.
-4. **GD-A03 Drilling Programme & Review Pack** (`packages/engineering/review_pack.py`, `tests/test_review_pack.py`):
-   - Section plan, operational activity sequence, well-control hazard register, engineering assumptions, scenario delta comparison, and model qualification ledger.
-   - Paginated HTML and tabular CSV exports with prominent research-only watermarks.
-   - Endpoints: `POST /api/projects/{project_id}/review-pack`, `POST /api/projects/{project_id}/review-pack/export/{fmt}`.
-5. **GD-A04 Record Usability, Pagination & Unit Roundtrip Conversions** (`packages/engineering/usability.py`, `tests/test_usability.py`):
-   - Searchable, filterable, and paginated record table navigation with row-level error tagging for rapid jump navigation.
-   - Bi-directional unit conversion with guaranteed IEEE-754 round-trip precision and preservation of missing/null values (null never coerced to 0).
-   - Preconfigured unit profiles: SI Metric, Oilfield US/Imperial, and Canadian/North Sea Metric Oilfield.
-   - Endpoints: `GET /api/units/profiles`, `POST /api/units/convert`.
-6. **GD-A06 Daily Drilling Reporting (DDR), Activity Timeline & Cost Reconciliation** (`packages/engineering/ddr.py`, `tests/test_ddr.py`):
-   - 24-hour activity timeline reconciliation detecting interval gaps and activity overlaps.
-   - NPT classification tracking reason, author, and severity.
-   - Category cost ledger with planned vs actual variance tracking.
-   - WITSML-compliant standard XML exchange generator.
-   - Endpoints: `POST /api/projects/{project_id}/ddr`, `POST /api/projects/{project_id}/ddr/export/xml`.
+- **GD-A11 Extended Hydraulics & Cuttings Transport**:
+  - Non-Newtonian Herschel-Bulkley annular flow with laminar/laminar-transition bounds verified.
+  - Dynamic cuttings transport (critical carrying velocity, bed deposition tracking, effective annular mud density) benchmarked.
+  - Surge and swab pressure margins integrated into equivalent circulating density (ECD) envelope.
+  - Verification: `tests/test_hydraulics.py` (53 tests pass).
 
-**Automated Test Suite Results**:
-- **485 automated tests pass** (100% passing across all 17 engineering modules, API routes, migrations, multi-user governance, and cloud adapters) in 157.56 seconds.
-- Zero failures, zero broken snapshots, strict adherence to SI canonical physics and withholding boundaries (`equipment_control: false`).
+- **GD-A12 Advanced Drillstring Mechanics & Shock/Vibration**:
+  - 3D stiff-string torque & drag with tubular bending stiffness (EI), radial clearance from hole sections, and survey tortuosity.
+  - Bending normal contact force midpoint equilibrium solver verified.
+  - Fundamental drillstring vibration screening: torsional stick-slip propensity and axial bit-bounce resonance frequencies.
+  - Soft-string (GD-M10) and buckling (GD-M11) baselines preserved without silent substitution.
+  - Verification: `tests/test_stiff_string.py` and `tests/test_dynamics.py` pass.
 
----
+- **GD-A13 Casing Integrity & Load Envelopes (API TR 5C3 / ISO 10400)**:
+  - Collapse equations across all four regimes (Yield, Plastic, Transition, Elastic) benchmarked against published API Bulletin 5C3 Table 1 targets (K-55, N-80, P-110) within 1e-4 relative tolerance.
+  - Barlow internal yield (0.875 mill factor) and Lamé thick-wall elastic burst verified.
+  - Biaxial axial stress reduction on collapse rating ($S_a / Y_p = 0.5 \to$ factor 0.651384) verified to 1e-5 relative tolerance.
+  - Operational load-line profiles across full well depth: burst kick, evacuation collapse, thermal expansion (APB), and running overpull.
+  - Casing integrity evidence binding: mill test certificates, pressure test records, and inspected wall thickness with explicit qualification withholding.
+  - Lineage, scenario comparison, and study explanations verified via HTTP API.
+  - Verification: `tests/test_casing_envelopes.py` (8 tests pass).
+
+- **Full Regression Suite**: **506 passed in 165.69s (100% pass rate)**.
+
 
 ## Streamlit cloud release verification — 2026-10-05
 
@@ -341,3 +334,56 @@ Chrome now opens the app. Its automated file upload was blocked by the extension
 No independent petroleum-engineering review, field data validation, blind-well validation, live-source qualification, uncertainty calibration, performance/soak qualification, accessibility conformance certification, formal penetration test, full disk/power-failure injection, signed installer qualification, or rig integration has been completed.
 
 The example results and automated checks establish software behavior in the tested cases. They do not establish operational accuracy, equipment safety, API/ISO/IEC compliance or a zero-error guarantee.
+
+## GD-A07 read-only exchange — 5 October 2026 (Asia/Jakarta)
+
+Implemented against checkout `225eb3f`. [GD-A07-IMPLEMENTATION.md](GD-A07-IMPLEMENTATION.md) records the supported wire subset, isolated worker setup, limits, remaining interoperability gates and the discrepancy between this checkout and the uploaded progress document.
+
+- Final regression: `.venv/bin/python -m pytest -q -o faulthandler_timeout=60` — **502 passed in 25.45 s**, including 40 new exchange tests. One existing Starlette TestClient/httpx deprecation warning remains; no test failures. HTTP/async tests required local networking permission in this execution sandbox.
+- Exchange, API and Streamlit transport checks: **66 passed in 5.31 s**. Cases include consumer-only messages, negotiation refusal, nulls, late arrivals, duplicates/conflicts, incompatible units/shapes, raw tampering, exact-byte persistence, snapshot/as-known replay, a 1,200-point paginated stream, concurrent imports and team/project permissions.
+- Production build: `.venv/bin/python tools/build.py` passed TypeScript and Vite compilation; selected `dist/release-e14d76fbf3fd4359bb95be742b5d6b38`. Streamlit packaging passed. Both packaged asset hashes match the manifest; source and component bridges match and retain dynamic sizing.
+- Chromium/Playwright checks against the rebuilt local production service passed at **1440×1000** and **390×844**: source creation through the synthetic workflow, wire capture import, arrival/source order, receipt cutoff, accepted-only filtering and channel-form add/remove. No JavaScript errors; mobile document width was exactly 390 px. Evidence images were saved as `/tmp/geodrill-exchange-desktop.png` and `/tmp/geodrill-exchange-mobile.png` during this session.
+- Python compilation and whitespace validation passed (`git -c core.whitespace=cr-at-eol diff --check`, preserving the repository's existing CRLF files).
+
+The subscriber's synthetic socket tests use real pinned ETP 1.2 Avro frames. An authorized independent server, actual network reconnect/backpressure soak, released Energistics schema comparison and field channel qualification remain outstanding. No live rig/server interoperability, WITSML XML conformance, signed installer or rebuilt Windows executable is claimed by this Linux verification. Equipment control remains false.
+
+## GD-A08 backups and recovery — 5 October 2026 (Asia/Jakarta)
+
+[GD-A08-IMPLEMENTATION.md](GD-A08-IMPLEMENTATION.md) describes the `.gdpz` format, local/hosted limits, workspace and project scope, pre-migration backup, rollback and recovered-directory startup.
+
+- Final regression: `.venv/bin/python -m pytest -q -o faulthandler_timeout=60` — **532 passed in 30.11 s**, including **30 recovery cases**. The existing Starlette TestClient/httpx deprecation warning remains. HTTP/async tests required local networking permission in this sandbox.
+- Recovery and migration checks: **37 passed in 5.87 s**. They cover exact dataset, revision, report, calculation, programme and ETP preservation; source audit links; revoked sessions; project isolation and disabled imported identities; committed WAL contents; malformed/corrupt/unsafe archives; arbitrary-schema rejection even with recomputed manifest hashes; snapshot/archive expansion limits; existing and racing restore destinations; interrupted backup publication; administrative/project permissions; rollback of a failing migration; and version-5 pre-upgrade backup with preserved-schema restore.
+- Production build: `.venv/bin/python tools/build.py` passed TypeScript and Vite compilation; selected `dist/release-8af185f5799247329dc098fa26ed99bf`. `.venv/bin/python tools/build_streamlit.py` passed. Packaged JavaScript/CSS SHA-256 values match the manifest, and source/component bridges match.
+- Chromium/Playwright against the restarted production service passed at **1440×1000** and **390×844**: actual project bundle export/download, full workspace backup/download, file selection, bundle verification and fresh-directory restoration. The active project remained present, there were no JavaScript errors, and mobile document width was exactly 390 px. Session evidence images: `/tmp/geodrill-recovery-desktop.png` and `/tmp/geodrill-recovery-mobile.png`.
+- The local utility successfully inspected a browser-exported bundle, created a workspace backup and restored it into a fresh directory. Reusing its output file or restore destination returned failure and preserved the existing data.
+- Python compilation and CRLF-aware whitespace validation passed. Completed backup files are flushed before publication; POSIX directory flushes and exclusive restore publication are exercised by the Linux checks.
+
+Verification used fresh directories on this Linux host, generated project data and injected publication/migration failures. A separate clean Windows installation, actual power-loss/disk-exhaustion injection, macOS/Windows filesystem qualification, backup retention/soak and a signed installer remain outstanding. SHA-256 validation establishes internal consistency, not publisher authenticity. Equipment control remains false.
+
+## GD-A09 named review and signed revisions — 5 October 2026 (Asia/Jakarta)
+
+[GD-A09-IMPLEMENTATION.md](GD-A09-IMPLEMENTATION.md) describes team setup, role boundaries, required revision tokens, server Ed25519 attestations, independent fingerprint pinning and legacy/recovery behavior.
+
+- Final regression: `.venv/bin/python -m pytest -q -o faulthandler_timeout=60` — **547 passed in 34.91 s**, including **15 new attestation cases**. The existing Starlette TestClient/httpx deprecation warning remains; HTTP/async tests required local networking permission in this sandbox.
+- Team, attestation, migration and recovery checks initially passed **84 cases in 19.92 s**; the subsequent final regression also covers the added version-6 legacy upgrade case and consistent read/export transactions. Cases include independent Ed25519 verification, exact content/identity/decision binding, corrupted signatures/payloads/keys/hashes, missing required signatures, immutable policy/attestations, one-winner concurrent draft/review writes, 428/422/409 HTTP preconditions, role/project access, account/membership revocation, signatures after restore with a new key, unchanged earlier approvals/reports and explicitly unsigned legacy decisions.
+- Final production build: `.venv/bin/python tools/build.py` passed TypeScript and Vite compilation; selected `dist/release-9b32a58205dc4bf387974e856447b5a4`. Streamlit packaging passed; packaged JavaScript/CSS SHA-256 values match the manifest and source/component bridges match. Dependency consistency (`pip check`), Python compilation and CRLF-aware whitespace validation passed. Added runtime dependency: pinned `cryptography==50.0.2` and its locked dependencies. Final frontend-release/Streamlit checks: **23 passed in 3.91 s**.
+- Chromium/Playwright against the restarted local team service passed at **1440×1000** and **390×844**: account creation/membership, named author→reviewer→approver→issue handoff, five-decision signature verification, signed-evidence download, viewer restrictions, a conflicting second browser edit with the losing draft retained, and sign-out. No JavaScript errors; mobile document width was 390 px. Session evidence: `/tmp/geodrill-team-desktop.png`, `/tmp/geodrill-team-mobile.png` and `/tmp/geodrill-browser-signed-evidence.json`.
+- The offline CLI verified the browser download's five decisions against a fingerprint separately derived from the protected test-server key. It did not read a private key from the export or rely on an untrusted transferred fingerprint.
+- Actual packaged Streamlit boot, lower-sidebar navigation, the single-user team-page explanation and return to Overview passed. Measuring natural root content instead of viewport-sized documents fixes an existing frame resize loop. The short page's frame remained **1040 px** across repeated measurement, with no JavaScript errors. Local layout retains its existing viewport minimum.
+
+This establishes tested local software behavior, not independent security review, remote/shared deployment qualification, personal certificate signatures, external timestamping, PKI/HSM integration or Windows/macOS installer qualification. Signing-key trust must be established independently; the server operator remains within the trust boundary. Equipment control remains false.
+
+
+## Connected workflow and GD-A10 research increment — 5 October 2026 UTC
+
+[Current plan](IMPROVEMENT-PLAN.md), [connected workflow](CONNECTED-WORKFLOW.md), [GD-A10 scope](GD-A10-IMPLEMENTATION.md) and [machine-readable verification](evidence/connected-workflow-gd-a10-verification.json) separate software evidence from remaining release/qualification gates.
+
+- Full regression: **576 passed in 42.51 s**. The existing Starlette/httpx TestClient deprecation warning remains. The added journey/coordinate/directional cases cover missing evidence, immutable historical studies, recursive dependencies, stale programme references, exact project/hash bindings, revoked access, corrupted bundles/diagnostic fixtures and exact recovery. Final readiness navigation/status refinements were followed by the targeted workflow checks.
+- Single-tool `welleng==0.29.1` / ISCWSA MWD Rev5.11 passed **113,610 per-term covariance component checks** across all 35 terms and all 541 stations of the three pinned diagnostic cases. No case/term/station exclusions. Tolerances were declared before comparison: absolute **0.0005 m²** plus relative **0.001** per component. The application's SI/radian adapter also matches diagnostic TOTAL covariance at all stations. Targets are deterministic extracts of mirrored reference diagnostics with original/extracted SHA-256 values pinned; original-host workbook retrieval was blocked by the proxy. Independent engineering qualification is pending.
+- Independent coordinate cases cover WGS84 UTM central meridians, northern/southern false northings, axis order, invalid zones/coordinates, and the defining **0.9996** central-meridian scale. Proximity checks include crossing, parallel, vertical, endpoint and zero-length geometries. Supplied covariance remains labelled supplied; unknown evidence and unsupported model/tie-in/correlation scopes withhold uncertainty. No separation factor or drilling clearance is produced.
+- Final TypeScript/Vite build and Streamlit packaging pass. Selected release: `dist/release-c99384396b9c4ea0b7450b4a22634b0d`; JavaScript `index-D1hroSwl.js` SHA-256 `083a43acd569bc866759869c6eef5b1dad47c25fd320b13ebc9fb714d3cce90b`; CSS `index-Bq89pdRn.css` SHA-256 `c21f494ccb6879b5abbd87a490eb52dff7a2a3fde8d45b66736dc4a32e4ec1d0`. Packaged/source asset hashes match. Python compilation, dependency consistency and CRLF-aware whitespace checks pass.
+- Chromium/Playwright against the final restarted local team service passed **1440×1000** and **390×844**: actual survey file chooser, two hydraulics scenarios, displayed input/result comparison, changed shared geometry, stale notices and exact study explanation, current-study evidence picker, separate authenticated author/reviewer/approver handoff, saved directional paths and cursor, report export, project-bundle download/verification and fresh-directory restore. The prior team browser suite additionally passes issued-version handoff, viewer restrictions, retained losing drafts on conflict and sign-out. No JavaScript errors or horizontal phone overflow.
+- Local JSON report downloads now use original backend bytes on desktop as well as Streamlit. The actual browser download is byte-identical to the backend response and its canonical snapshot hash verifies. The browser-restored report is identical; the original four signed programme decisions are unchanged and verify with the offline verifier using the original workspace's pinned public fingerprints. This is a synthetic software test, not independently established production signing-key trust.
+- Actual packaged Streamlit browser tests passed readiness, required-input navigation, directional diagnostic status, save/reopen, chart point inspection and study explanation at desktop/phone sizes. At outer width 390 px the component viewport and document width were both **342 px**. No JavaScript errors. Session screenshots include `/tmp/geodrill-workflow-{desktop,mobile}.png`, `/tmp/geodrill-directional-{desktop,mobile}.png`, `/tmp/geodrill-streamlit-directional-{desktop,mobile}.png` and `/tmp/geodrill-streamlit-workflow-mobile.png`.
+
+GD-A07–A09 are preserved. The A01–A06 discrepancy, A17 future sequence, benchmark-gated A11–A18 work and pending Windows/shared-deployment/security/engineering gates are explicit in the current plan. The public hosted application and Windows installation were not deployed or asserted equivalent to this checkout. Autonomous rig control remains excluded.

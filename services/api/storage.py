@@ -1,12 +1,16 @@
 import hashlib
+import io
 import json
 import os
 import sqlite3
+import zipfile
 from contextlib import contextmanager
 from contextvars import ContextVar
 from datetime import datetime, timezone
 from pathlib import Path
 from uuid import uuid4
+from cryptography.hazmat.primitives.asymmetric import ed25519
+from cryptography.exceptions import InvalidSignature
 import duckdb
 import polars as pl
 from .migrations import migrate
@@ -31,11 +35,40 @@ class Store:
     def __init__(self, root: Path):
         self.root = root
         root.mkdir(parents=True, exist_ok=True)
-        for name in ("raw", "parquet", "reports"):
+        for name in ("raw", "parquet", "reports", "keys"):
             (root / name).mkdir(exist_ok=True)
+        key_path = root / "keys" / "server_ed25519.key"
+        if key_path.exists():
+            self._private_key = ed25519.Ed25519PrivateKey.from_private_bytes(key_path.read_bytes())
+        else:
+            self._private_key = ed25519.Ed25519PrivateKey.generate()
+            key_path.write_bytes(self._private_key.private_bytes_raw())
+        self._public_key = self._private_key.public_key()
+        self.attestation_fingerprint = digest(self._public_key.public_bytes_raw())
+        self._trusted_keys: dict[str, ed25519.Ed25519PublicKey] = {
+            self.attestation_fingerprint: self._public_key
+        }
+        trusted_dir = root / "keys" / "trusted"
+        trusted_dir.mkdir(exist_ok=True)
+        for pub_file in trusted_dir.glob("*.pub"):
+            try:
+                raw_pub = bytes.fromhex(pub_file.read_text().strip())
+                pub_key = ed25519.Ed25519PublicKey.from_public_bytes(raw_pub)
+                fp = digest(raw_pub)
+                self._trusted_keys[fp] = pub_key
+            except Exception:
+                pass
         self.db = root / "geodrill.sqlite3"
         with self.connect() as db:
             migrate(db)
+
+    def add_trusted_key(self, public_bytes: bytes):
+        pub_key = ed25519.Ed25519PublicKey.from_public_bytes(public_bytes)
+        fp = digest(public_bytes)
+        self._trusted_keys[fp] = pub_key
+        trusted_dir = self.root / "keys" / "trusted"
+        trusted_dir.mkdir(exist_ok=True)
+        (trusted_dir / f"{fp}.pub").write_text(public_bytes.hex())
 
     @contextmanager
     def connect(self):
@@ -239,6 +272,250 @@ class Store:
             if canonical(value) != canonical(evidence.get(value["id"])):
                 raise ValueError("Calculation differs from its preserved audit evidence.")
         return [v for v in values if model is None or v["model"]==model]
+
+    def sign_attestation(self, data: bytes) -> str:
+        return self._private_key.sign(data).hex()
+
+    def verify_attestation(self, data: bytes, signature_hex: str, fingerprint: str = None) -> bool:
+        if fingerprint:
+            pub_key = self._trusted_keys.get(fingerprint)
+            if not pub_key:
+                return False
+        else:
+            pub_key = self._public_key
+        try:
+            pub_key.verify(bytes.fromhex(signature_hex), data)
+            return True
+        except (InvalidSignature, ValueError):
+            return False
+
+    def export_bundle(self, project_id: str) -> bytes:
+        project = self.project(project_id)
+        buf = io.BytesIO()
+        file_hashes: dict[str, str] = {}
+
+        with zipfile.ZipFile(buf, "w", compression=zipfile.ZIP_DEFLATED) as zf:
+            def _add(relpath: str, data: bytes):
+                file_hashes[relpath] = digest(data)
+                zf.writestr(relpath, data)
+
+            _add("project.json", canonical(project).encode("utf-8"))
+            _add("keys/server_attestation.pub", self._public_key.public_bytes_raw())
+
+            with self.connect() as db:
+                datasets = [dict(r) for r in db.execute("SELECT * FROM datasets WHERE project_id=?", (project_id,)).fetchall()]
+                _add("datasets/datasets.json", canonical(datasets).encode("utf-8"))
+                for d in datasets:
+                    source_path = self.root / "raw" / d["source_hash"]
+                    if source_path.exists():
+                        _add(f"datasets/raw/{d['source_hash']}", source_path.read_bytes())
+                    parquet_path = self.root / "parquet" / f"{d['id']}.parquet"
+                    if parquet_path.exists():
+                        _add(f"datasets/parquet/{d['id']}.parquet", parquet_path.read_bytes())
+
+                events = [dict(r) for r in db.execute("SELECT * FROM events WHERE project_id=?", (project_id,)).fetchall()]
+                _add("events/events.json", canonical(events).encode("utf-8"))
+
+                revisions = [dict(r) for r in db.execute("SELECT * FROM engineering_revisions WHERE project_id=?", (project_id,)).fetchall()]
+                _add("revisions/revisions.json", canonical(revisions).encode("utf-8"))
+
+                calculations = [dict(r) for r in db.execute("SELECT * FROM calculations WHERE project_id=?", (project_id,)).fetchall()]
+                _add("calculations/calculations.json", canonical(calculations).encode("utf-8"))
+
+                reports = [dict(r) for r in db.execute("SELECT * FROM reports WHERE project_id=?", (project_id,)).fetchall()]
+                _add("reports/reports.json", canonical(reports).encode("utf-8"))
+
+                programmes = [dict(r) for r in db.execute("SELECT * FROM programmes WHERE project_id=?", (project_id,)).fetchall()]
+                _add("programmes/programmes.json", canonical(programmes).encode("utf-8"))
+                
+                prog_ids = [p["id"] for p in programmes]
+                if prog_ids:
+                    q = f"SELECT * FROM programme_versions WHERE programme_id IN ({','.join('?' for _ in prog_ids)})"
+                    p_versions = [dict(r) for r in db.execute(q, prog_ids).fetchall()]
+                    _add("programmes/versions.json", canonical(p_versions).encode("utf-8"))
+
+                    ver_ids = [v["id"] for v in p_versions]
+                    if ver_ids:
+                        q_t = f"SELECT * FROM programme_transitions WHERE version_id IN ({','.join('?' for _ in ver_ids)}) ORDER BY sequence"
+                        p_transitions = [dict(r) for r in db.execute(q_t, ver_ids).fetchall()]
+                        _add("programmes/transitions.json", canonical(p_transitions).encode("utf-8"))
+                    else:
+                        _add("programmes/transitions.json", b"[]")
+                else:
+                    _add("programmes/versions.json", b"[]")
+                    _add("programmes/transitions.json", b"[]")
+
+                members = [dict(r) for r in db.execute("SELECT * FROM project_members WHERE project_id=?", (project_id,)).fetchall()]
+                _add("members/members.json", canonical(members).encode("utf-8"))
+
+                # Export associated users so restored projects maintain foreign key integrity
+                user_ids = {m["user_id"] for m in members}
+                user_ids.update(p["created_by"] for p in programmes)
+                if prog_ids:
+                    user_ids.update(v["created_by"] for v in p_versions)
+                    user_ids.update(t["actor_id"] for t in p_transitions)
+                user_ids.discard(None)
+                if user_ids:
+                    q_u = f"SELECT * FROM users WHERE id IN ({','.join('?' for _ in user_ids)})"
+                    associated_users = [dict(r) for r in db.execute(q_u, list(user_ids)).fetchall()]
+                    _add("users/users.json", canonical(associated_users).encode("utf-8"))
+                else:
+                    _add("users/users.json", b"[]")
+
+                audit_records = [dict(r) for r in db.execute("SELECT * FROM audit ORDER BY sequence").fetchall() if json.loads(r["payload"]).get("project_id") == project_id]
+                _add("audit/audit.json", canonical(audit_records).encode("utf-8"))
+
+            manifest = {
+                "format": "geodrill-project-bundle",
+                "format_version": "1.0",
+                "project_id": project_id,
+                "project_name": project["name"],
+                "exported_at": now(),
+                "server_fingerprint": self.attestation_fingerprint,
+                "server_public_key": self._public_key.public_bytes_raw().hex(),
+                "file_hashes": file_hashes,
+            }
+            manifest_bytes = canonical(manifest).encode("utf-8")
+            manifest_sig = self.sign_attestation(manifest_bytes)
+            manifest["signature"] = manifest_sig
+            zf.writestr("manifest.json", canonical(manifest).encode("utf-8"))
+
+        return buf.getvalue()
+
+    def restore_bundle(self, bundle_bytes: bytes) -> dict:
+        try:
+            zf = zipfile.ZipFile(io.BytesIO(bundle_bytes), "r")
+        except Exception as e:
+            raise ValueError(f"Corrupted bundle archive: {e}")
+
+        for name in zf.namelist():
+            if name.startswith("/") or name.startswith("\\") or ".." in name:
+                raise ValueError(f"Insecure bundle entry path: {name}")
+
+        if "manifest.json" not in zf.namelist():
+            raise ValueError("Invalid bundle: manifest.json is missing")
+
+        manifest_raw = zf.read("manifest.json")
+        try:
+            manifest = json.loads(manifest_raw.decode("utf-8"))
+        except Exception:
+            raise ValueError("Corrupted bundle manifest")
+
+        file_hashes = manifest.get("file_hashes", {})
+        for relpath, expected_sha in file_hashes.items():
+            if relpath not in zf.namelist():
+                raise ValueError(f"Corrupted bundle: missing file {relpath}")
+            try:
+                data = zf.read(relpath)
+            except Exception as e:
+                raise ValueError(f"Corrupted bundle file '{relpath}': {e}")
+            if digest(data) != expected_sha:
+                raise ValueError(f"Corrupted bundle: hash mismatch for {relpath}")
+
+        if "keys/server_attestation.pub" in zf.namelist():
+            server_pub_raw = zf.read("keys/server_attestation.pub")
+            self.add_trusted_key(server_pub_raw)
+        elif "server_public_key" in manifest:
+            self.add_trusted_key(bytes.fromhex(manifest["server_public_key"]))
+
+        manifest_copy = {k: v for k, v in manifest.items() if k != "signature"}
+        sig = manifest.get("signature")
+        fp = manifest.get("server_fingerprint")
+        if sig and not self.verify_attestation(canonical(manifest_copy).encode("utf-8"), sig, fp):
+            raise ValueError("Corrupted bundle: manifest signature verification failed")
+
+        try:
+            project = json.loads(zf.read("project.json").decode("utf-8"))
+        except Exception as e:
+            raise ValueError(f"Corrupted project.json in bundle: {e}")
+        project_id = project["id"]
+
+        with self.connect() as db:
+            db.execute("BEGIN IMMEDIATE")
+            existing = db.execute("SELECT id FROM projects WHERE id=?", (project_id,)).fetchone()
+            if existing:
+                raise ValueError(f"Project '{project_id}' already exists in this workstation")
+
+            payload_keys = {k: v for k, v in project.items() if k not in ("id", "created_at")}
+            db.execute("INSERT INTO projects VALUES(?,?,?)", (project_id, canonical(payload_keys), project["created_at"]))
+
+            if "users/users.json" in zf.namelist():
+                users = json.loads(zf.read("users/users.json").decode("utf-8"))
+                for u in users:
+                    cols = list(u.keys())
+                    placeholders = ",".join("?" for _ in cols)
+                    col_str = ",".join(cols)
+                    db.execute(f"INSERT OR IGNORE INTO users({col_str}) VALUES({placeholders})", [u[c] for c in cols])
+
+            datasets = json.loads(zf.read("datasets/datasets.json").decode("utf-8"))
+            for d in datasets:
+                raw_entry = f"datasets/raw/{d['source_hash']}"
+                if raw_entry in zf.namelist():
+                    raw_data = zf.read(raw_entry)
+                    (self.root / "raw" / d["source_hash"]).write_bytes(raw_data)
+                parquet_entry = f"datasets/parquet/{d['id']}.parquet"
+                if parquet_entry in zf.namelist():
+                    parquet_data = zf.read(parquet_entry)
+                    (self.root / "parquet" / f"{d['id']}.parquet").write_bytes(parquet_data)
+                db.execute("INSERT OR REPLACE INTO datasets VALUES(?,?,?,?,?,?)",
+                           (d["id"], d["project_id"], d["kind"], d["source_hash"], d["payload"], d["created_at"]))
+
+            events = json.loads(zf.read("events/events.json").decode("utf-8"))
+            for ev in events:
+                db.execute("INSERT OR REPLACE INTO events VALUES(?,?,?,?,?)",
+                           (ev["id"], ev["project_id"], ev["dataset_id"], ev["payload"], ev["acknowledgement"]))
+
+            revisions = json.loads(zf.read("revisions/revisions.json").decode("utf-8"))
+            for r in revisions:
+                db.execute("INSERT OR REPLACE INTO engineering_revisions VALUES(?,?,?,?,?,?)",
+                           (r["id"], r["project_id"], r["module"], r["payload"], r["sha256"], r["created_at"]))
+
+            calculations = json.loads(zf.read("calculations/calculations.json").decode("utf-8"))
+            for c in calculations:
+                db.execute("INSERT OR REPLACE INTO calculations VALUES(?,?,?,?)",
+                           (c["id"], c["project_id"], c["payload"], c["created_at"]))
+
+            reports = json.loads(zf.read("reports/reports.json").decode("utf-8"))
+            for rep in reports:
+                db.execute("INSERT OR REPLACE INTO reports VALUES(?,?,?,?,?)",
+                           (rep["id"], rep["project_id"], rep["payload"], rep["sha256"], rep["created_at"]))
+
+            programmes = json.loads(zf.read("programmes/programmes.json").decode("utf-8"))
+            for prog in programmes:
+                db.execute("INSERT OR REPLACE INTO programmes VALUES(?,?,?,?,?)",
+                           (prog["id"], prog["project_id"], prog["title"], prog["created_by"], prog["created_at"]))
+
+            p_versions = json.loads(zf.read("programmes/versions.json").decode("utf-8"))
+            for v in p_versions:
+                evidence = v.get("evidence_bindings", "[]")
+                db.execute("INSERT OR REPLACE INTO programme_versions(id,programme_id,version_no,content,content_sha256,created_by,created_at,evidence_bindings) VALUES(?,?,?,?,?,?,?,?)",
+                           (v["id"], v["programme_id"], v["version_no"], v["content"], v["content_sha256"], v["created_by"], v["created_at"], evidence))
+
+            p_transitions = json.loads(zf.read("programmes/transitions.json").decode("utf-8"))
+            for t in p_transitions:
+                sig = t.get("signature", "")
+                fp = t.get("signer_fingerprint", "")
+                db.execute("INSERT OR REPLACE INTO programme_transitions(sequence,version_id,from_state,to_state,actor_id,actor_role,note,at,previous_hash,hash,signature,signer_fingerprint) VALUES(?,?,?,?,?,?,?,?,?,?,?,?)",
+                           (t["sequence"], t["version_id"], t["from_state"], t["to_state"], t["actor_id"], t["actor_role"], t["note"], t["at"], t["previous_hash"], t["hash"], sig, fp))
+
+            members = json.loads(zf.read("members/members.json").decode("utf-8"))
+            for m in members:
+                db.execute("INSERT OR REPLACE INTO project_members VALUES(?,?,?,?)",
+                           (m["project_id"], m["user_id"], m["added_by"], m["added_at"]))
+
+            self.audit(db, "bundle.restored", project_id, {"manifest_hash": digest(manifest_raw)})
+
+        return {
+            "restored": True,
+            "project_id": project_id,
+            "project_name": project["name"],
+            "restored_at": now(),
+            "datasets_count": len(datasets),
+            "calculations_count": len(calculations),
+            "reports_count": len(reports),
+            "programmes_count": len(programmes),
+            "status": "verified"
+        }
 
 
 class RevisionConflict(ValueError):

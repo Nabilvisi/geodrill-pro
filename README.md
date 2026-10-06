@@ -1,10 +1,13 @@
 # GeoDrill Pro Engineering Workstation
 
-**Version 0.8.0 — completed local engineering research build through Module 17.** The audited software workflows are implemented with persistent projects, original input documents, immutable studies, plots, review tables and fixed evidence reports. Modules 1–11 are preserved, and Modules 12–17 add reduced BHA dynamics, inspected bit cohorts, casing wear/fatigue, causal flow-balance replay, characterized phase studies and isolated supervisory simulation.
+**Version 0.8.0 — Phase 3 Core Engineering (GD-A11, GD-A12 & GD-A13).** The audited engineering workstation links source data → studies → scenario comparisons → programme governance → verified export and recovery.
 
-[MODULES-1-17.md](docs/MODULES-1-17.md) maps delivered capabilities and boundaries. [MODEL-SPECS-0.8.md](docs/MODEL-SPECS-0.8.md) declares the new equations and applicability. [VERIFICATION.md](docs/VERIFICATION.md) records 406 passing automated tests, the production build, actual Chrome import/save/reopen/export checks, served asset hashes and preserved reports after restart.
+See **[Current Improvement Plan](docs/IMPROVEMENT-PLAN.md)** for reconciled roadmap status, delivered increments, and pending gates. [VERIFICATION.md](docs/VERIFICATION.md) records verified test evidence across all modules, including the connected project journey and ISCWSA diagnostic benchmarks. [PROGRESS-AND-ROADMAP.md](docs/PROGRESS-AND-ROADMAP.md) provides the implementation sequence.
 
-This completes the audited MVP/research software scope. Field qualification, the proposal's unsupported prediction claims, live rig integration and a signed native installer are outside this release.
+> [!NOTE]
+> Software completion in this checkout is verified by automated test suites. Standalone Windows packaging, shared production deployment, and independent petroleum engineering or security qualification remain separate, pending gates. Do not assume this checkout, the Windows executable, and the hosted Streamlit deployment contain identical releases without explicit verification. Equipment control and autonomous rig actuation remain strictly excluded (`equipment_control: false`).
+
+[MODULES-1-17.md](docs/MODULES-1-17.md) maps delivered capabilities and boundaries. [MODEL-SPECS-0.8.md](docs/MODEL-SPECS-0.8.md) declares equations and applicability.
 
 ## Hosted Streamlit app
 

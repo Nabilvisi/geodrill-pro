@@ -28,6 +28,8 @@ class DynamicsSensor(Contract):
         return self
 
 class DynamicsInput(StudyInput):
+    static_wob_n: float = Field(default=0.0, ge=0, le=1e7)
+    static_rpm: float = Field(default=0.0, ge=0, le=500)
     top_md_m: float = Field(ge=0,le=30000)
     bottom_md_m: float = Field(gt=0,le=30000)
     outside_diameter_m: float = Field(gt=.005,le=1)
@@ -133,6 +135,26 @@ def dynamics(v,geometry,path):
         gap=max(b.time_s-a.time_s for a,b in zip(sensor.samples,sensor.samples[1:]))
         qualified=all(s.quality=="accepted" for s in sensor.samples) and sensor.anti_alias_bandwidth_hz<.5/gap
         sensors.append({"name":sensor.name,"axis":sensor.axis,"units":sensor.units,"status":("synthetic_native_review" if v.evidence_state=="synthetic" else "supplied_native_review") if qualified else "withheld","minimum_sampling_hz":1/gap,"anti_alias_bandwidth_hz":sensor.anti_alias_bandwidth_hz,"rms":rms([s.value for s in sensor.samples]) if qualified else None,"samples":[s.model_dump() for s in sensor.samples],"bandwidth_eligible_modes":[i+1 for i,f in enumerate(freq) if qualified and f<sensor.anti_alias_bandwidth_hz],"modal_observability_established":False,"calibration_independently_verified":False,"state_estimation_performed":False})
-    out.update(history=b,mode_frequencies_hz=freq,mode_vectors_mass_normalized_coordinates=[e[1] for e in eig],mode_vector_basis="Eigenvectors in mass-normalized generalized coordinates; not a measured spatial mode shape.",generalized_mass=m,generalized_stiffness=k,refinement_relative_errors=errors,contact_active_samples=contacts,sensor_review=sensors,observability="Supplied native channels reviewed; unmeasured states not inferred.",maximum_energy_balance_residual_j=max(abs(r["energy_balance_residual_j"]) for r in b))
+    
+    axial_modes = [f for f, e in zip(freq, eig) if abs(e[1][0]) > max(abs(e[1][1]), abs(e[1][2]))]
+    # Simple torsional stick slip propensity: static torque / torsional stiffness
+    prop = (v.static_wob_n * v.outside_diameter_m / 2) / (k[1][1] * (v.static_rpm + 1e-9)) if v.static_rpm > 0 else 0.
+    
+    out.update(
+        history=b,
+        mode_frequencies_hz=freq,
+        mode_vectors_mass_normalized_coordinates=[e[1] for e in eig],
+        mode_vector_basis="Eigenvectors in mass-normalized generalized coordinates; not a measured spatial mode shape.",
+        generalized_mass=m,
+        generalized_stiffness=k,
+        refinement_relative_errors=errors,
+        contact_active_samples=contacts,
+        sensor_review=sensors,
+        observability="Supplied native channels reviewed; unmeasured states not inferred.",
+        maximum_energy_balance_residual_j=max(abs(r["energy_balance_residual_j"]) for r in b),
+        axial_bit_bounce_resonance_frequencies_hz=axial_modes,
+        torsional_stick_slip_propensity=prop
+    )
+
     if max(errors.values())>v.refinement_relative_tolerance:out.update(status="incomplete_assessment",reasons=["Response time-step refinement exceeds supplied tolerance."])
     return out

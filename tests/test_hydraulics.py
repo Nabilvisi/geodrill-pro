@@ -189,8 +189,8 @@ def test_piecewise_geometry_sensitivity_and_equipment_rating():
 
 @pytest.mark.parametrize("field,setting",[
     ("circulation_state","transient"),("circulation_state","multiphase"),("circulation_state","losses"),
-    ("circulation_state","unknown"),("flow_regime","unknown"),("flow_regime","transitional_or_turbulent"),
-    ("rotation_rad_s",1.),("eccentricity_fraction",.1),("cuttings_volume_fraction",.01),("wall_roughness_m",.01)])
+    ("circulation_state","unknown"),("flow_regime","unknown"),("flow_regime","turbulent"),
+    ("rotation_rad_s",1.),("eccentricity_fraction",.1),("wall_roughness_m",.01)])
 def test_unsupported_states_withhold(field,setting):
     r=hydraulics(request(**{field:setting}),geometry(),path())
     assert r["status"]=="withheld" and r["nominal"] is None and not r["profile"]
@@ -302,3 +302,32 @@ def test_api_synthetic_example_and_historical_evidence_boundary(api_setup):
 def test_consistency_sensitivity_must_remain_in_the_declared_envelope():
     v=request().model_dump();v["mud"]["consistency_pa_sn"]=100.;v["sensitivity"]["consistency_relative_delta"]=.5
     with pytest.raises(ValidationError):HydraulicsInput.model_validate(v)
+
+def test_cuttings_transport_and_surge_margins():
+    v = request(flow_m3_s=0.0001, cuttings_volume_fraction=0.05, surge_margin_pa=1000., swab_margin_pa=500., flow_regime="laminar_transition").model_dump()
+    v["string_sections"][0]["outside_diameter_m"] = 0.05
+    v["string_sections"][0]["inside_diameter_m"] = 0.04
+    # Ensure velocity is small to trigger critical velocity reason
+    r = hydraulics(HydraulicsInput.model_validate(v), geometry(), path(inclination=math.pi/4))
+    
+    assert r["status"] == "scenario_only"
+    assert "Annular velocity is below critical carrying velocity in at least one segment." in r["reasons"]
+    
+    # check rho_eff logic
+    # clean mud rho is 1000, cuttings is 2600. effective rho = 1000 + 0.05 * 1600 = 1080
+    assert r["nominal"]["mass_in_kg_s"] == pytest.approx(1080.0 * 0.0001)
+    
+    # Check segment metrics
+    s = r["nominal"]["segments"][0]
+    assert s["critical_carrying_velocity_m_s"] > 0.5
+    assert s["dynamic_bed_height_m"] > 0
+    assert s["effective_cuttings_loading"] > 0.05
+    
+    # Check ECD with surge/swab
+    assert r["profile"][-1]["equivalent_density_including_surge_kg_m3"] > r["profile"][-1]["equivalent_density_including_backpressure_kg_m3"]
+    assert r["profile"][-1]["equivalent_density_including_swab_kg_m3"] < r["profile"][-1]["equivalent_density_including_backpressure_kg_m3"]
+
+def test_laminar_transition_allowed():
+    v = request(flow_regime="laminar_transition").model_dump()
+    r = hydraulics(HydraulicsInput.model_validate(v), geometry(), path())
+    assert r["status"] == "scenario_only"

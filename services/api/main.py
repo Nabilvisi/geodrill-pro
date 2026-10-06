@@ -18,7 +18,7 @@ from .auth import user_for_token
 from .access import role_denial, project_id_from_path, is_member, visible_projects, add_member
 from .team import build_router, bearer
 from packages.engineering.geometry import GeometryInput, GeometryRevisionRequest, geometry_result
-from packages.engineering.casing import CasingCheckInput, casing_check
+from packages.engineering.casing import CasingCheckInput, casing_check, CasingEnvelopesInput, casing_envelopes
 from packages.engineering.clustering import ClusteringInput, cluster_logs
 from packages.engineering.shaly_sand import ShalySandInput, interpret_logs
 from packages.engineering.em_vendor import EMVendorDocument, EMReviewInput, review_vendor
@@ -37,13 +37,22 @@ from packages.engineering.anomaly import AnomalyInput, anomaly
 from packages.engineering.gas_phase import GasInput, gas_phase
 from packages.engineering.supervision import SupervisionInput, supervision
 from packages.engineering.qualification import list_qualification_cards, get_qualification_card
-from packages.engineering.readiness import inspect_readiness
+from packages.engineering.readiness import inspect_readiness, assess_project_readiness
+from packages.engineering.explanations import explain_study
 from packages.engineering.scenarios import build_lineage_graph, compare_scenarios
+from packages.engineering.directional import (
+    convert_geodetic_to_projected,
+    convert_projected_to_geodetic,
+    calculate_survey_uncertainty,
+    calculate_proximity,
+    load_diagnostic_manifest,
+    verify_iscwsa_diagnostics,
+)
 from packages.engineering.review_pack import build_programme_pack, export_pack_to_html, export_pack_to_csv
 from packages.engineering.usability import convert_unit, paginate_and_search_records, UNIT_PROFILES
 from packages.engineering.ddr import create_daily_drilling_report, export_ddr_to_xml
 from packages.frontend import frontend_dist
-from . import demo
+from . import demo, programmes
 
 import sys
 ROOT = Path(sys._MEIPASS).resolve() if getattr(sys, "frozen", False) and hasattr(sys, "_MEIPASS") else Path(__file__).resolve().parents[2]
@@ -270,6 +279,24 @@ def create_app(data_dir: Path | None = None, mode: str | None = None):
             result.update(geometry_revision_id=revision["id"],geometry_sha256=revision["sha256"])
             return store.calculation(project_id,"casing",value.model_dump(),result)
 
+    @app.post("/api/projects/{project_id}/calculations/casing-envelopes")
+    def calculate_casing_envelopes(project_id: str, value: CasingEnvelopesInput):
+        with lock:
+            project = store.project(project_id)
+            revision = checked_geometry(project_id, value.geometry_revision_id)
+            if value.depth_datum != project["datum"]:
+                raise ValueError("Casing envelope depth datum must match the project datum.")
+            if value.evidence_state == "synthetic" and project["origin"] != "synthetic":
+                raise ValueError("Synthetic casing evidence is restricted to synthetic projects.")
+            geometry = GeometryInput.model_validate(revision["input"])
+            source = store.dataset(project_id, geometry.survey_dataset_id)
+            path = SurveyPath(SurveyRequest(stations=[{k: r[k] for k in ("md_m", "inclination_rad", "azimuth_rad")} for r in source["rows"]]))
+            result = casing_envelopes(value, geometry, path)
+            result.update(geometry_revision_id=revision["id"], geometry_sha256=revision["sha256"],
+                          survey_source_sha256=source["source_hash"], survey_parquet_sha256=source["parquet_sha256"])
+            return store.calculation(project_id, "casing-envelopes", value.model_dump(), result)
+
+
     @app.post("/api/projects/{project_id}/calculations/clustering")
     def calculate_clustering(project_id: str, value: ClusteringInput):
         with lock:
@@ -389,6 +416,100 @@ def create_app(data_dir: Path | None = None, mode: str | None = None):
             return compare_scenarios(calcs[baseline_id], calcs[alternative_id])
         except ValueError as err:
             raise HTTPException(422, str(err))
+
+    @app.get("/api/projects/{project_id}/readiness")
+    def project_readiness(project_id: str, workflow: str = "full_workstation"):
+        project = store.project(project_id)
+        ds = store.datasets(project_id)
+        revs = store.revisions(project_id, "M1")
+        calcs = store.calculations(project_id)
+        try:
+            progs = programmes.list_programmes(store, project_id)
+        except Exception:
+            progs = []
+        evts = store.events(project_id)
+        audit_history = store.audit_history()
+        return assess_project_readiness(
+            project=project,
+            datasets=ds,
+            revisions=revs,
+            calculations=calcs,
+            programmes=progs,
+            events=evts,
+            audit_history=audit_history,
+            workflow=workflow,
+        )
+
+    @app.get("/api/projects/{project_id}/calculations/{calc_id}/explanation")
+    def study_explanation(project_id: str, calc_id: str):
+        project = store.project(project_id)
+        calcs = {c["id"]: c for c in store.calculations(project_id)}
+        if calc_id not in calcs:
+            raise HTTPException(404, f"Calculation '{calc_id}' not found in this project.")
+        ds = store.datasets(project_id)
+        revs = store.revisions(project_id, "M1")
+        return explain_study(calcs[calc_id], project, ds, revs)
+
+    @app.get("/api/projects/{project_id}/bundle/export")
+    def project_bundle_export(project_id: str):
+        project = store.project(project_id)
+        bundle_bytes = store.export_bundle(project_id)
+        safe_name = "".join(c if c.isalnum() or c in "-_" else "_" for c in project.get("name", project_id))[:40]
+        return Response(
+            bundle_bytes,
+            media_type="application/zip",
+            headers={"Content-Disposition": f'attachment; filename="geodrill-{safe_name}-{project_id[:8]}.gdpz"'}
+        )
+
+    @app.post("/api/projects/bundle/restore", status_code=201)
+    async def project_bundle_restore(file: UploadFile = File(...)):
+        raw = await file.read(MAX_FILE_BYTES * 10)
+        await file.close()
+        if len(raw) == 0:
+            raise HTTPException(400, "Empty bundle file uploaded.")
+        def execute():
+            with lock:
+                return store.restore_bundle(raw)
+        return await run_in_threadpool(execute)
+
+    @app.post("/api/projects/{project_id}/directional/coordinates/convert")
+    def directional_convert_coords(project_id: str, payload: dict = Body(...)):
+        store.project(project_id)
+        crs = payload.get("crs_code", "EPSG:32631")
+        datum = payload.get("datum", "WGS84")
+        if "latitude_deg" in payload and "longitude_deg" in payload:
+            return convert_geodetic_to_projected(
+                float(payload["latitude_deg"]),
+                float(payload["longitude_deg"]),
+                crs_code=crs,
+                datum=datum,
+            )
+        elif "easting_m" in payload and "northing_m" in payload:
+            return convert_projected_to_geodetic(
+                float(payload["easting_m"]),
+                float(payload["northing_m"]),
+                crs_code=crs,
+                datum=datum,
+            )
+        raise HTTPException(422, "Provide either (latitude_deg, longitude_deg) or (easting_m, northing_m).")
+
+    @app.post("/api/projects/{project_id}/directional/uncertainty")
+    def directional_uncertainty(project_id: str, payload: dict = Body(...)):
+        project = store.project(project_id)
+        if "latitude_deg" not in payload and "latitude" in project:
+            payload["latitude_deg"] = project["latitude"]
+        return calculate_survey_uncertainty(payload)
+
+    @app.post("/api/projects/{project_id}/directional/proximity")
+    def directional_proximity(project_id: str, payload: dict = Body(...)):
+        store.project(project_id)
+        return calculate_proximity(payload)
+
+    @app.get("/api/directional/diagnostic-cases")
+    def directional_diagnostic_cases():
+        manifest = load_diagnostic_manifest()
+        verification = verify_iscwsa_diagnostics()
+        return {"manifest": manifest, "verification": verification}
 
     @app.get("/api/projects/{project_id}/research/{model}/template/{revision_id}")
     def research_template(project_id: str, model: str, revision_id: str):

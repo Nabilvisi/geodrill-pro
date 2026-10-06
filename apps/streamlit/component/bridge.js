@@ -53,32 +53,5 @@
     }).catch(error=>alert(error.message));
   },true);
   send("streamlit:componentReady",{apiVersion:1});
-  
-  let currentHeight = 0;
-  const updateFrameHeight = () => {
-    const root = document.getElementById("root");
-    const h = Math.max(
-      1000,
-      root ? root.scrollHeight : 0,
-      document.body ? document.body.scrollHeight : 0,
-      document.documentElement ? document.documentElement.scrollHeight : 0
-    );
-    if (Math.abs(h - currentHeight) > 5) {
-      currentHeight = h;
-      send("streamlit:setFrameHeight", { height: h + 40 });
-    }
-  };
-
-  updateFrameHeight();
-  window.addEventListener("load", updateFrameHeight);
-  window.addEventListener("resize", updateFrameHeight);
-  if (typeof ResizeObserver !== "undefined") {
-    const observer = new ResizeObserver(() => {
-      requestAnimationFrame(updateFrameHeight);
-    });
-    observer.observe(document.documentElement);
-    const rootEl = document.getElementById("root");
-    if (rootEl) observer.observe(rootEl);
-  }
-  setInterval(updateFrameHeight, 600);
+  send("streamlit:setFrameHeight",{height:1100});
 })();

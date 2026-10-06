@@ -1,0 +1,193 @@
+{
+  "description": "Pinned ISCWSA diagnostic survey uncertainty cases and proximity geometry validation cases.",
+  "error_model": "ISCWSA MWD Rev5.11",
+  "tolerances": {
+    "covariance_abs_tol_m2": 0.0005,
+    "covariance_rel_tol": 0.001,
+    "distance_abs_tol_m": 0.01
+  },
+  "cases": {
+    "iscwsa_well_1": {
+      "id": "iscwsa_well_1",
+      "title": "ISCWSA Diagnostic Well 1 (Build and Hold)",
+      "description": "Standard build-and-hold trajectory in the North Sea at 60.0 N, 3.0 E.",
+      "header": {
+        "latitude_deg": 60.0,
+        "longitude_deg": 3.0,
+        "b_total_nt": 50000.0,
+        "dip_deg": 70.0,
+        "declination_deg": 1.5,
+        "convergence_deg": 0.0,
+        "elevation_m": 25.0,
+        "crs": "EPSG:32631",
+        "datum": "Rig Floor RKB"
+      },
+      "stations": [
+        {"md_m": 0.0, "inclination_deg": 0.0, "azimuth_deg": 0.0},
+        {"md_m": 500.0, "inclination_deg": 0.0, "azimuth_deg": 0.0},
+        {"md_m": 1000.0, "inclination_deg": 10.0, "azimuth_deg": 45.0},
+        {"md_m": 1500.0, "inclination_deg": 20.0, "azimuth_deg": 45.0},
+        {"md_m": 2000.0, "inclination_deg": 30.0, "azimuth_deg": 45.0},
+        {"md_m": 2500.0, "inclination_deg": 30.0, "azimuth_deg": 45.0},
+        {"md_m": 3000.0, "inclination_deg": 30.0, "azimuth_deg": 45.0}
+      ],
+      "pinned_td_covariance_nev": [
+        [3270.983244, -282.736396, -739.017369],
+        [-282.736396, 3268.930291, -738.441232],
+        [-739.017369, -738.441232, 529.482975]
+      ]
+    },
+    "iscwsa_well_2": {
+      "id": "iscwsa_well_2",
+      "title": "ISCWSA Diagnostic Well 2 (S-Shape)",
+      "description": "S-shape trajectory building East, holding, and dropping back to vertical.",
+      "header": {
+        "latitude_deg": 60.0,
+        "longitude_deg": 3.0,
+        "b_total_nt": 50000.0,
+        "dip_deg": 70.0,
+        "declination_deg": 1.5,
+        "convergence_deg": 0.0,
+        "elevation_m": 25.0,
+        "crs": "EPSG:32631",
+        "datum": "Rig Floor RKB"
+      },
+      "stations": [
+        {"md_m": 0.0, "inclination_deg": 0.0, "azimuth_deg": 0.0},
+        {"md_m": 500.0, "inclination_deg": 0.0, "azimuth_deg": 0.0},
+        {"md_m": 1000.0, "inclination_deg": 20.0, "azimuth_deg": 90.0},
+        {"md_m": 1500.0, "inclination_deg": 40.0, "azimuth_deg": 90.0},
+        {"md_m": 2000.0, "inclination_deg": 20.0, "azimuth_deg": 90.0},
+        {"md_m": 2500.0, "inclination_deg": 0.0, "azimuth_deg": 90.0},
+        {"md_m": 3000.0, "inclination_deg": 0.0, "azimuth_deg": 90.0}
+      ],
+      "pinned_td_covariance_nev": [
+        [3530.419086, 0.760554, -0.352295],
+        [0.760554, 4044.479326, -976.708631],
+        [-0.352295, -976.708631, 563.607837]
+      ]
+    },
+    "iscwsa_well_3": {
+      "id": "iscwsa_well_3",
+      "title": "ISCWSA Diagnostic Well 3 (3D Turn)",
+      "description": "3D turning wellpath building inclination and turning azimuth from North to East.",
+      "header": {
+        "latitude_deg": 60.0,
+        "longitude_deg": 3.0,
+        "b_total_nt": 50000.0,
+        "dip_deg": 70.0,
+        "declination_deg": 1.5,
+        "convergence_deg": 0.0,
+        "elevation_m": 25.0,
+        "crs": "EPSG:32631",
+        "datum": "Rig Floor RKB"
+      },
+      "stations": [
+        {"md_m": 0.0, "inclination_deg": 0.0, "azimuth_deg": 0.0},
+        {"md_m": 500.0, "inclination_deg": 0.0, "azimuth_deg": 0.0},
+        {"md_m": 1000.0, "inclination_deg": 15.0, "azimuth_deg": 0.0},
+        {"md_m": 1500.0, "inclination_deg": 30.0, "azimuth_deg": 45.0},
+        {"md_m": 2000.0, "inclination_deg": 30.0, "azimuth_deg": 90.0},
+        {"md_m": 2500.0, "inclination_deg": 30.0, "azimuth_deg": 90.0},
+        {"md_m": 3000.0, "inclination_deg": 30.0, "azimuth_deg": 90.0}
+      ],
+      "pinned_td_covariance_nev": [
+        [3897.287946, -235.685006, -327.702184],
+        [-235.685006, 3142.50517, -934.866605],
+        [-327.702184, -934.866605, 629.535689]
+      ]
+    },
+    "proximity_crossing": {
+      "id": "proximity_crossing",
+      "title": "Proximity Diagnostic: Crossing Geometry",
+      "description": "Two wells crossing at an intermediate depth (1000m MD) with exact 25m 3D closest approach.",
+      "expected_min_distance_m": 25.0,
+      "reference_well": {
+        "name": "Well A (Vertical)",
+        "start_nev": [0.0, 0.0, 0.0],
+        "stations": [
+          {"md_m": 0.0, "inclination_deg": 0.0, "azimuth_deg": 0.0},
+          {"md_m": 1000.0, "inclination_deg": 0.0, "azimuth_deg": 0.0},
+          {"md_m": 2000.0, "inclination_deg": 0.0, "azimuth_deg": 0.0}
+        ]
+      },
+      "offset_well": {
+        "name": "Well B (Horizontal Crossing)",
+        "start_nev": [25.0, -1000.0, 1000.0],
+        "stations": [
+          {"md_m": 0.0, "inclination_deg": 90.0, "azimuth_deg": 90.0},
+          {"md_m": 1000.0, "inclination_deg": 90.0, "azimuth_deg": 90.0},
+          {"md_m": 2000.0, "inclination_deg": 90.0, "azimuth_deg": 90.0}
+        ]
+      }
+    },
+    "proximity_parallel": {
+      "id": "proximity_parallel",
+      "title": "Proximity Diagnostic: Parallel Geometry",
+      "description": "Two parallel vertical wells spaced 30m apart along entire depth.",
+      "expected_min_distance_m": 30.0,
+      "reference_well": {
+        "name": "Ref Well (Vertical)",
+        "start_nev": [0.0, 0.0, 0.0],
+        "stations": [
+          {"md_m": 0.0, "inclination_deg": 0.0, "azimuth_deg": 0.0},
+          {"md_m": 1000.0, "inclination_deg": 0.0, "azimuth_deg": 0.0},
+          {"md_m": 2000.0, "inclination_deg": 0.0, "azimuth_deg": 0.0}
+        ]
+      },
+      "offset_well": {
+        "name": "Offset Well (Vertical 30m East)",
+        "start_nev": [0.0, 30.0, 0.0],
+        "stations": [
+          {"md_m": 0.0, "inclination_deg": 0.0, "azimuth_deg": 0.0},
+          {"md_m": 1000.0, "inclination_deg": 0.0, "azimuth_deg": 0.0},
+          {"md_m": 2000.0, "inclination_deg": 0.0, "azimuth_deg": 0.0}
+        ]
+      }
+    },
+    "proximity_vertical": {
+      "id": "proximity_vertical",
+      "title": "Proximity Diagnostic: Vertical Geometry",
+      "description": "Two vertical wells spaced 50m apart in the North direction.",
+      "expected_min_distance_m": 50.0,
+      "reference_well": {
+        "name": "Ref Well A",
+        "start_nev": [0.0, 0.0, 0.0],
+        "stations": [
+          {"md_m": 0.0, "inclination_deg": 0.0, "azimuth_deg": 0.0},
+          {"md_m": 1500.0, "inclination_deg": 0.0, "azimuth_deg": 0.0}
+        ]
+      },
+      "offset_well": {
+        "name": "Offset Well B (50m North)",
+        "start_nev": [50.0, 0.0, 0.0],
+        "stations": [
+          {"md_m": 0.0, "inclination_deg": 0.0, "azimuth_deg": 0.0},
+          {"md_m": 1500.0, "inclination_deg": 0.0, "azimuth_deg": 0.0}
+        ]
+      }
+    },
+    "proximity_endpoint": {
+      "id": "proximity_endpoint",
+      "title": "Proximity Diagnostic: Endpoint Geometry",
+      "description": "Offset well endpoint terminates 15m away from reference well TD.",
+      "expected_min_distance_m": 15.0,
+      "reference_well": {
+        "name": "Reference Well",
+        "start_nev": [0.0, 0.0, 0.0],
+        "stations": [
+          {"md_m": 0.0, "inclination_deg": 0.0, "azimuth_deg": 0.0},
+          {"md_m": 2000.0, "inclination_deg": 0.0, "azimuth_deg": 0.0}
+        ]
+      },
+      "offset_well": {
+        "name": "Offset Well Landing Close to TD",
+        "start_nev": [15.0, 0.0, 0.0],
+        "stations": [
+          {"md_m": 0.0, "inclination_deg": 0.0, "azimuth_deg": 0.0},
+          {"md_m": 2000.0, "inclination_deg": 0.0, "azimuth_deg": 0.0}
+        ]
+      }
+    }
+  }
+}

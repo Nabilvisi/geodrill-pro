@@ -30,6 +30,14 @@ class ScenarioComparison(TypedDict):
     baseline_id: str
     alternative_id: str
     model: str
+    geometry_compatible: bool
+    geometry_note: str
+    sources_compatible: bool
+    sources_note: str
+    units_compatible: bool
+    units_note: str
+    compatibility_status: Literal["compatible", "warning", "incompatible"]
+    warnings: list[str]
     common_inputs: dict[str, Any]
     differing_inputs: dict[str, dict[str, Any]]  # {param: {baseline: val, alternative: val}}
     outcome_deltas: dict[str, dict[str, Any]]
@@ -115,7 +123,7 @@ def build_lineage_graph(project_id: str, datasets: list[dict], revisions: list[d
 
 
 def compare_scenarios(baseline: dict[str, Any], alternative: dict[str, Any]) -> ScenarioComparison:
-    """Compare baseline and alternative calculation scenarios, isolating inputs and outcomes."""
+    """Compare baseline and alternative calculation scenarios, isolating inputs and outcomes with explicit compatibility checks."""
     if baseline.get("model") != alternative.get("model"):
         raise ValueError("Cannot compare scenarios across different models.")
 
@@ -124,6 +132,52 @@ def compare_scenarios(baseline: dict[str, Any], alternative: dict[str, Any]) -> 
     alt_in = alternative.get("inputs_si", {})
     base_res = baseline.get("result", {})
     alt_res = alternative.get("result", {})
+
+    warnings: list[str] = []
+
+    # 1. Geometry compatibility
+    base_geom = base_in.get("geometry_revision_id") or base_res.get("geometry_revision_id")
+    alt_geom = alt_in.get("geometry_revision_id") or alt_res.get("geometry_revision_id")
+    if base_geom and alt_geom:
+        if base_geom == alt_geom:
+            geom_compatible = True
+            geom_note = f"Shared geometry revision: {base_geom[:8]}"
+        else:
+            geom_compatible = False
+            geom_note = f"Incompatible geometry revisions: baseline uses {base_geom[:8]}, alternative uses {alt_geom[:8]}"
+            warnings.append(geom_note)
+    elif not base_geom and not alt_geom:
+        geom_compatible = True
+        geom_note = "Neither scenario depends on a wellbore geometry revision"
+    else:
+        geom_compatible = False
+        geom_note = "One scenario is bound to a geometry revision while the other is not"
+        warnings.append(geom_note)
+
+    # 2. Source datasets compatibility
+    base_src_sha = base_res.get("source_sha256") or base_res.get("survey_source_sha256")
+    alt_src_sha = alt_res.get("source_sha256") or alt_res.get("survey_source_sha256")
+    if base_src_sha and alt_src_sha:
+        if base_src_sha == alt_src_sha:
+            src_compatible = True
+            src_note = f"Matching source dataset SHA-256: {base_src_sha[:12]}..."
+        else:
+            src_compatible = False
+            src_note = f"Source dataset hash mismatch: baseline ({base_src_sha[:8]}...) vs alternative ({alt_src_sha[:8]}...)"
+            warnings.append(src_note)
+    else:
+        src_compatible = True
+        src_note = "Source dataset hashes aligned or not individually tracked"
+
+    # 3. Units compatibility
+    # Both calculations store normalized inputs in inputs_si
+    units_compatible = True
+    units_note = "Both scenarios evaluated on standard SI basis (inputs_si)"
+
+    if not geom_compatible or not src_compatible:
+        status: Literal["compatible", "warning", "incompatible"] = "warning" if (geom_compatible or src_compatible) else "incompatible"
+    else:
+        status = "compatible"
 
     all_input_keys = set(base_in.keys()) | set(alt_in.keys())
     common_inputs: dict[str, Any] = {}
@@ -156,12 +210,24 @@ def compare_scenarios(baseline: dict[str, Any], alternative: dict[str, Any]) -> 
         elif b_val != a_val:
             outcome_deltas[k] = {"baseline": b_val, "alternative": a_val}
 
+    eval_summary = f"Comparison identified {len(differing_inputs)} differing inputs and {len(outcome_deltas)} outcome variance metrics."
+    if warnings:
+        eval_summary += f" Compatibility status: {status.upper()} ({len(warnings)} caution(s))."
+
     return {
         "baseline_id": baseline["id"],
         "alternative_id": alternative["id"],
         "model": model,
+        "geometry_compatible": geom_compatible,
+        "geometry_note": geom_note,
+        "sources_compatible": src_compatible,
+        "sources_note": src_note,
+        "units_compatible": units_compatible,
+        "units_note": units_note,
+        "compatibility_status": status,
+        "warnings": warnings,
         "common_inputs": common_inputs,
         "differing_inputs": differing_inputs,
         "outcome_deltas": outcome_deltas,
-        "evaluation": f"Comparison identified {len(differing_inputs)} differing inputs and {len(outcome_deltas)} outcome variance metrics."
+        "evaluation": eval_summary,
     }

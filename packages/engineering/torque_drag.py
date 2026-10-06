@@ -14,6 +14,7 @@ class DragSection(Contract):
     inside_diameter_m: float = Field(ge=0,le=2)
     material_density_kg_m3: float = Field(ge=1000,le=20000)
     friction_coefficient: float = Field(ge=0,le=1)
+    young_modulus_pa: float = Field(default=200e9,ge=1e9,le=500e9)
     @model_validator(mode="after")
     def dimensions(self):
         if self.bottom_md_m<=self.top_md_m or self.inside_diameter_m>=self.outside_diameter_m:
@@ -21,6 +22,8 @@ class DragSection(Contract):
         return self
 
 class TorqueDragInput(Contract):
+    model: Literal['soft_string', 'stiff_string'] = 'soft_string'
+    tortuosity_rad_m: float = Field(default=0.0,ge=0,le=0.1)
     study_name: str = Field(min_length=3,max_length=100)
     geometry_revision_id: str
     depth_datum: str
@@ -95,6 +98,50 @@ def drag_case(v,path,step,mu_delta=0.):
             "minimum_tension_n":min(r["tension_n"] for r in rows),"maximum_tension_n":max(r["tension_n"] for r in rows),
             "maximum_iterations":iterations_max,"profile":list(reversed(rows))}
 
+
+def stiff_drag_case(v,geometry,path,step,mu_delta=0.):
+    td=v.string_sections[-1].bottom_md_m
+    cuts={0.,td,*[m for m in path.depths if m<td]}
+    for s in v.string_sections:
+        cuts.update([s.top_md_m,s.bottom_md_m])
+        n=math.ceil((s.bottom_md_m-s.top_md_m)/step)
+        cuts.update(s.top_md_m+(s.bottom_md_m-s.top_md_m)*j/n for j in range(n+1))
+    cuts=sorted(cuts);tension=v.bottom_tension_n;torque=v.bottom_torque_nm
+    rows=[{"md_m":td,"tension_n":tension,"torque_nm":torque,"normal_force_n":0.}]
+    contact=0.;iterations_max=0
+    for lo,hi in reversed(list(zip(cuts,cuts[1:]))):
+        mid=(lo+hi)/2;s=next(s for s in v.string_sections if s.top_md_m<=mid<s.bottom_md_m)
+        length=hi-lo;t=tangent(path,mid);a=tangent(path,lo);b=tangent(path,hi)
+        curvature=[(y-x)/length for x,y in zip(a,b)]
+        w=(s.material_density_kg_m3-v.fluid_density_kg_m3)*G*math.pi*(s.outside_diameter_m**2-s.inside_diameter_m**2)/4
+        radius=s.outside_diameter_m/2;mu=s.friction_coefficient+mu_delta
+        speed=math.hypot(v.axial_speed_m_s,radius*v.rotation_rad_s)
+        fraction=v.axial_speed_m_s/speed if speed>1e-9 else 0.
+        rotfraction=radius*v.rotation_rad_s/speed if speed>1e-9 else 0.
+        
+        I = math.pi/64*(s.outside_diameter_m**4-s.inside_diameter_m**4)
+        EI = s.young_modulus_pa*I
+        hole_d = min((h.diameter_m for h in geometry.hole_sections if max(h.top_md_m,s.top_md_m)<min(h.bottom_md_m,s.bottom_md_m)),default=s.outside_diameter_m+.1)
+        clearance = max(1e-5, hole_d/2 - s.outside_diameter_m/2)
+        
+        estimate=tension+w*t[2]*length
+        for iteration in range(80):
+            mean=(tension+estimate)/2
+            normal=math.sqrt(sum((mean*c-w*((1. if j==2 else 0.)-t[2]*t[j]))**2 for j,c in enumerate(curvature)))
+            curv_mag = math.sqrt(sum(c*c for c in curvature)) + v.tortuosity_rad_m
+            bending_contact = EI * curv_mag / clearance if clearance > 1e-4 else 0.
+            normal = (normal + bending_contact)*length
+            updated=tension+w*t[2]*length+mu*normal*fraction
+            if abs(updated-estimate)<1e-7*max(1.,abs(updated)):break
+            estimate=updated
+        else:raise ValueError("Stiff-string midpoint equilibrium did not converge.")
+        estimate=updated;iterations_max=max(iterations_max,iteration+1)
+        torque+=mu*normal*radius*rotfraction;contact+=normal;tension=estimate
+        rows.append({"md_m":lo,"tension_n":tension,"torque_nm":torque,"normal_force_n":normal})
+    return {"hookload_n":tension,"surface_torque_nm":torque,"summed_normal_force_n":contact,
+            "minimum_tension_n":min(r["tension_n"] for r in rows),"maximum_tension_n":max(r["tension_n"] for r in rows),
+            "maximum_iterations":iterations_max,"profile":list(reversed(rows))}
+
 def torque_drag(v,geometry,path):
     td=v.string_sections[-1].bottom_md_m
     if td>path.depths[-1]:raise ValueError("String exceeds accepted survey.")
@@ -110,12 +157,16 @@ def torque_drag(v,geometry,path):
         for c in geometry.casings:
             if c.state=="installed" and max(c.top_md_m,s.top_md_m)<min(c.bottom_md_m,s.bottom_md_m) and s.outside_diameter_m>=c.inside_diameter_m:
                 raise ValueError("String OD does not clear installed casing.")
-    base={"model_version":"M10-soft-string-1","approval_issued":False,"equipment_authority":"none",
+    base={"model_version":"M10-soft-string-1" if v.model=="soft_string" else "GD-A12-stiff-string-1","approval_issued":False,"equipment_authority":"none",
           "scope":"Quasi-static soft string, constant internal/external fluid density, Coulomb friction; tension positive; upward axial speed positive.",
           "operation":v.operation}
     if v.evidence_state=="unknown":return {**base,"status":"withheld","reasons":["String/friction evidence unknown."],"profile":[]}
-    nominal=drag_case(v,path,v.step_m);fine=drag_case(v,path,v.step_m/2)
-    cases=[drag_case(v,path,v.step_m/2,d) for d in sorted(set([-v.friction_delta,v.friction_delta]))]
+    if v.model=="stiff_string":
+        nominal=stiff_drag_case(v,geometry,path,v.step_m);fine=stiff_drag_case(v,geometry,path,v.step_m/2)
+        cases=[stiff_drag_case(v,geometry,path,v.step_m/2,d) for d in sorted(set([-v.friction_delta,v.friction_delta]))]
+    else:
+        nominal=drag_case(v,path,v.step_m);fine=drag_case(v,path,v.step_m/2)
+        cases=[drag_case(v,path,v.step_m/2,d) for d in sorted(set([-v.friction_delta,v.friction_delta]))]
     hookrange=[min(c["hookload_n"] for c in cases),max(c["hookload_n"] for c in cases)]
     torquerange=[min(c["surface_torque_nm"] for c in cases),max(c["surface_torque_nm"] for c in cases)]
     reasons=[]

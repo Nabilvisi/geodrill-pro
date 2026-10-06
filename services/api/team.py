@@ -30,10 +30,12 @@ class ActiveIn(BaseModel):
 class ProgrammeIn(BaseModel):
     title: str = Field(max_length=200)
     content: dict[str, Any]
+    evidence_bindings: list[dict[str, Any]] | None = None
 
 
 class VersionIn(BaseModel):
     content: dict[str, Any]
+    evidence_bindings: list[dict[str, Any]] | None = None
 
 
 class ActionIn(BaseModel):
@@ -104,7 +106,8 @@ def build_router(store: Store) -> APIRouter:
     def create_programme(project_id: str, value: ProgrammeIn, request: Request):
         user = me(request)
         access.require_member(store, user, project_id)
-        return programmes.create_programme(store, project_id, value.title, value.content, user)
+        bindings = value.evidence_bindings if value.evidence_bindings is not None else value.content.get("evidence_bindings")
+        return programmes.create_programme(store, project_id, value.title, value.content, user, evidence_bindings=bindings)
 
     @router.get("/api/projects/{project_id}/programmes")
     def list_programmes(project_id: str, request: Request):
@@ -120,7 +123,8 @@ def build_router(store: Store) -> APIRouter:
     def new_version(programme_id: str, value: VersionIn, request: Request):
         user = me(request)
         access.require_member(store, user, access.project_for_programme(store, programme_id))
-        return programmes.new_version(store, programme_id, value.content, user)
+        bindings = value.evidence_bindings if value.evidence_bindings is not None else value.content.get("evidence_bindings")
+        return programmes.new_version(store, programme_id, value.content, user, evidence_bindings=bindings)
 
     @router.post("/api/team/versions/{version_id}/actions/{action}")
     def act(version_id: str, action: str, value: ActionIn, request: Request):

@@ -107,3 +107,14 @@ def casing_check(data: CasingCheckInput, geometry: GeometryInput):
                            "Body ratings and connection ratings are independent supplied evidence; no combined connection envelope is inferred.",
                            "Uniform user-supplied derating; no temperature profile, collapse interaction, sealing, fatigue, corrosion chemistry or cement-support solver.",
                            "Passing these selected screens is conditional and never a complete design or barrier approval."]}
+
+
+# Re-export GD-A13 Casing Envelopes for unified access
+from .casing_envelopes import (
+    CasingEnvelopesInput,
+    CasingIntegrityEvidence,
+    casing_envelopes,
+    api_collapse_rating,
+    api_burst_rating,
+)
+
