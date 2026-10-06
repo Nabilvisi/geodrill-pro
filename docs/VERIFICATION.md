@@ -68,6 +68,19 @@
 
 - **Full Regression Suite**: **537 passed in 197.59s (100% pass rate)**.
 
+## Standalone Windows Executable & Packaging Verification — 2026-10-06
+
+The standalone desktop executable was compiled via PyInstaller 6.22.3 with Python 3.12.14 on Windows 11 x64, bundling the complete FastAPI backend, engineering packages (`packages.*`), and verified production frontend assets:
+- **Build tool**: `tools/build_exe.py`
+- **Application entrypoint**: `tools/desktop_app.py` (initiates local background Uvicorn daemon at `127.0.0.1:8765` with `%APPDATA%/GeoDrillPro/data` persistent storage).
+- **Standalone executable**: `dist/GeoDrillPro/GeoDrillPro.exe`
+  - Size: 4,107,312 bytes
+  - SHA-256: `DE1972A90EA5D5CBBD21717A331E21F173F7A6A2428EB32DF89CED3516479A17`
+- **Portable distribution archive**: `dist/GeoDrillPro-Windows-x64.zip`
+  - Size: 11,075,693 bytes
+  - SHA-256: `7601C062887EF681A0A4F5E7E88E7B9F65315FC364255C562EDAD142F5398E9D`
+- **Streamlit component build**: `tools/build_streamlit.py` synchronized and verified by `tests/test_streamlit_cloud.py` (16/16 tests pass).
+
 
 ## Streamlit cloud release verification — 2026-10-05
 

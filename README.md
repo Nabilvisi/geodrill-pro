@@ -97,22 +97,22 @@ M4 requires compatible total physical porosity and wet-shale volume assumptions.
 - M14 requires supplied material/exposure evidence. Localized grooves and incomplete exposure withhold the residual capacity screen; connection/barrier approval is absent.
 - M15 is an offline causal balance replay. Manufactured event metrics do not establish calibrated kick/loss detection or protective alarm performance.
 - M16 native binary EOS is not actual-mud solubility. External phase flags remain supplied evidence; batch replay does not solve coupled wellbore momentum, energy or slip transport.
-- M17 has a simulated plant and validator only. It has no rig network adapter, hardware-command endpoint or authority to control equipment.
+- M17 has a simulated plant and validator only. It has no rig network adapter, hardware-command endpoint or authority to control equipment (`equipment_control: false`).
 - MSE uses surface observations for imports. Downhole energy losses, motor power and synchronization error are not inferred.
-- Replay is **source-time playback**, not arrival-time/as-known reconstruction. There is no live WITSML interface or live-data freshness gate yet.
-- Survey coordinates can be translated into a declared frame. No magnetic/CRS transformation, quantified survey uncertainty, collision clearance or isolation approval is implemented. Interpreted boundaries are horizontal TVD surfaces; supplied pick bands are not confidence intervals.
-- LAS curves retain their source units except depth, converted to metres. M3 groups responses after supplied transforms/scaling; it does not correct tools/environment, confirm lithology or provide calibrated facies probabilities. Clustering is limited to 2,500 native samples and eight features.
-- Acknowledgements identify a **single local workstation user**, not an authenticated named engineer. Multiuser roles, signatures and approval workflows are deferred.
-- Hashes detect accidental changes and inconsistent local data. They are not signatures or an independently anchored tamper-proof audit.
-- The executable Tauri shell, signed installer and offline update/recovery qualification remain future work. This build runs as a local React/FastAPI workstation in a browser.
+- Replay supports **source-time playback** and **ETP 1.2 / WITSML 2.1 read-only streaming ingestion** with arrival-time vs source-time gap inspection (GD-A07).
+- Directional surveying includes WGS84 UTM projections, ISCWSA MWD Rev5.11 positional uncertainty propagation benchmarked against diagnostic cases, tie-in covariance, multi-tool intervals, and 3D closest approach (GD-A10, `clearance_generated: false`).
+- Advanced engineering includes non-Newtonian Herschel-Bulkley hydraulics with dynamic cuttings bed transport (GD-A11), 3D stiff-string torque & drag with calibrated friction and vibration screening (GD-A12), API TR 5C3 / ISO 10400 casing collapse and operational load lines (GD-A13), offset well P10/P50/P90 benchmarking (GD-A14), 8-position IADC dull grading bit wear mechanics (GD-A15), passive anomaly advisory with disjoint validation (GD-A16), 3D in-situ stresses and Mogi-Coulomb geomechanics (GD-A17), and permission-aware evidence search with SHA-256 citations (GD-A18).
+- Multi-user governance supports named roles (Engineer/Author, Reviewer, Approver, Admin), four-eyes review controls, and Ed25519 digital server attestations (GD-A09).
+- Project backup and disaster recovery supports scoped `.gdpz` archives and verified fresh-directory restoration with preserved cryptographic hashes and signatures (GD-A08).
+- Standalone Windows packaging provides portable `dist/GeoDrillPro-Windows-x64.zip` containing `GeoDrillPro.exe` (PyInstaller 6.22.3). Installer code-signing and external third-party security audits remain separate pending gates.
 
 ## Data location and recovery
 
-By default, data is under `data/`: SQLite state, original sources in `raw/`, normalized files in `parquet/`, and service logs. The service listens only on `127.0.0.1`. It has no outbound data upload functionality.
+By default, data is under `data/`: SQLite state, original sources in `raw/`, normalized files in `parquet/`, and service logs. In standalone executable mode, user data is isolated in `%APPDATA%/GeoDrillPro/data`. The service listens only on `127.0.0.1`. It has no outbound data upload functionality.
 
 **This checkout is in OneDrive. The operating system's OneDrive client may synchronize its contents independently of GeoDrill.** For real project data, use an approved non-synchronized directory by setting `GEODRILL_DATA_DIR` before starting the app. Stop the application before switching the data directory. Existing data is not automatically moved.
 
-For a basic backup, stop the app and copy the entire data directory, including the SQLite database and any `-wal`/`-shm` companions if present, original files and Parquet. Restore the complete directory while stopped, then reopen the project and verify its audit chain. Signed/encrypted backups, backup UI and crash/disk-full recovery qualification are not implemented.
+For backup, GeoDrill Pro provides complete `.gdpz` project archives (`tools/backup_restore.py`, `packages/engineering/scenarios.py`) and consistent SQLite backup. Restoring into a fresh directory re-verifies all source hashes, calculation identities, and digital attestations before reopening. Signed/encrypted installers and crash/disk-full recovery qualification remain future work.
 
 ## Import contracts
 
