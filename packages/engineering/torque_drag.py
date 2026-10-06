@@ -224,7 +224,7 @@ def torque_drag(v,geometry,path):
                     if loss < best_loss:
                         best_loss = loss
                         best_dmu = test_dmu
-                except Exception:
+                except (ValueError, ArithmeticError):  # nosec B112 - ignore invalid grid point evaluations
                     continue
 
             cal_performed = True

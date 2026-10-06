@@ -56,8 +56,8 @@ def squared(a, b):
 
 def lloyd(points, k, seed, max_iterations):
     """k-means++ sampling then Lloyd iteration, exact label convergence."""
-    rng=random.Random(seed)
-    centers=[list(points[rng.randrange(len(points))])]
+    rng = random.Random(seed)  # nosec B311 - k-means++ algorithmic initialization, non-cryptographic
+    centers = [list(points[rng.randrange(len(points))])]
     for _ in range(1,k):
         weights=[min(squared(p,c) for c in centers) for p in points]
         total=math.fsum(weights)

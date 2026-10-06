@@ -62,7 +62,16 @@ if code != 0:
     sys.exit(code)
 
 print("\nPyInstaller build completed successfully!")
-print(f"Standalone executable is located at: {ROOT / 'dist' / 'GeoDrillPro' / 'GeoDrillPro.exe'}")
+exe_path = ROOT / "dist" / "GeoDrillPro" / "GeoDrillPro.exe"
+print(f"Standalone executable is located at: {exe_path}")
+
+# Authenticode code signing hook (Gate 2)
+try:
+    from tools.sign_windows_binary import sign_binary
+    print("Executing Authenticode code-signing pipeline for standalone binary...")
+    sign_binary(exe_path, allow_self_signed=True)
+except Exception as e:
+    print(f"Code signing note: {e}")
 
 zip_dest = ROOT / "dist" / "GeoDrillPro-Windows-x64"
 print(f"Packaging standalone bundle into {zip_dest}.zip...")

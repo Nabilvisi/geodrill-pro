@@ -56,7 +56,7 @@ class Store:
                 pub_key = ed25519.Ed25519PublicKey.from_public_bytes(raw_pub)
                 fp = digest(raw_pub)
                 self._trusted_keys[fp] = pub_key
-            except Exception:
+            except (ValueError, OSError):  # nosec B110 - ignore unreadable or malformed public key files on startup
                 pass
         self.db = root / "geodrill.sqlite3"
         with self.connect() as db:
@@ -330,13 +330,13 @@ class Store:
                 
                 prog_ids = [p["id"] for p in programmes]
                 if prog_ids:
-                    q = f"SELECT * FROM programme_versions WHERE programme_id IN ({','.join('?' for _ in prog_ids)})"
+                    q = f"SELECT * FROM programme_versions WHERE programme_id IN ({','.join('?' for _ in prog_ids)})"  # nosec B608 - only placeholder ? joined, values bound
                     p_versions = [dict(r) for r in db.execute(q, prog_ids).fetchall()]
                     _add("programmes/versions.json", canonical(p_versions).encode("utf-8"))
 
                     ver_ids = [v["id"] for v in p_versions]
                     if ver_ids:
-                        q_t = f"SELECT * FROM programme_transitions WHERE version_id IN ({','.join('?' for _ in ver_ids)}) ORDER BY sequence"
+                        q_t = f"SELECT * FROM programme_transitions WHERE version_id IN ({','.join('?' for _ in ver_ids)}) ORDER BY sequence"  # nosec B608 - only placeholder ? joined, values bound
                         p_transitions = [dict(r) for r in db.execute(q_t, ver_ids).fetchall()]
                         _add("programmes/transitions.json", canonical(p_transitions).encode("utf-8"))
                     else:
@@ -356,7 +356,7 @@ class Store:
                     user_ids.update(t["actor_id"] for t in p_transitions)
                 user_ids.discard(None)
                 if user_ids:
-                    q_u = f"SELECT * FROM users WHERE id IN ({','.join('?' for _ in user_ids)})"
+                    q_u = f"SELECT * FROM users WHERE id IN ({','.join('?' for _ in user_ids)})"  # nosec B608 - only placeholder ? joined, values bound
                     associated_users = [dict(r) for r in db.execute(q_u, list(user_ids)).fetchall()]
                     _add("users/users.json", canonical(associated_users).encode("utf-8"))
                 else:

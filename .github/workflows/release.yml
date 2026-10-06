@@ -1,0 +1,84 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-release:
+    name: Build & Release Windows Packaging (Gate 2)
+    runs-on: windows-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: requirements.txt
+
+      - name: Install Python Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pyinstaller
+
+      - name: Build Standalone Executable & Portable Bundle
+        run: |
+          python tools/build_exe.py
+
+      - name: Authenticode Code Signing (Executable)
+        shell: bash
+        run: |
+          if [ -n "${{ secrets.CODESIGN_PFX_BASE64 }}" ]; then
+            echo "${{ secrets.CODESIGN_PFX_BASE64 }}" | base64 -d > cert.pfx
+            python tools/sign_windows_binary.py dist/GeoDrillPro/GeoDrillPro.exe --cert cert.pfx --password "${{ secrets.CODESIGN_PASSWORD }}"
+            rm -f cert.pfx
+          else
+            echo "No production PFX configured in secrets; falling back to development signature verification."
+            python tools/sign_windows_binary.py dist/GeoDrillPro/GeoDrillPro.exe --self-signed
+          fi
+
+      - name: Install Inno Setup
+        run: |
+          choco install innosetup --no-progress
+
+      - name: Build Inno Setup Installer
+        run: |
+          & "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" tools/installer/setup.iss
+
+      - name: Authenticode Code Signing (Installer)
+        shell: bash
+        run: |
+          if [ -f "dist/GeoDrillPro-Setup.exe" ]; then
+            if [ -n "${{ secrets.CODESIGN_PFX_BASE64 }}" ]; then
+              echo "${{ secrets.CODESIGN_PFX_BASE64 }}" | base64 -d > cert.pfx
+              python tools/sign_windows_binary.py dist/GeoDrillPro-Setup.exe --cert cert.pfx --password "${{ secrets.CODESIGN_PASSWORD }}"
+              rm -f cert.pfx
+            else
+              python tools/sign_windows_binary.py dist/GeoDrillPro-Setup.exe --self-signed
+            fi
+          fi
+
+      - name: Generate Checksums (SHA256SUMS.txt)
+        shell: pwsh
+        run: |
+          Get-ChildItem -Path dist/*.exe, dist/*.zip | Get-FileHash -Algorithm SHA256 | ForEach-Object { "$($_.Hash)  $($_.Path | Split-Path -Leaf)" } | Set-Content -Path dist/SHA256SUMS.txt
+          Get-Content dist/SHA256SUMS.txt
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            dist/GeoDrillPro-Setup.exe
+            dist/GeoDrillPro-Windows-x64.zip
+            dist/SHA256SUMS.txt
+          generate_release_notes: true
+          draft: false
+          prerelease: false

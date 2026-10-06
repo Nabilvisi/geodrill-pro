@@ -9,7 +9,7 @@ Provides:
 
 from __future__ import annotations
 
-import xml.etree.ElementTree as ET
+import xml.etree.ElementTree as ET  # nosec B405 - only used for outbound XML serialization, defusedxml used for parsing
 from datetime import datetime, timezone
 from typing import Any, Dict, List, Literal, Optional, Tuple, TypedDict
 from uuid import uuid4

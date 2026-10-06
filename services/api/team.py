@@ -73,7 +73,7 @@ def build_router(store: Store) -> APIRouter:
             token, user = auth.login(store, value.username, value.password)
         except auth.AuthError as error:
             raise HTTPException(401, str(error))
-        return {"token": token, "token_type": "bearer", "expires_in_hours": auth.SESSION_HOURS, "user": user}
+        return {"token": token, "token_type": "bearer", "expires_in_hours": auth.SESSION_HOURS, "user": user}  # nosec B105 - OAuth2 token_type parameter, not a password
 
     @router.post("/api/team/logout")
     def logout(request: Request):

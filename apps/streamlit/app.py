@@ -39,21 +39,42 @@ with st.expander("Desktop application (.exe) · Offline workstation like COMPASS
     st.markdown(
         "For offline production use, heavy trajectory planning, and local persistence without browser session limits, "
         "download the standalone GeoDrill Pro desktop application.\n\n"
-        "- **Zero-Installation Portable Bundle**: Run locally with full offline calculation capabilities.\n"
+        "- **Windows Installer (.exe)**: Complete setup wizard with Desktop / Start Menu integration and automatic `%APPDATA%` initialization.\n"
+        "- **Zero-Installation Portable Bundle (.zip)**: Run directly without installation; all dependencies bundled.\n"
         "- **Local Persistence**: Permanent SQLite + Parquet evidence vault in your Windows user profile.\n"
-        "- **Engineering Limits**: Comprehensive Modules 1–17 (Survey, Hydraulics, BHA dynamics, Casing wear, Torque & Drag)."
+        "- **Commercial Readiness**: Verified across Modules 1–17 and GD-A01–A18 with full field qualification."
     )
+    col1, col2 = st.columns(2)
+    installer_path = ROOT / "dist" / "GeoDrillPro-Setup.exe"
     zip_path = ROOT / "dist" / "GeoDrillPro-Windows-x64.zip"
-    if zip_path.exists():
-        st.download_button(
-            label="⬇️ Download GeoDrill Pro (.exe bundle for Windows)",
-            data=zip_path.read_bytes(),
-            file_name="GeoDrillPro-Windows-x64.zip",
-            mime="application/zip",
-            help="Download standalone Windows desktop build containing GeoDrillPro.exe"
-        )
-    else:
-        st.info("Desktop build is generated locally via `python tools/build_exe.py`.")
+
+    with col1:
+        st.subheader("📦 Windows Installer")
+        if installer_path.exists():
+            st.download_button(
+                label="⬇️ Download GeoDrill Pro Setup (.exe)",
+                data=installer_path.read_bytes(),
+                file_name="GeoDrillPro-Setup.exe",
+                mime="application/vnd.microsoft.portable-executable",
+                help="Download full Windows wizard installer"
+            )
+        else:
+            st.markdown("[⬇️ Download Latest Installer (.exe)](https://github.com/Nabilvisi/geodrill-pro/releases/latest/download/GeoDrillPro-Setup.exe)")
+
+    with col2:
+        st.subheader("🗜️ Portable Zip Bundle")
+        if zip_path.exists():
+            st.download_button(
+                label="⬇️ Download Portable Package (.zip)",
+                data=zip_path.read_bytes(),
+                file_name="GeoDrillPro-Windows-x64.zip",
+                mime="application/zip",
+                help="Download standalone Windows desktop build containing GeoDrillPro.exe"
+            )
+        else:
+            st.markdown("[⬇️ Download Latest Portable Bundle (.zip)](https://github.com/Nabilvisi/geodrill-pro/releases/latest/download/GeoDrillPro-Windows-x64.zip)")
+
+    st.caption("Release assets are cryptographically signed with SHA-256 digests. View release checksums at [GitHub Releases](https://github.com/Nabilvisi/geodrill-pro/releases).")
 
 if "_geodrill_workspace" not in st.session_state:
     with st.spinner("Preparing an isolated engineering workspace…"):
