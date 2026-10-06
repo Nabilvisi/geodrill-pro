@@ -11,6 +11,7 @@ import zipfile
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 from tools.sign_windows_binary import verify_signature
+from tools.source_snapshot import create_source_snapshot
 
 
 def sha256(path: Path) -> str:
@@ -34,6 +35,13 @@ def verify(mode: str, root: Path = ROOT) -> dict:
             raise ValueError("Portable archive CRC check failed")
         if hashlib.sha256(package.read("GeoDrillPro/GeoDrillPro.exe")).hexdigest() != sha256(executable):
             raise ValueError("Portable executable differs from the verified executable")
+        bundled_snapshot = json.loads(package.read("GeoDrillPro/SOURCE-SNAPSHOT.json"))
+        selected_snapshot = json.loads((dist / "GeoDrillPro" / "SOURCE-SNAPSHOT.json").read_text(encoding="utf-8"))
+        if bundled_snapshot != selected_snapshot:
+            raise ValueError("Portable source snapshot differs from the selected bundle")
+        current_snapshot = create_source_snapshot(root)
+        if selected_snapshot != current_snapshot:
+            raise ValueError("Source changed since the executable was packaged")
         names = package.namelist()
         if not any("directional_cases/manifest.json" in name for name in names):
             raise ValueError("Packaged directional reference data missing")
@@ -47,6 +55,9 @@ def verify(mode: str, root: Path = ROOT) -> dict:
     manifest = {
         "version": "0.8.0", "created_at_utc": datetime.now(timezone.utc).isoformat(),
         "source_commit": head, "source_has_uncommitted_changes": bool(dirty),
+        "source_snapshot_sha256": selected_snapshot["digest"],
+        "source_snapshot_file_count": len(selected_snapshot["files"]),
+        "source_snapshot_scope": selected_snapshot["scope"],
         "signing_mode": mode, "trusted_signature_verification": signatures,
         "independent_engineering_qualification": "pending", "external_security_audit": "pending",
         "equipment_control": False, "clearance_generated": False,

@@ -40,3 +40,9 @@ The [Equinor Volve source portal](https://www.equinor.com/energy/volve-data-shar
 publishes its own Open Data Licence; the former blanket CC BY 4.0 assignment
 to unverified embedded Volve values is withdrawn. Named independent reviewers
 and scope-specific signed assessments have not been supplied.
+
+The [FORGE dynamics source review](FORGE-DYNAMICS-SOURCE-REVIEW.md) records
+sampling and processed-data limitations from primary sources, plus the verified
+Larsen article identity. These sources do not establish the embedded vibration
+targets or Tulsa observations. Direct benchmark calls now include the same
+withheld validation status and absent license as the suite.

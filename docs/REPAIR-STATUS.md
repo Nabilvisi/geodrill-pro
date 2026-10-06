@@ -3,8 +3,10 @@
 Implemented and verified:
 
 - Declared missing cryptography, directional and protocol runtime dependencies.
-- Isolated pytest temporary directories; full regression passes 568 tests.
+- Isolated pytest temporary directories; full regression passes 577 tests.
 - Removed automatic field qualification and invented independent sign-off.
+- Direct benchmark calls withhold independent validation and leave unverified source licenses unset.
+- Survey comparisons reject reflected coordinate vectors even when radial displacement agrees.
 - Corrected the failed FORGE axial-band comparison and withheld circular friction validation.
 - Added original-source FORGE trajectory reproduction across all 422 stations with source hashing and corruption rejection.
 - Rebuilt current desktop and Streamlit frontend assets.
@@ -13,6 +15,8 @@ Implemented and verified:
 - Built the missing Windows installer; isolated install, execution and uninstall pass.
 - Confirmed uninstall preserves extra user-created files and persistent evidence.
 - Verified ZIP/executable identity, generated final hashes and explicit unsigned release manifest.
+- Added a bundled source-file snapshot and rejection of source changes after packaging.
+- Added manifest-bound installer recovery checks to the release workflow.
 - Repaired the release pipeline to test/build current source, sign before ZIP creation, require trusted publisher certificates, and withhold unmatched assets.
 - Replaced dead hosted download links with actual release-asset discovery and truthful unavailable states.
 - Reconciled commercial gate claims and recorded current internal security checks.
@@ -34,3 +38,5 @@ Required external steps:
 4. Obtain an actual external security assessment and organizational certification evidence before making compliance claims.
 
 The goal remains open while those requirements are missing. Equipment control and automated drilling clearance remain false.
+
+See [release and independent-review handoff](RELEASE-AND-QUALIFICATION-HANDOFF.md) for the concrete remaining inputs and acceptance evidence.

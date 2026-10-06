@@ -29,6 +29,19 @@ def _sha256(data: Any) -> str:
     return hashlib.sha256(serialized).hexdigest()
 
 
+def _provisional_evidence() -> Dict[str, Any]:
+    """Keep direct calls as explicit about absent provenance as the full suite."""
+    return {
+        "source_provenance": "unverified_embedded_example",
+        "reference_license": None,
+        "independent_validation": False,
+        "field_qualified": False,
+        "numerical_check_only": True,
+        "validation_status": "withheld",
+        "validation_reason": "Original observations, extraction provenance and independent review have not been verified.",
+    }
+
+
 # -----------------------------------------------------------------------------
 # 1. EQUINOR VOLVE FIELD 15/9-F-12 BENCHMARK DATASET
 # Claimed source: Equinor Volve. Original survey/DDR extraction is unverified.
@@ -142,10 +155,11 @@ DOWNHOLE_SUB_FRICTION_BENCHMARK = {
 # =============================================================================
 
 def run_volve_survey_benchmark() -> Dict[str, Any]:
-    """Execute Volve 15/9-F-12 minimum-curvature directional benchmark.
-    
-    Verifies that GeoDrill Pro minimum-curvature path coordinates match published
-    official Equinor survey coordinates within 1.5% margin.
+    """Compare minimum curvature with unverified embedded survey targets.
+
+    Agreement is an example calculation, not verification against an original
+    Equinor record. The horizontal error measures the coordinate vector, so a
+    reflected trajectory cannot pass merely by matching distance from the origin.
     """
     stations_input = [
         Survey(
@@ -176,7 +190,11 @@ def run_volve_survey_benchmark() -> Dict[str, Any]:
         # Coordinate horizontal distance comparison
         horiz_dist_ref = math.hypot(ref["northing_m"], ref["easting_m"])
         horiz_dist_comp = math.hypot(comp["north_m"], comp["east_m"])
-        horiz_err_pct = abs(horiz_dist_comp - horiz_dist_ref) / max(1.0, horiz_dist_ref) * 100.0
+        horiz_vector_error_m = math.hypot(
+            comp["north_m"] - ref["northing_m"],
+            comp["east_m"] - ref["easting_m"],
+        )
+        horiz_err_pct = horiz_vector_error_m / max(1.0, horiz_dist_ref) * 100.0
         max_horiz_err_pct = max(max_horiz_err_pct, horiz_err_pct)
 
         comparisons.append({
@@ -186,14 +204,16 @@ def run_volve_survey_benchmark() -> Dict[str, Any]:
             "tvd_err_pct": round(tvd_err_pct, 4),
             "ref_horiz_m": round(horiz_dist_ref, 2),
             "calc_horiz_m": round(horiz_dist_comp, 2),
-            "horiz_err_pct": round(horiz_err_pct, 4)
+            "horiz_err_pct": round(horiz_err_pct, 4),
+            "horizontal_vector_error_m": horiz_vector_error_m
         })
 
     passed = max_tvd_err_pct < 1.5 and max_horiz_err_pct < 1.5
 
     return {
+        **_provisional_evidence(),
         "benchmark": "Equinor Volve 15/9-F-12 Directional Survey",
-        "reference_source": "Equinor Volve Open Data (CC BY 4.0), Well 15/9-F-12 Definitive Survey",
+        "reference_source": "Claimed Volve 15/9-F-12 survey; original extraction and license unverified",
         "data_sha256": _sha256(VOLVE_15_9_F12_SURVEY_STATIONS),
         "passed": passed,
         "max_tvd_error_pct": round(max_tvd_err_pct, 4),
@@ -207,11 +227,7 @@ def run_volve_survey_benchmark() -> Dict[str, Any]:
 
 
 def run_volve_hydraulics_benchmark() -> Dict[str, Any]:
-    """Execute Volve 15/9-F-12 hydraulics and ECD benchmark against Daily Drilling Reports.
-    
-    Validates that Herschel-Bulkley annular pressure loss and bottomhole ECD (including
-    BHA annular restriction and drilling cuttings loading) match published field ECD within 1.5%.
-    """
+    """Compare production flow gradients with unverified embedded ECD targets."""
     case = VOLVE_15_9_F12_HYDRAULICS
     q = case["flow_rate_m3_s"]
     k = case["mud_rheology"]["k_consistency_pa_sn"]
@@ -249,8 +265,9 @@ def run_volve_hydraulics_benchmark() -> Dict[str, Any]:
     passed = ecd_error_pct <= case["tolerance_pct"]
 
     return {
+        **_provisional_evidence(),
         "benchmark": "Equinor Volve 15/9-F-12 Hydraulics & ECD",
-        "reference_source": "Equinor Volve DDR 12-1/4 in drilling section records",
+        "reference_source": "Claimed Volve DDR ECD; original observations and operating conditions unverified",
         "data_sha256": _sha256(case),
         "passed": passed,
         "calculated_ecd_kg_m3": round(calculated_ecd_kg_m3, 2),
@@ -264,12 +281,10 @@ def run_volve_hydraulics_benchmark() -> Dict[str, Any]:
 
 
 def run_forge_dynamics_benchmark() -> Dict[str, Any]:
-    """Execute Utah FORGE 16A(78)-32 geothermal hard-rock vibration benchmark.
-    
-    Validates:
-    - Fundamental torsional natural frequency f_tor matching observed stick-slip resonance.
-    - Stick-slip propensity index screening matching severe field vibration.
-    - Axial bit-bounce resonance band prediction.
+    """Compare illustrative analytical modes with unverified vibration targets.
+
+    These fixed-free formulas do not execute the production coupled BHA model.
+    Native high-frequency observations and matching boundary conditions are absent.
     """
     case = FORGE_16A_78_32_DYNAMICS
     l_total = case["depth_md_m"]
@@ -311,8 +326,9 @@ def run_forge_dynamics_benchmark() -> Dict[str, Any]:
     passed = f_tor_err_pct <= 5.0 and ss_propensity > 1.0 and axial_band_matched
 
     return {
+        **_provisional_evidence(),
         "benchmark": "Utah FORGE 16A(78)-32 Geothermal Hard-Rock Dynamics",
-        "reference_source": "US DOE Utah FORGE Project Well 16A(78)-32 Technical Reports",
+        "reference_source": "Claimed FORGE dynamics; native observations and extraction unverified",
         "data_sha256": _sha256(case),
         "passed": passed,
         "calculated_torsional_frequency_hz": round(f_tor_calc, 4),
@@ -390,8 +406,9 @@ def run_flowloop_cuttings_calibration() -> Dict[str, Any]:
     passed = mean_bed_diff < 0.05 and mean_vcrit_err < 8.0
 
     return {
+        **_provisional_evidence(),
         "benchmark": "Tulsa University (TUDRP) Flow-Loop Cuttings Bed Calibration",
-        "reference_source": "TUDRP Experimental Cuttings Transport & SPE-27490",
+        "reference_source": "Claimed Tulsa flow-loop targets; original experiment and paper mapping unverified",
         "data_sha256": _sha256(TUDRP_FLOWLOOP_BENCHMARKS),
         "passed": passed,
         "mean_bed_fraction_abs_error": round(mean_bed_diff, 4),
@@ -410,6 +427,7 @@ def run_downhole_sub_friction_validation() -> Dict[str, Any]:
     """
     case = DOWNHOLE_SUB_FRICTION_BENCHMARK
     return {
+        **_provisional_evidence(),
         "benchmark": "Provisional downhole friction example",
         "reference_source": "Unverified embedded campaign values",
         "data_sha256": _sha256(case),
@@ -445,8 +463,7 @@ def run_all_field_qualifications() -> Dict[str, Any]:
         "downhole_sub_friction": b5,
     }
     for result in benchmarks.values():
-        result["source_provenance"] = "unverified_embedded_example"
-        result["independent_validation"] = False
+        result.update(_provisional_evidence())
     return {
         "suite": "GeoDrill Pro provisional Gate 3 benchmark review",
         "qualification_gate": "Gate 3",

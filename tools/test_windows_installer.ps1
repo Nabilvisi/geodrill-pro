@@ -1,7 +1,14 @@
-param([string]$Installer)
+param([string]$Installer, [string]$EvidencePath)
 $ErrorActionPreference = 'Stop'
 $projectRoot = (Resolve-Path -LiteralPath (Join-Path $PSScriptRoot '..')).Path
 if (-not $Installer) { $Installer = Join-Path $projectRoot 'dist\GeoDrillPro-Setup.exe' }
+if (-not $EvidencePath) { $EvidencePath = Join-Path $projectRoot 'docs\evidence\windows-installer-verification.json' }
+$EvidencePath = [IO.Path]::GetFullPath($EvidencePath)
+if (-not $EvidencePath.StartsWith($projectRoot + '\', [StringComparison]::OrdinalIgnoreCase)) { throw 'Evidence output escaped the workspace.' }
+$releaseManifest = Get-Content -LiteralPath (Join-Path $projectRoot 'dist\release-manifest.json') -Raw | ConvertFrom-Json
+$actualInstallerHash = (Get-FileHash -LiteralPath $Installer).Hash.ToLowerInvariant()
+$manifestInstaller = $releaseManifest.assets | Where-Object { $_.name -eq 'GeoDrillPro-Setup.exe' }
+if (-not $manifestInstaller -or $manifestInstaller.sha256 -ne $actualInstallerHash) { throw 'Installer does not match the verified release manifest.' }
 $existingInstall = Get-ItemProperty -LiteralPath 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Uninstall\{62F7642F-0639-44F4-98F8-C36C617F9B1D}_is1' -ErrorAction SilentlyContinue
 if ($existingInstall) { throw 'An existing user installation is registered; do not replace it for verification.' }
 $verificationRoot = Join-Path $projectRoot ('build\installer-check-' + [guid]::NewGuid().ToString('N'))
@@ -37,16 +44,18 @@ if (-not (Test-Path -LiteralPath $smokePath)) { throw 'Uninstall removed persist
 if (Test-Path -LiteralPath $installedExe) { throw 'Installed executable remained after uninstall.' }
 $evidence = @{
     passed = $true
-    installer_sha256 = (Get-FileHash -LiteralPath $Installer).Hash.ToLowerInvariant()
+    installer_sha256 = $actualInstallerHash
     installed_executable_sha256 = $installedHash.ToLowerInvariant()
     install_exit_code = $installed.ExitCode
     smoke_exit_code = $smoke.ExitCode
     uninstall_exit_code = $uninstalled.ExitCode
     extra_user_file_preserved = $true
     persistent_evidence_preserved = $true
-    signing_mode = 'unsigned_research'
+    signing_mode = $releaseManifest.signing_mode
+    source_snapshot_sha256 = $releaseManifest.source_snapshot_sha256
     equipment_control = $false
     clearance_generated = $false
 }
-$evidence | ConvertTo-Json | Set-Content -LiteralPath (Join-Path $projectRoot 'docs\evidence\windows-installer-verification.json') -Encoding utf8
+New-Item -ItemType Directory -Path (Split-Path -Parent $EvidencePath) -Force | Out-Null
+$evidence | ConvertTo-Json | Set-Content -LiteralPath $EvidencePath -Encoding utf8
 $evidence | ConvertTo-Json

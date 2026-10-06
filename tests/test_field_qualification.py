@@ -1,4 +1,4 @@
-"""Automated test suite for Gate 3: Engineering Field Qualification & Calibration."""
+"""Provisional checks cannot supply source provenance or engineering approval."""
 import pytest
 from packages.engineering.field_qualification import (
     run_volve_survey_benchmark,
@@ -16,7 +16,7 @@ from packages.engineering.field_qualification import (
 
 
 def test_volve_directional_survey_benchmark():
-    """Verify Equinor Volve 15/9-F-12 minimum-curvature survey trajectory within 1.5% tolerance."""
+    """Check numerical agreement with the embedded example, not a field survey."""
     res = run_volve_survey_benchmark()
     assert res["passed"] is True
     assert res["max_tvd_error_pct"] < 1.5
@@ -28,7 +28,7 @@ def test_volve_directional_survey_benchmark():
 
 
 def test_volve_hydraulics_ecd_benchmark():
-    """Verify Equinor Volve 15/9-F-12 annular pressure loss and ECD against DDR records within 1.5%."""
+    """Check numerical agreement with the unverified ECD example."""
     res = run_volve_hydraulics_benchmark()
     assert res["passed"] is True
     assert res["ecd_error_pct"] <= 1.5
@@ -51,7 +51,7 @@ def test_utah_forge_dynamics_benchmark():
 
 
 def test_tudrp_flowloop_cuttings_calibration():
-    """Verify Tulsa University (TUDRP) empirical flow-loop cuttings transport calibration."""
+    """Check the illustrative fit; this does not verify production transport."""
     res = run_flowloop_cuttings_calibration()
     assert res["passed"] is True
     assert res["mean_bed_fraction_abs_error"] < 0.05
@@ -62,7 +62,7 @@ def test_tudrp_flowloop_cuttings_calibration():
 
 
 def test_downhole_sub_friction_validation():
-    """Verify instrumented downhole sub friction factor inversion and hookload prediction."""
+    """Absent original observations cannot produce a friction calibration."""
     res = run_downhole_sub_friction_validation()
     assert res["passed"] is False
     assert res["status"] == "withheld"
@@ -115,3 +115,32 @@ def test_dossier_retains_failures_and_missing_signoff(tmp_path):
     results = json.loads((tmp_path / "field-qualification-results.json").read_text())
     assert results["field_qualified"] is False
     assert results["benchmarks"]["utah_forge_dynamics"]["axial_band_matched"] is False
+
+
+@pytest.mark.parametrize("benchmark", [
+    run_volve_survey_benchmark, run_volve_hydraulics_benchmark,
+    run_forge_dynamics_benchmark, run_flowloop_cuttings_calibration,
+    run_downhole_sub_friction_validation,
+])
+def test_direct_benchmark_calls_withhold_unverified_validation(benchmark):
+    result = benchmark()
+    assert result["source_provenance"] == "unverified_embedded_example"
+    assert result["reference_license"] is None
+    assert result["independent_validation"] is False
+    assert result["field_qualified"] is False
+    assert result["numerical_check_only"] is True
+    assert result["validation_status"] == "withheld"
+    assert result["validation_reason"]
+    assert "CC BY" not in result["reference_source"]
+
+
+def test_reflected_survey_cannot_pass_by_matching_radial_distance(monkeypatch):
+    import packages.engineering.field_qualification as module
+    original = module.minimum_curvature
+    def reflected(request):
+        return [{**row, "north_m": -row["north_m"], "east_m": -row["east_m"]}
+                for row in original(request)]
+    monkeypatch.setattr(module, "minimum_curvature", reflected)
+    result = module.run_volve_survey_benchmark()
+    assert result["passed"] is False
+    assert result["max_horizontal_error_pct"] > 190

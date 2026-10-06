@@ -100,12 +100,18 @@ jobs:
             python tools/verify_windows_release.py --signed
           }
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Verify installer execution and recovery
+        shell: pwsh
+        run: |
+          ./tools/test_windows_installer.ps1 -EvidencePath "$pwd/build/release-installer-verification.json"
       - uses: actions/upload-artifact@v4
         with:
           name: windows-release-evidence
           path: |
             dist/release-manifest.json
             build/release-tests.xml
+            build/release-installer-verification.json
+            dist/GeoDrillPro/SOURCE-SNAPSHOT.json
       - name: Publish verified artifacts
         uses: softprops/action-gh-release@v2
         with:

@@ -12,6 +12,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 from packages.frontend import frontend_dist
 from tools.sign_windows_binary import sign_binary
+from tools.source_snapshot import create_source_snapshot
 
 
 def build(mode: str, cert: Path | None = None) -> Path:
@@ -22,6 +23,7 @@ def build(mode: str, cert: Path | None = None) -> Path:
     frontend = frontend_dist(ROOT)
     if not (frontend / "index.html").is_file():
         raise RuntimeError("Run tools/build.py before packaging.")
+    source_snapshot = create_source_snapshot(ROOT)
     stage = ROOT / "build" / ("windows-" + uuid4().hex)
     frontend_rel = frontend.relative_to(ROOT)
     command = [
@@ -42,6 +44,11 @@ def build(mode: str, cert: Path | None = None) -> Path:
     subprocess.run(command, cwd=ROOT, check=True)
     staged_bundle = stage / "dist" / "GeoDrillPro"
     executable = staged_bundle / "GeoDrillPro.exe"
+    if create_source_snapshot(ROOT)["digest"] != source_snapshot["digest"]:
+        raise RuntimeError("Source changed during packaging; no release package was selected.")
+    (staged_bundle / "SOURCE-SNAPSHOT.json").write_text(
+        json.dumps(source_snapshot, indent=2) + "\n", encoding="utf-8"
+    )
     if mode == "signed" and not sign_binary(executable, cert, os.environ.get("GEODRILL_SIGN_PASSWORD")):
         raise RuntimeError("Publisher signing/trust verification failed; no release package was selected.")
     (staged_bundle / "RELEASE-NOTICE.txt").write_text(

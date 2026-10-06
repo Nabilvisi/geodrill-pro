@@ -1,13 +1,14 @@
 {
-  "install_exit_code": 0,
-  "installed_executable_sha256": "247460f1552d2233ed9736522e504cba32da5f91142e0d736b88959fb09cbea0",
-  "signing_mode": "unsigned_research",
-  "smoke_exit_code": 0,
-  "persistent_evidence_preserved": true,
-  "passed": true,
   "uninstall_exit_code": 0,
+  "smoke_exit_code": 0,
+  "passed": true,
+  "installer_sha256": "966f11f123dd1ec8e31d1e3a60982875915f90636900795f73cb5025de018881",
   "extra_user_file_preserved": true,
+  "install_exit_code": 0,
+  "persistent_evidence_preserved": true,
+  "equipment_control": false,
+  "source_snapshot_sha256": "50bc719ab66a1c3fdfd699cd4f1c922c7c41e16517c48933f1bdbbfc1877744e",
   "clearance_generated": false,
-  "installer_sha256": "7138e50d189cc224e96b33af53d0f3697ecb7ee8e95ebdda49bbec30a09ba601",
-  "equipment_control": false
+  "installed_executable_sha256": "06448df47519a0ac1f9f41c63d6a026330230c17f9cd4dae8ffd0323e399874a",
+  "signing_mode": "unsigned"
 }

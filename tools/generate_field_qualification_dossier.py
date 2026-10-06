@@ -17,7 +17,7 @@ def generate_dossier(output_dir: Path | None = None) -> Path:
     rows = []
     for key, value in results["benchmarks"].items():
         status = value.get("status", "numerical_check_passed" if value["passed"] else "numerical_check_failed")
-        rows.append(f"| {key} | {status} | Unverified embedded example | {value['data_sha256']} |")
+        rows.append(f"| {key} | {status} | {value['validation_status']} | Unverified embedded example | {value['data_sha256']} |")
     missing = "\n".join(f"- {item}" for item in results["missing_evidence"])
     text = f"""# GeoDrill Pro — Provisional engineering benchmark dossier
 
@@ -27,12 +27,15 @@ Qualification status: **{results['overall_status']}**.
 No independent reviewer, engineering board approval or commercial certification
 has been supplied. The former automated field-qualification seal is withdrawn.
 
-| Example | Numerical status | Provenance | Embedded-value SHA-256 |
-|---|---|---|---|
+| Example | Numerical status | Independent validation | Provenance | Embedded-value SHA-256 |
+|---|---|---|---|---|
 {chr(10).join(rows)}
 
 These hashes identify serialized values embedded in the code. They do not identify
 an original Equinor, FORGE, Tulsa or service-company source document.
+Direct calls to each example also withhold independent validation and do not assign
+a source license. The survey comparison checks the horizontal coordinate vector;
+matching radial displacement alone cannot pass a reflected trajectory.
 The flow-loop example fits embedded targets and does not test the production
 transport model independently. The friction example is withheld because its
 former arithmetic reconstructed its own observations. The FORGE example's

@@ -4,7 +4,7 @@ The former Gate 4 closure, commercial deployment seal and COMPLIANT matrix are
 withdrawn. This document records internal software checks. No external auditor,
 SOC 2 report or ISO/IEC 27001 certificate has been supplied.
 
-Current full regression: 568 passed, zero failures/errors, one Starlette/httpx
+Current full regression: 577 passed, zero failures/errors, one Starlette/httpx
 deprecation warning. Security cases cover named authentication, project isolation,
 role restrictions, programme identity separation, signatures, tampered archives
 and input rejection. This is test evidence within the implemented scope, not an

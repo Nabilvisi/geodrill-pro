@@ -1,6 +1,6 @@
 # GeoDrill Pro Engineering Workstation
 
-Current repair verification: **568 passed, zero failures/errors**; Windows research installer install/execute/uninstall verified. See [repair status](docs/REPAIR-STATUS.md) for current gates and artifact evidence.
+Current repair verification: **577 passed, zero failures/errors**; Windows research installer install/execute/uninstall verified. See [repair status](docs/REPAIR-STATUS.md) for current gates and artifact evidence.
 
 
 **Version 0.8.0 — Engineering research workstation (GD-A01–A18).** The audited engineering workstation links source data → studies → scenario comparisons → programme governance → verified export and recovery.

@@ -457,3 +457,7 @@ or third-party sign-off. Source-backed FORGE trajectory reproduction is recorded
 Security automation is internal verification; external audit and certification are pending.
 Unsigned research packaging is separate from trusted publisher signing.
 Earlier counts and hashes above are historical snapshots and are not current-release claims.
+
+## Additional provenance and packaging repair — 6 October 2026
+
+Full local regression: **577 passed**, zero failures/errors/skips, with the existing Starlette/httpx deprecation warning. Direct provisional benchmark results withhold independent validation, declare absent source licensing and cannot grant qualification. A reflected horizontal survey fails the coordinate-vector comparison. Windows packaging records individual source hashes and rejects later source changes; release automation now includes installer execution and recovery. Current artifact hashes and execution results are in the repair evidence and release manifest.
