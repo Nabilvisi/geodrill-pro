@@ -1,0 +1,67 @@
+{
+  "version": "0.9.0-alpha.1",
+  "baseline_commit": "3268a82d36699c00fbd126fb4d8d791f8d6dd7f5",
+  "baseline_tests": {
+    "passed": 668,
+    "failed": 0,
+    "elapsed_seconds": 231.04,
+    "junit": "build/v09-audit-baseline.xml"
+  },
+  "regression_tests": {
+    "passed": 683,
+    "failed": 0,
+    "skipped": 0,
+    "elapsed_seconds": 266.2,
+    "junit": "build/v09-release-regression.xml",
+    "warning": "Starlette TestClient httpx deprecation"
+  },
+  "frontend_build": {
+    "typecheck": "passed",
+    "vite": "passed",
+    "release": "dist/release-5bc07397c70d4bbcba3f5f9f74b94177"
+  },
+  "streamlit_component": {
+    "version": "0.9.0-alpha.1",
+    "frontend_source_sha256": "7015f7c3053c141fc69e28464426006bcf448d21b307d4fbdefb620cf0d9c8bc",
+    "source_release": "dist/release-5bc07397c70d4bbcba3f5f9f74b94177",
+    "assets": [
+      {
+        "path": "assets/index-D1k-d0nj.css",
+        "sha256": "65494c6cfa0faa55f303f8044b56e90e5bf19f261870ae995c2651dc143eb158"
+      },
+      {
+        "path": "assets/index-D6XwBnm_.js",
+        "sha256": "1e574a11c7081ece54522136f8ba0fa543717b0cb22b676df91ee79204cd90b2"
+      }
+    ]
+  },
+  "local_browser": {
+    "url": "http://127.0.0.1:8765",
+    "data_directory": "build/v09-browser-data",
+    "survey_sha256": "4cadd3a791d62a3901e51472913094a212b22dde18c273a588321434998c5dcb",
+    "selected_md_m": 900,
+    "north_m": 34.187,
+    "east_m": 23.938,
+    "tvd_m": 897.082,
+    "geometry_id_prefix": "2ae6efa1",
+    "geometry_sha256_prefix": "646d3118bf919bd5",
+    "missing_geomagnetic_metadata": "withheld, observed in UI"
+  },
+  "github": {
+    "status": "publication pending",
+    "baseline_ci_run": "https://github.com/Nabilvisi/geodrill-pro/actions/runs/37500268872"
+  },
+  "hosted_streamlit": {
+    "url": "https://geodrill-pro.streamlit.app/",
+    "status": "updated source publication/render verification pending"
+  },
+  "windows": {
+    "status": "rebuild and verification in progress",
+    "signing_mode": "unsigned"
+  },
+  "equipment_control": false,
+  "equipment_authority": "none",
+  "independent_engineering_qualification": "pending",
+  "external_security_audit": "pending",
+  "updated_at_utc": "2026-10-06T17:51:27.691265+00:00"
+}

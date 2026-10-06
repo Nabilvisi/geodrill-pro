@@ -2,7 +2,8 @@
 from pathlib import Path
 import hashlib,json,shutil,sys
 ROOT=Path(__file__).resolve().parents[1];sys.path.insert(0,str(ROOT))
-from packages.frontend import frontend_dist
+from packages.frontend import frontend_dist, frontend_source_hash
+from packages.version import APP_VERSION
 release=frontend_dist(ROOT);target=ROOT/"apps"/"streamlit"/"component"
 target.mkdir(parents=True,exist_ok=True)
 assets=target/"assets";assets.mkdir(exist_ok=True)
@@ -19,7 +20,7 @@ for f in release.iterdir():
  if f.is_file() and f.name!="index.html":shutil.copy2(f,target/f.name)
 html=(release/"index.html").read_text(encoding="utf-8").replace('"/assets/','"./assets/').replace('"/favicon.svg','"./favicon.svg')
 html=html.replace("<head>","<head>\n<script src=\"./bridge.js\"></script>")
-(target/"index.html").write_text(html,encoding="utf-8")
+(target/"index.html").write_text("\n".join(line.rstrip() for line in html.splitlines())+"\n",encoding="utf-8",newline="\n")
 shutil.copy2(ROOT/"apps"/"streamlit"/"bridge.js",target/"bridge.js")
-(target/"manifest.json").write_text(json.dumps({"version":"0.8.0","source_release":str(release.relative_to(ROOT)).replace("\\","/"),"assets":manifest},indent=2),encoding="utf-8")
+(target/"manifest.json").write_text(json.dumps({"version":APP_VERSION,"frontend_source_sha256":frontend_source_hash(ROOT),"source_release":str(release.relative_to(ROOT)).replace("\\","/"),"assets":manifest},indent=2)+"\n",encoding="utf-8",newline="\n")
 print("Packaged the complete verified workstation for Streamlit.")

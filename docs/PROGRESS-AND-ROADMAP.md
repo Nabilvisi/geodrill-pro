@@ -1,5 +1,7 @@
 # GeoDrill Pro — progress and remaining roadmap
 
+7 October 2026 v0.9 reconciliation: the current source is **0.9.0-alpha.1**. Use [the v0.9 architecture audit](V09-ARCHITECTURE-AUDIT.md), [progress record](../GEODRILL_PRO_V0.9_PROGRESS.md) and [verification evidence](evidence/v09-verification.json) for current distribution and acceptance status. The all-phases-complete claim is withdrawn. The roadmap below retains the earlier GD-A increments and their dated release evidence; those milestones do not establish completion of the v0.9 architecture.
+
 Updated 6 October 2026. This file supersedes the former 485/537-test progress
 snapshots and blanket "advancement complete" declaration. Historical command
 records remain in [VERIFICATION.md](VERIFICATION.md).

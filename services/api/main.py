@@ -59,6 +59,7 @@ from . import demo, programmes
 from packages.domain.errors import GeoDrillDomainError
 from .errors import domain_error_handler, api_error_handler, APIError
 from .routers import projects_router, directional_router, engineering_router, qualification_router, wells_router
+from packages.version import APP_VERSION
 
 import sys
 ROOT = Path(sys._MEIPASS).resolve() if getattr(sys, "frozen", False) and hasattr(sys, "_MEIPASS") else Path(__file__).resolve().parents[2]
@@ -67,7 +68,7 @@ ALLOWED_HOSTS = {"127.0.0.1:8765", "localhost:8765", "127.0.0.1:5173", "localhos
 
 
 def create_app(data_dir: Path | None = None, mode: str | None = None):
-    app = FastAPI(title="GeoDrill Pro", version="0.8.0", docs_url=None, redoc_url=None, openapi_url=None)
+    app = FastAPI(title="GeoDrill Pro", version=APP_VERSION, docs_url=None, redoc_url=None, openapi_url=None)
     store = Store(data_dir or Path(os.environ.get("GEODRILL_DATA_DIR", ROOT / "data")))
     app.state.store = store
     session = secrets.token_urlsafe(32)
@@ -108,7 +109,10 @@ def create_app(data_dir: Path | None = None, mode: str | None = None):
                 denial = role_denial(request.method, path, user)
                 if denial:
                     return JSONResponse({"detail": denial}, status_code=403)
-                scoped = project_id_from_path(path)
+                try:
+                    scoped = await run_in_threadpool(project_id_from_path, path, store)
+                except KeyError:
+                    return JSONResponse({"detail": "Project not found"}, status_code=404)
                 if scoped is not None and not await run_in_threadpool(is_member, store, user, scoped):
                     return JSONResponse({"detail": "Project not found"}, status_code=404)
                 actor_token = current_actor.set(f"user:{user['username']}")
@@ -156,11 +160,11 @@ def create_app(data_dir: Path | None = None, mode: str | None = None):
     @app.get("/api/session")
     def bootstrap(response: Response):
         response.set_cookie("gd_session", session, httponly=True, samesite="strict", path="/")
-        return {"mode": "engineering-research", "version": "0.8.0", "equipment_authority": "none"}
+        return {"mode": "engineering-research", "version": APP_VERSION, "equipment_authority": "none"}
 
     @app.get("/api/health")
     def health():
-        return {"status": "ok", "version": "0.8.0", "mode": "local-research", "equipment_control": False,
+        return {"status": "ok", "version": APP_VERSION, "mode": "local-research", "equipment_control": False,
                 "instance_id": hashlib.sha256(str(ROOT).encode()).hexdigest()[:16], "pid": os.getpid()}
 
     @app.get("/api/projects")
@@ -638,6 +642,9 @@ def create_app(data_dir: Path | None = None, mode: str | None = None):
                           survey_source_sha256=source["source_hash"],survey_parquet_sha256=source["parquet_sha256"])
             result["input_evidence_state"]=value.evidence_state
             return store.calculation(project_id,model,value.model_dump(),result)
+
+    # Compatibility bridge retains the existing integrity/context/save gates during v1 migration.
+    app.state.run_project_research_case = research_save
 
     @app.post("/api/projects/{project_id}/research/{model}/imports",status_code=201)
     async def import_research_inputs(project_id: str,model: str,file: UploadFile = File(...)):

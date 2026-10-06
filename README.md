@@ -1,9 +1,13 @@
 # GeoDrill Pro Engineering Workstation
 
+**Current source: 0.9.0-alpha.1 — engineering research workstation preview.** The 7 October v0.9 audit corrected stale embedded Streamlit assets, source/context presentation and v1 route integration/authorization. The supplied all-phases-complete report is superseded by [the architecture acceptance matrix](docs/V09-ARCHITECTURE-AUDIT.md) and [template-based progress](GEODRILL_PRO_V0.9_PROGRESS.md). [Current verification evidence](docs/evidence/v09-verification.json) distinguishes this preview's source, hosted app and Windows packages. Docking/themes, complete wellbore-owned revisions, Three.js, Tauri/updater, enterprise infrastructure and independent qualification remain open.
+
+The release paragraphs below are historical v0.8 milestones at their recorded revisions.
+
 Published [research-5](https://github.com/Nabilvisi/geodrill-pro/releases/tag/research-5) verification: **635 tests passed locally, on Windows and Linux CI, and in the Windows release job**. Formation geomechanics now has a survey-bound input/import/calculation workflow, editable core/calibration evidence, stress plots and sampled elastic pressure intervals. Complete and withheld studies were saved and reopened on the hosted app; the actual downloaded portable executable also passed import, calculation, citation and fixed-report checks. Installation, backup/restore and uninstall passed; all four public downloads matched their hashes. [Geomechanics release evidence](docs/evidence/geomechanics-verification.json) identifies exact source, hosted assets and package hashes. Remaining software and qualification gaps are tracked in [the delivery matrix](docs/IMPROVEMENT-PLAN.md).
 
 
-**Version 0.8.0 — Engineering research workstation (GD-A01–A18).** The audited engineering workstation links source data → studies → scenario comparisons → programme governance → verified export and recovery.
+**Preserved v0.8 foundation — Engineering research workstation (GD-A01–A18).** The audited engineering workstation links source data → studies → scenario comparisons → programme governance → verified export and recovery.
 
 See **[Current Improvement Plan](docs/IMPROVEMENT-PLAN.md)** for reconciled roadmap status, delivered increments, and pending gates. [VERIFICATION.md](docs/VERIFICATION.md) records dated, reproducible test evidence across the implemented modules, including the connected project journey and ISCWSA diagnostic benchmarks. [PROGRESS-AND-ROADMAP.md](docs/PROGRESS-AND-ROADMAP.md) provides the complete implementation sequence.
 
@@ -14,7 +18,7 @@ See **[Current Improvement Plan](docs/IMPROVEMENT-PLAN.md)** for reconciled road
 
 ## Hosted Streamlit app
 
-Open **[GeoDrill Pro on Streamlit](https://geodrill-pro.streamlit.app/)**. The hosted app provides 27 named workspace pages and uses the existing deterministic Python API through an isolated browser-session workspace. Start with North Sea · Research for telemetry/survey/log replay. Switch to Cloud verification · Synthetic for eight saved research workflows, including formation geomechanics and offset benchmarks. The in-app Start here guide explains imports, geometry revisions and fixed report downloads. On phones, the Open page selector provides named navigation to all 27 workspace pages.
+Open **[GeoDrill Pro on Streamlit](https://geodrill-pro.streamlit.app/)**. The refreshed preview groups named workspaces under Projects, Plan & Design, Engineering, Operations and Governance, using the existing Python API through an isolated browser-session workspace. Directional and the interim spatial viewer disclose actual source/revision context. The architecture's full five-pillar mapping remains an acceptance item. Start with North Sea · Research for telemetry/survey/log replay. Switch to Cloud verification · Synthetic for saved research workflows, including formation geomechanics and offset benchmarks. The in-app Start here guide explains imports, geometry revisions and fixed report downloads. On phones, the Open page selector provides named navigation. See the dated verification record for the deployed asset identity.
 
 The hosted workspace is temporary. Download complete evidence reports before leaving; reports are not a restorable project backup. Use the local workstation when persistent project storage is required. All included examples are synthetic and equipment control remains unavailable.
 

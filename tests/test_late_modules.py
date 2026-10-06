@@ -5,6 +5,7 @@ from pydantic import ValidationError
 from fastapi.testclient import TestClient
 from test_geometry_casing import geom,survey,api_setup
 from packages.engineering.geometry import GeometryInput,Path
+from packages.version import APP_VERSION
 from packages.engineering.dynamics import DynamicsInput,dynamics,matrices,response,DynamicsSensor
 from packages.engineering.bit_condition import BitInput,BitRun,bit_condition,kaplan_meier
 from packages.engineering.wear_fatigue import WearInput,wear_fatigue,fatigue_cycles
@@ -283,7 +284,7 @@ def test_late_api_all_modules_geometry_binding_fixed_report_restart(api_setup):
         bad=copy.deepcopy(data);bad["geometry_revision_id"]="absent"
         assert c.post(base+"/calculations/"+model,json=bad).status_code==404
     report=c.post(base+"/reports").json();snapshot=c.get(base+"/reports/"+report["id"]).json()
-    assert snapshot["snapshot"]["application_version"]=="0.8.0"
+    assert snapshot["snapshot"]["application_version"]==APP_VERSION
     for rec in saved:assert rec in snapshot["snapshot"]["calculations"]
     after=TestClient(create_app(root));after.get("/api/session")
     for rec in saved:assert rec in after.get(base+"/calculations?model="+rec["model"]).json()

@@ -4,6 +4,7 @@ from pydantic import BaseModel, Field
 from typing import Any, Literal
 from packages.domain.models import Project, CoordinateReference
 from services.application.projects import ProjectService
+from services.api.access import visible_projects, add_member
 
 
 router = APIRouter(prefix="/api/v1/projects", tags=["Projects"])
@@ -20,6 +21,8 @@ class ProjectCreateV1(BaseModel):
 
 @router.get("", response_model=list[dict[str, Any]])
 def list_projects(request: Request):
+    if hasattr(request.state, "user"):
+        return visible_projects(request.app.state.store, request.state.user)
     svc = ProjectService(request.app.state.store)
     return svc.list_projects()
 
@@ -35,6 +38,8 @@ def create_project(request: Request, body: ProjectCreateV1):
         north_reference=body.north_reference,
         owner=body.owner,
     )
+    if hasattr(request.state, "user"):
+        add_member(request.app.state.store, proj["id"], request.state.user["id"], request.state.user)
     return proj
 
 

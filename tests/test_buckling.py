@@ -7,6 +7,7 @@ from fastapi.testclient import TestClient
 from packages.engineering.buckling import BucklingInput,buckling,thresholds,transfer,mode,interpolate
 from packages.engineering.torque_drag import TorqueDragInput,torque_drag
 from packages.engineering.geometry import Path,GeometryInput
+from packages.version import APP_VERSION
 from packages.engineering.models import SurveyRequest
 from services.api import demo
 from services.api.main import create_app
@@ -170,7 +171,7 @@ def test_api_binding_report_restart_and_rejections(api_setup):
     snapshot_id=c.post(base+"/reports").json()["id"]
     snapshot=c.get(base+"/reports/"+snapshot_id).json()
     assert record in snapshot["snapshot"]["calculations"]
-    assert snapshot["snapshot"]["application_version"]=="0.8.0"
+    assert snapshot["snapshot"]["application_version"]==APP_VERSION
     after=TestClient(create_app(root));after.get("/api/session")
     assert record in after.get(base+"/calculations?model=buckling").json()
     assert after.get(base+"/reports/"+snapshot_id).json()==snapshot

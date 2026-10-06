@@ -1,0 +1,28 @@
+.directional-workspace { display: grid; gap: 20px; }
+.engineering-plan { width: 100%; max-height: 420px; background: #f8fafc; border: 1px solid #e2e8f0; }
+.engineering-scene { width: 100%; min-height: 300px; max-height: 580px; background: #f8fafc; border: 1px solid #e2e8f0; }
+.scene-controls { display: flex; flex-wrap: wrap; align-items: center; gap: 18px; margin: 16px 0; }
+.scene-controls label { display: flex; align-items: center; gap: 8px; font-size: 12px; }
+.selected-row { background: #fff0dd; }
+.workspace-context { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px 20px; background: #fff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px 16px; font-size: 12px; }
+.workspace-context dl { display: flex; flex-wrap: wrap; gap: 8px 20px; margin: 0; }
+.workspace-context dl div { display: flex; gap: 5px; }
+.workspace-context dt { color: #64748b; }
+.workspace-context dd { margin: 0; color: #0f172a; font-weight: 600; }
+.directional-workspace pre { overflow: auto; max-height: 400px; white-space: pre-wrap; overflow-wrap: anywhere; }
+.directional-workspace textarea { width: 100%; padding: 12px; border: 1px solid #cbd5e1; border-radius: 6px; font: 12px monospace; }
+.directional-workspace .table-scroll { max-height: 480px; overflow: auto; }
+.directional-workspace .muted { color: #64748b; font-size: 12px; }
+.project-tree { display: grid; gap: 8px; }
+.project-tree details { border-left: 2px solid #e2e8f0; margin-left: 8px; padding-left: 12px; }
+.project-tree summary { cursor: pointer; font-weight: 600; padding: 8px 0; }
+.project-tree .tree-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+.app-shell { background: #F8FAFC; }
+:root { color: #0F172A; background: #F8FAFC; --green: #0B3D91; --ink: #0F172A; --muted: #64748B; --border: #E2E8F0; --accent: #CFF3F6; }
+.sidebar { background: #082A63; color: #CBD5E1; }
+.sidebar .nav-item.active { background: #CFF3F6; color: #0B3D91; }
+.sidebar .nav-item.active svg { color: #0B3D91; }
+.sidebar .project-switch, .sidebar .project-switch select option { background: #103C79; }
+.sidebar .mode-card { background: #103C79; }
+.sidebar .nav-label, .sidebar .workspace-label { color: #94A3B8; }
+.sidebar .nav-item, .sidebar .brand span { color: #E2E8F0; }

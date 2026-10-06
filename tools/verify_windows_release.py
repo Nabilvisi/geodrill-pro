@@ -12,6 +12,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 from tools.sign_windows_binary import verify_signature
 from tools.source_snapshot import create_source_snapshot
+from packages.version import APP_VERSION
 
 
 def sha256(path: Path) -> str:
@@ -53,7 +54,7 @@ def verify(mode: str, root: Path = ROOT) -> dict:
     head = subprocess.run(["git", "rev-parse", "HEAD"], cwd=root, capture_output=True, text=True, check=True).stdout.strip()
     dirty = subprocess.run(["git", "status", "--porcelain"], cwd=root, capture_output=True, text=True, check=True).stdout.strip()
     manifest = {
-        "version": "0.8.0", "created_at_utc": datetime.now(timezone.utc).isoformat(),
+        "version": APP_VERSION, "created_at_utc": datetime.now(timezone.utc).isoformat(),
         "source_commit": head, "source_has_uncommitted_changes": bool(dirty),
         "source_snapshot_sha256": selected_snapshot["digest"],
         "source_snapshot_file_count": len(selected_snapshot["files"]),

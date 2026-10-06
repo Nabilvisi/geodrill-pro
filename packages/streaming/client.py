@@ -12,6 +12,7 @@ from pathlib import Path
 from filelock import FileLock
 from websockets.asyncio.client import connect
 from websockets.exceptions import ConnectionClosed, InvalidHandshake
+from packages.version import APP_VERSION
 from .capture import materialize, source, preserve, envelopes, micros, PROFILE
 from .wire import decode, encode, read_header, MAX_MESSAGE
 
@@ -156,7 +157,7 @@ class ReadOnlyClient:
                             raise ValueError("WebSocket peer did not select ETP 1.2")
                         self.stats["connections"] += 1
                         await self.send(ws, "RequestSession", {"applicationName": "GeoDrill Pro read-only customer",
-                            "applicationVersion": "0.8.0", "clientInstanceId": uuid4().bytes,
+                            "applicationVersion": APP_VERSION, "clientInstanceId": uuid4().bytes,
                             "requestedProtocols": [{"protocol": 21, "protocolVersion": {"major": 1, "minor": 2, "revision": 0, "patch": 0},
                                                     "role": "store", "protocolCapabilities": {}}],
                             "supportedDataObjects": [{"qualifiedType": "witsml21.Channel", "dataObjectCapabilities": {}}],
