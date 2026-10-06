@@ -20,6 +20,7 @@ class Workspace:
         self.responses={}
         self.request_hashes={}
         self.latest=[]
+        self.report_downloads={}
         if seed:self.seed()
 
     def call(self,method,path,**kw):
@@ -82,6 +83,16 @@ class Workspace:
             if size>MAX_BODY+65536:raise ValueError("Multipart input exceeds the 2 MiB limit.")
             kw.update(data=data,files=files)
         response=self.client.request(method,path,**kw)
+        # Keep the original immutable export bytes for Streamlit's native HTTP
+        # download control as well as the embedded workstation's blob link.
+        disposition=response.headers.get("content-disposition","")
+        if (method=="GET" and response.status_code==200 and u.path.endswith("/download")
+                and disposition.startswith('attachment; filename="geodrill-report-')
+                and disposition.endswith('.json"')):
+            filename=disposition.split('"')[1]
+            self.report_downloads[filename]=response.content
+            while len(self.report_downloads)>3:
+                self.report_downloads.pop(next(iter(self.report_downloads)))
         result=self._encode(identifier,response)
         self.responses[identifier]=result
         self.request_hashes[identifier]=fingerprint

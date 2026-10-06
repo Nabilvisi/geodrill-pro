@@ -89,6 +89,14 @@ if "_geodrill_workspace" not in st.session_state:
     with st.spinner("Preparing an isolated engineering workspace…"):
         st.session_state["_geodrill_workspace"]=Workspace()
 workspace=st.session_state["_geodrill_workspace"]
+if getattr(workspace,"report_downloads",None):
+    with st.expander("Saved report downloads",expanded=True):
+        st.caption("Each file contains the complete fixed snapshot and its integrity hash. The three most recently prepared reports are available here.")
+        for filename, original_bytes in workspace.report_downloads.items():
+            report_label=filename.removeprefix("geodrill-report-")[:8]
+            st.download_button("Download report "+report_label,data=original_bytes,
+                               file_name=filename,mime="application/json",
+                               key="native-"+filename,on_click="ignore")
 if "_geodrill_batch_id" not in st.session_state:st.session_state["_geodrill_batch_id"]=None
 component=components.declare_component("geodrill_workstation",path=str(ROOT/"apps"/"streamlit"/"component"))
 value=component(responses=workspace.latest,key="geodrill-workstation",default=None)

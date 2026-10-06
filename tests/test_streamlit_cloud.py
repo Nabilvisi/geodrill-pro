@@ -56,11 +56,28 @@ def test_complete_fixed_report_download(seeded):
  p=next(p for p in seeded.call("GET","/api/projects") if p["name"].startswith("Cloud verification"));b="/api/projects/"+p["id"]
  created=decoded(seeded.execute(req("create-report","POST",b+"/reports")))
  v=decoded(seeded.execute(req("download-report","GET",b+"/reports/"+created["id"]+"/download")))
+ filename="geodrill-report-"+created["id"]+".json"
+ original=seeded.client.get(b+"/reports/"+created["id"]+"/download").content
+ assert seeded.report_downloads[filename]==original
  assert len(v["snapshot"]["calculations"])==6
  canonical=json.dumps(v["snapshot"],sort_keys=True,separators=(",",":"),allow_nan=False).encode()
  assert hashlib.sha256(canonical).hexdigest()==v["sha256"]==created["sha256"]
  seeded.call("POST",b+"/reports")
  assert seeded.call("GET",b+"/reports/"+created["id"])==v
+
+def test_native_report_exports_are_bounded_and_session_private(workspace):
+ p=project(workspace);b="/api/projects/"+p["id"]
+ workspace.execute(req("read-project","GET",b))
+ assert not workspace.report_downloads
+ names=[]
+ for index in range(4):
+  created=workspace.call("POST",b+"/reports")
+  workspace.execute(req("export-"+str(index),"GET",b+"/reports/"+created["id"]+"/download"))
+  names.append("geodrill-report-"+created["id"]+".json")
+ assert list(workspace.report_downloads)==names[-3:]
+ other=Workspace(seed=False)
+ try:assert not other.report_downloads
+ finally:other.close()
 def test_batch_error_keeps_next_request_working(workspace):
  r=workspace.batch({"requests":[req("bad","GET","https://example.com/api"),req("ok","GET","/api/health")]})
  assert r[0]["status"]==422 and r[1]["status"]==200 and not decoded(r[1])["equipment_control"]
