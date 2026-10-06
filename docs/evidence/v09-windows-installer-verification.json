@@ -1,0 +1,21 @@
+{
+  "packaged_restore_exit_code": 0,
+  "install_exit_code": 0,
+  "restored_smoke_exit_code": 0,
+  "signing_mode": "unsigned",
+  "existing_restore_destination_preserved": true,
+  "smoke_exit_code": 0,
+  "installer_sha256": "896abe99a0618626931762dd2263ee16355431be7e3540124c36935c0839ac40",
+  "extra_user_file_preserved": true,
+  "persistent_evidence_preserved": true,
+  "equipment_control": false,
+  "packaged_backup_exit_code": 0,
+  "installed_executable_sha256": "79f9c60936721fe4aba0cbe9f2b646d96c02f2c0f2d8e9d2ed8a8e0139e5dc8a",
+  "restored_signing_identity_preserved": true,
+  "uninstall_exit_code": 0,
+  "wrong_hash_restore_rejected": true,
+  "passed": true,
+  "source_snapshot_sha256": "1e0a3a74bf5b2662bed6b578e156f118237dff6f6bb8a27578329a3954832eb7",
+  "clearance_generated": false,
+  "backup_archive_sha256": "4e82867001b5d13f52e8cf66098e64cf5cef19acd4094206a14da429dc13828b"
+}

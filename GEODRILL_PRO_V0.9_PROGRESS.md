@@ -6,10 +6,10 @@
 - Session: v0.9 independent verification and distribution repair
 - Repository: C:/Users/HP/OneDrive/Project Drill/geodrill-pro
 - Branch: v09-verify-20261007
-- HEAD commit: 3268a82d36699c00fbd126fb4d8d791f8d6dd7f5
+- HEAD commit: f8b1372de7cd2c64efb9c33c970a8d00f024d8f6
 - Working tree: See recorded file status below; prior baseline retained
-- Five Hour Limit Remaining: 68%
-- Reason session stopped: Active session checkpoint; publication/package checks continue
+- Five Hour Limit Remaining: 60%
+- Reason session stopped: Local/GitHub verification finished; awaiting explicit approval to merge PR #2 into main and publish Streamlit/unsigned preview
 
 ## Current Objective
 
@@ -34,6 +34,7 @@ Phases 1–7 partially implemented; phase 8 retains the legacy PyInstaller resea
 
 | File | Purpose |
 |---|---|
+| .gitattributes | Preserve exact compiled Streamlit bytes on Windows/Linux checkouts |
 | packages/version.py | Single application preview version |
 | apps/desktop/src/workstation.css | Native workstation layout and approved palette |
 | tests/test_v09_verification.py | 15 source, isolation, integrity and route regression cases |
@@ -140,19 +141,122 @@ ETP application handshake uses APP_VERSION. Read-only transport/capture/replay b
     "tvd_m": 897.082,
     "geometry_id_prefix": "2ae6efa1",
     "geometry_sha256_prefix": "646d3118bf919bd5",
-    "missing_geomagnetic_metadata": "withheld, observed in UI"
+    "missing_geomagnetic_metadata": "withheld, observed in UI",
+    "report_download": {
+      "path": "C:\\Users\\HP\\Downloads\\geodrill-report-0498c979-6faf-47ce-a55c-260802d48d03.json",
+      "size_bytes": 140917,
+      "download_sha256": "c52a83928b94cede505a58bfeed5ed1dda6f19e783c7aeb07d5a7e95a46e8350",
+      "snapshot_sha256": "18954082b6a1ea8fda35dfe2abd86d58a4ecd1d9865b71890a777aba6b71150c",
+      "canonical_integrity_verified": true,
+      "application_version": "0.9.0-alpha.1"
+    }
   },
   "hosted_streamlit": {
     "url": "https://geodrill-pro.streamlit.app/",
-    "status": "updated source publication/render verification pending"
+    "status": "still using previous main/component; refreshed source published on PR branch, deployment pending explicit main merge approval"
   },
   "github": {
-    "status": "publication pending",
-    "baseline_ci_run": "https://github.com/Nabilvisi/geodrill-pro/actions/runs/37500268872"
+    "status": "PR ready; explicit approval required for main/publication",
+    "pull_request": "https://github.com/Nabilvisi/geodrill-pro/pull/2",
+    "verified_source_commit": "f8b1372de7cd2c64efb9c33c970a8d00f024d8f6",
+    "ci_run": "https://github.com/Nabilvisi/geodrill-pro/actions/runs/37508291450",
+    "windows": {
+      "passed": 683,
+      "failed": 0,
+      "elapsed_seconds": 87.6,
+      "job_id": 112422473384
+    },
+    "linux": {
+      "passed": 683,
+      "failed": 0,
+      "elapsed_seconds": 61.12,
+      "job_id": 112422473044
+    },
+    "previous_windows_failure": "Asset bytes changed by automatic checkout CRLF conversion; .gitattributes now preserves compiled component bytes",
+    "main_commit": "3268a82d36699c00fbd126fb4d8d791f8d6dd7f5",
+    "main_update_approval": "auto_review rejected default-branch mutation; no bypass attempted"
   },
   "windows": {
-    "status": "rebuild and verification in progress",
-    "signing_mode": "unsigned"
+    "status": "local unsigned preview rebuilt and verified; public release pending approval",
+    "signing_mode": "unsigned",
+    "packaged_workflow": {
+      "health": {
+        "status": "ok",
+        "version": "0.9.0-alpha.1",
+        "mode": "local-research",
+        "equipment_control": false,
+        "instance_id": "d2b65dba662650cd",
+        "pid": 24252
+      },
+      "frontend_asset_hashes_verified": true,
+      "import_dataset_id": "697bc308-0622-4ae8-bdd6-14b5aa9944af",
+      "report_snapshot_sha256": "0a405e2c7a475eb2c142b54dd1f06d2cc0af47ae7e650693ad3dc7ce297a4b35",
+      "original_download_sha256": "b92225c552071d72c8a283d92aa0fdccd0b437b7dbbea58841509c9c577a743d",
+      "source_import_and_fixed_report_passed": true
+    },
+    "manifest": {
+      "version": "0.9.0-alpha.1",
+      "created_at_utc": "2026-10-06T18:07:00.927427+00:00",
+      "source_commit": "f8b1372de7cd2c64efb9c33c970a8d00f024d8f6",
+      "source_has_uncommitted_changes": true,
+      "source_snapshot_sha256": "1e0a3a74bf5b2662bed6b578e156f118237dff6f6bb8a27578329a3954832eb7",
+      "source_snapshot_file_count": 210,
+      "source_snapshot_scope": "Git-listed application, package, service, tool, test, workflow and original-source files; root build/dependency files. Generated verification reports excluded.",
+      "signing_mode": "unsigned",
+      "trusted_signature_verification": {
+        "GeoDrillPro.exe": false,
+        "GeoDrillPro-Setup.exe": false
+      },
+      "independent_engineering_qualification": "pending",
+      "external_security_audit": "pending",
+      "equipment_control": false,
+      "clearance_generated": false,
+      "assets": [
+        {
+          "name": "GeoDrillPro-Setup.exe",
+          "size_bytes": 121796497,
+          "sha256": "896abe99a0618626931762dd2263ee16355431be7e3540124c36935c0839ac40"
+        },
+        {
+          "name": "GeoDrillPro-Windows-x64.zip",
+          "size_bytes": 184326288,
+          "sha256": "51a5522f49a15d3c933be91c70886fc30f591d780aa392a7252410bfc834899e"
+        }
+      ],
+      "executable_sha256": "79f9c60936721fe4aba0cbe9f2b646d96c02f2c0f2d8e9d2ed8a8e0139e5dc8a"
+    },
+    "installer": {
+      "packaged_restore_exit_code": 0,
+      "install_exit_code": 0,
+      "restored_smoke_exit_code": 0,
+      "signing_mode": "unsigned",
+      "existing_restore_destination_preserved": true,
+      "smoke_exit_code": 0,
+      "installer_sha256": "896abe99a0618626931762dd2263ee16355431be7e3540124c36935c0839ac40",
+      "extra_user_file_preserved": true,
+      "persistent_evidence_preserved": true,
+      "equipment_control": false,
+      "packaged_backup_exit_code": 0,
+      "installed_executable_sha256": "79f9c60936721fe4aba0cbe9f2b646d96c02f2c0f2d8e9d2ed8a8e0139e5dc8a",
+      "restored_signing_identity_preserved": true,
+      "uninstall_exit_code": 0,
+      "wrong_hash_restore_rejected": true,
+      "passed": true,
+      "source_snapshot_sha256": "1e0a3a74bf5b2662bed6b578e156f118237dff6f6bb8a27578329a3954832eb7",
+      "clearance_generated": false,
+      "backup_archive_sha256": "4e82867001b5d13f52e8cf66098e64cf5cef19acd4094206a14da429dc13828b"
+    },
+    "browser_checks": {
+      "hierarchy_crud": "field/well/wellbore/target created and visibly listed in isolated packaged data",
+      "new_survey_staleness": "saved geometry remains historical; current survey displacement displayed; observed UI warning",
+      "mobile_viewport": {
+        "width": 390,
+        "height": 844,
+        "document_width": 375,
+        "page_selector": "opened 3D well engineering",
+        "override_reset": true
+      }
+    }
   }
 }
 ```
@@ -160,46 +264,8 @@ ETP application handshake uses APP_VERSION. Read-only transport/capture/replay b
 ## Current Working Tree
 
 ```text
-M  .github/workflows/release.yml
-M  GEODRILL_PRO_V0.9_PROGRESS.md
-MM README.md
-M  apps/desktop/src/DirectionalWorkspace.tsx
-M  apps/desktop/src/Well3DWorkspace.tsx
-M  apps/desktop/src/components/ProjectTree.tsx
-M  apps/desktop/src/design-system/WorkspaceHeader.tsx
-M  apps/desktop/src/main.tsx
-A  apps/desktop/src/workstation.css
-M  apps/streamlit/app.py
-D  apps/streamlit/component/assets/index-CVotoqRw.js
-R  apps/streamlit/component/assets/index-DQfLpxdr.css -> apps/streamlit/component/assets/index-D1k-d0nj.css
-A  apps/streamlit/component/assets/index-D6XwBnm_.js
-M  apps/streamlit/component/index.html
-M  apps/streamlit/component/manifest.json
-M  docs/IMPROVEMENT-PLAN.md
-M  docs/PROGRESS-AND-ROADMAP.md
-A  docs/V09-ARCHITECTURE-AUDIT.md
-A  docs/evidence/v09-reported-progress-20261007.md
- M package.json
-M  packages/domain/calculation.py
-M  packages/frontend.py
-M  packages/streaming/client.py
-A  packages/version.py
-M  services/api/access.py
-M  services/api/main.py
-M  services/api/routers/directional.py
-M  services/api/routers/engineering.py
-M  services/api/routers/projects.py
-M  services/api/storage.py
-M  services/application/directional.py
-M  services/application/engineering_cases.py
-M  services/application/wells.py
-M  tests/test_buckling.py
-M  tests/test_late_modules.py
-A  tests/test_v09_verification.py
-M  tools/build_streamlit.py
-M  tools/installer/setup.iss
-M  tools/verify_windows_release.py
-?? docs/evidence/v09-verification.json
+M docs/evidence/v09-verification.json
+?? docs/evidence/v09-windows-installer-verification.json
 ```
 
 ## Known Issues
@@ -214,6 +280,7 @@ M  tools/verify_windows_release.py
 
 ## Incomplete Work
 
+- Merge/publication approval, rendered hosted verification and public Windows preview download verification.
 - Full wellbore-owned survey/trajectory persistence and planning/actual/offset workflow.
 - Three.js/R3F scene, linked plots/grid and representative coordinate/load/picking validation.
 - Docking, layout persistence, complete theme/token/density/keyboard acceptance.
@@ -258,6 +325,7 @@ git log -3 --oneline
 
 ## Acceptance Criteria Still Open
 
+- [ ] Explicit main merge/publication approval and rendered/downloaded live preview verification
 - [ ] Full directional project → well → wellbore → plan/actual/uncertainty/offset workflow
 - [ ] Three.js authoritative scene and all synchronized picking/selection/performance gates
 - [ ] Dockable persistent layouts and complete themes
