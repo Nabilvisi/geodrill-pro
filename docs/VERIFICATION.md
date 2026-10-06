@@ -461,3 +461,24 @@ Earlier counts and hashes above are historical snapshots and are not current-rel
 ## Additional provenance and packaging repair — 6 October 2026
 
 Full local regression: **577 passed**, zero failures/errors/skips, with the existing Starlette/httpx deprecation warning. Direct provisional benchmark results withhold independent validation, declare absent source licensing and cannot grant qualification. A reflected horizontal survey fails the coordinate-vector comparison. Windows packaging records individual source hashes and rejects later source changes; release automation now includes installer execution and recovery. Current artifact hashes and execution results are in the repair evidence and release manifest.
+
+## Approved publication and rendered deployment — 6 October 2026
+
+PR 1 is merged. Final application code b213c1f861ea508590886751ea9febcee2c27656
+passes **578 tests on both Windows and Linux**. The unsigned research-2 prerelease
+passed the complete Windows release workflow, including packaged diagnostics,
+source/artifact identity and isolated installer execution/uninstall recovery.
+Actual public installer and ZIP downloads match their manifest hashes, and the
+ZIP's executable and 138-file source snapshot match the same manifest.
+
+The public Streamlit environment was rebuilt with the missing dependencies. Its
+synthetic demonstration renders 240 telemetry records, overview charts and the
+well trajectory; hydraulics navigation retains input/applicability withholding.
+A native Streamlit export now retains original backend report bytes. The actual
+112,246-byte JSON download contains all 240 telemetry rows and its canonical
+snapshot SHA-256 verifies. The app exposes actual research-2 desktop asset links.
+See [published research verification](evidence/published-research-verification.json)
+for workflow URLs, exact hashes and remaining external qualification gates.
+
+Trusted publisher signing, independent engineering qualification and external
+security/compliance assessment remain pending. No operational authority is issued.

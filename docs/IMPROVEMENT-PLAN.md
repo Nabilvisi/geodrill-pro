@@ -44,9 +44,9 @@ See [REPAIR-STATUS.md](REPAIR-STATUS.md) and [current machine-readable evidence]
 | Gate | Evidence required | Current status |
 |---|---|---|
 | Software verification | Full regression, frontend build, cloud session/report tests | Current command results recorded in repair evidence; historical counts superseded |
-| Windows research packaging | Executable smoke, installer build, isolated install/uninstall, matching ZIP executable, source snapshot and hashes | Passed locally as unsigned research packaging; publisher signing pending |
+| Windows research packaging | Executable smoke, installer build, isolated install/uninstall, matching ZIP executable, source snapshot and hashes | Published and verified as research-2, including actual public download hashes; publisher signing pending |
 | Trusted publisher distribution | Publisher certificate, timestamp and trusted verification on both EXE and installer | Pending publisher certificate; development fallback removed |
-| Hosted app repair | Reviewed merge, final cloud build and rendered live interaction | Tested repair branch prepared; live main currently fails startup |
+| Hosted app repair | Reviewed merge, final cloud build and rendered live interaction | PR 1 merged; public app renders charts/modules and a native report download whose snapshot hash verifies |
 | Independent engineering qualification | Original datasets, extraction provenance, applicability and holdout evidence, named independent reviewer | Pending; provisional examples cannot close this gate |
 | External security/compliance audit | Scoped external assessment and actual certification evidence if claimed | Pending; automated test/scanner results are internal software evidence |
 

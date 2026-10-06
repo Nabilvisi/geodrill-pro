@@ -1,23 +1,28 @@
 # Release and independent-review handoff
 
 The tested repair is [pull request 1](https://github.com/Nabilvisi/geodrill-pro/pull/1).
-Merge approval is pending. No direct update to the default branch is authorized.
+The user approved merge, deployment and unsigned research publication on 6 October 2026.
+PR 1 is merged at 509be9b9a96fda0604be2ce1eda205e9ea691280. A follow-up native
+cloud report export repair is published at b213c1f861ea508590886751ea9febcee2c27656.
 
 ## Research deployment
 
-After approval, merge the current tested PR head, wait for its final Windows/Linux
-CI results, and observe the Streamlit dependency build at
-https://geodrill-pro.streamlit.app/. Verify the rendered title, a demonstration
-project, charts, navigation and report download. A successful repository merge or
-dependency installation alone does not establish a working hosted deployment.
+Completed: final Windows/Linux CI each passed 578 tests; the Streamlit environment
+was rebuilt and https://geodrill-pro.streamlit.app/ renders the title, synthetic
+demonstration project, 240 telemetry records, charts and module navigation. The
+actual complete report was downloaded using the native cloud control and its
+canonical snapshot hash verified. Current evidence is in
+docs/evidence/published-research-verification.json.
 
-Use the Release workflow's explicit unsigned research input for a prerelease.
-The workflow must run regression, rebuild the frontend and executable, exercise
-packaged diagnostics, compile the installer, verify source/artifact identity,
-install/run/uninstall it, and preserve the verification artifacts before publishing.
-Confirm the published installer/ZIP hashes and the app's actual download links.
+Completed: https://github.com/Nabilvisi/geodrill-pro/releases/tag/research-2
+was built with the explicit unsigned research input. Release workflow
+37444938024 passed regression, rebuilt the frontend and executable, exercised
+packaged diagnostics, compiled the installer, verified source/artifact identity,
+and passed install/run/uninstall recovery before publication. Both public Windows
+downloads match their manifest hashes; the live app links to those actual files.
 
-Local research packages are already available under dist. Their manifests declare
+The final downloaded public packages are under build/published-research-2; dist
+also retains the earlier local research packages. Their manifests declare
 the actual signing state. SOURCE-SNAPSHOT.json records individual source-file hashes
 and a combined digest, including uncommitted source. The verifier rejects source
 changes made after packaging. Generated verification reports are outside that digest.

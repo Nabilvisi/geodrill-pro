@@ -1,9 +1,19 @@
 # GeoDrill repair status — 6 October 2026
 
+The approved repair PR is merged. The public Streamlit app and the final unsigned
+Windows research prerelease are deployed and verified.
+
+- Live app: https://geodrill-pro.streamlit.app/
+- Final prerelease: https://github.com/Nabilvisi/geodrill-pro/releases/tag/research-2
+- Final code: b213c1f861ea508590886751ea9febcee2c27656
+- Windows/Linux CI: https://github.com/Nabilvisi/geodrill-pro/actions/runs/37444825114
+- Release workflow: https://github.com/Nabilvisi/geodrill-pro/actions/runs/37444938024
+- Current publication evidence: docs/evidence/published-research-verification.json
+
 Implemented and verified:
 
 - Declared missing cryptography, directional and protocol runtime dependencies.
-- Isolated pytest temporary directories; full regression passes 577 tests.
+- Isolated pytest temporary directories; the original local repair regression passed 577 tests. Final Windows and Linux CI each pass 578 tests, including native cloud report export preservation.
 - Removed automatic field qualification and invented independent sign-off.
 - Direct benchmark calls withhold independent validation and leave unverified source licenses unset.
 - Survey comparisons reject reflected coordinate vectors even when radial displacement agrees.
@@ -19,9 +29,17 @@ Implemented and verified:
 - Added manifest-bound installer recovery checks to the release workflow.
 - Repaired the release pipeline to test/build current source, sign before ZIP creation, require trusted publisher certificates, and withhold unmatched assets.
 - Replaced dead hosted download links with actual release-asset discovery and truthful unavailable states.
+- Rebuilt the Streamlit dependency environment and verified the rendered synthetic project, all 240 telemetry records, charts and hydraulics navigation.
+- Added a native cloud report download alongside the embedded export. Downloaded the actual complete JSON and verified its canonical snapshot fingerprint.
+- Published research-2 after regression, packaged diagnostics, installer execution/recovery and artifact identity checks. Downloaded both public Windows packages and confirmed their exact manifest hashes.
+- Verified the live app links to the actual research-2 installer, portable ZIP and checksums.
 - Reconciled commercial gate claims and recorded current internal security checks.
 
 Artifacts in this checkout:
+
+- build/published-research-2/: downloaded final public installer, portable ZIP, manifest, checksums and verification evidence.
+- build/published-research-2/live-app.jpg and live-downloads.jpg: rendered deployment evidence.
+- The older dist root artifacts below record the earlier local research build; the final published files are in build/published-research-2 and the linked GitHub prerelease.
 
 - dist/GeoDrillPro-Setup.exe: unsigned research installer.
 - dist/GeoDrillPro-Windows-x64.zip: unsigned portable package.
@@ -32,11 +50,10 @@ Artifacts in this checkout:
 
 Required external steps:
 
-1. Review and merge the repair pull request. Direct main-branch publication was rejected by automatic approval review. Then verify the final Streamlit build and a representative rendered interaction.
-2. Supply/configure a trusted publisher signing certificate for a signed release. This is distinct from the working unsigned research installer.
-3. Complete original-source model validation for remaining field/experimental claims and obtain a named independent engineer's scope-specific signed review.
-4. Obtain an actual external security assessment and organizational certification evidence before making compliance claims.
+1. Supply/configure a trusted publisher signing certificate for a signed release. This is distinct from the verified unsigned research prerelease.
+2. Complete original-source model validation for remaining field/experimental claims and obtain a named independent engineer's scope-specific signed review.
+3. Obtain an actual external security assessment and organizational certification evidence before making compliance claims.
 
-The goal remains open while those requirements are missing. Equipment control and automated drilling clearance remain false.
+The merge, hosted repair and unsigned research publication are complete. Full independent qualification and trusted publisher distribution remain open while the external requirements are missing. Equipment control and automated drilling clearance remain false.
 
 See [release and independent-review handoff](RELEASE-AND-QUALIFICATION-HANDOFF.md) for the concrete remaining inputs and acceptance evidence.
