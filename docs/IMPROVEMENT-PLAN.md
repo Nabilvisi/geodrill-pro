@@ -5,9 +5,11 @@ withdrawn. This code audit distinguishes connected workflows, API/kernel capabil
 missing software and external qualification. Numerical tests do not close the original
 backlog's integration or independent review criteria.
 
-PR 1 merge, hosted repair and unsigned research-3 recovery publication are complete at their
-recorded revision. See [published evidence](evidence/published-research-verification.json).
-Current recovery changes and packaged acceptance are recorded in
+PR 1 merge, hosted repair and unsigned research-4 publication are complete at their
+recorded revisions. Research-4 includes connected offset benchmarking and evidence search;
+615 tests passed locally, on both CI platforms and in the Windows release job. See
+[current publication evidence](evidence/connected-increments-verification.json).
+Recovery changes and packaged acceptance are recorded in
 [the recovery implementation](GD-A08-IMPLEMENTATION.md).
 
 | Increment | Current code evidence | Remaining scope |
@@ -39,7 +41,7 @@ objective achieved.
 Separate release and external gates:
 
 - Hosted repair and unsigned research publication: complete at the recorded revision.
-- Research-3 recovery: 602 tests on Windows/Ubuntu; installed backup/restore and complete public asset hashes verified. New connected workflows require their own final CI/live/package evidence.
+- Research-4: 615 tests on Windows/Ubuntu; hosted save/reopen/search/inspection/abstention, installed backup/restore and all complete public asset hashes verified. Representative operator acceptance remains open.
 - Publisher signing: owner-supplied certificate, timestamp and trusted EXE/installer verification.
 - Engineering qualification: original observations, applicability/holdout comparisons and a real named reviewer assessment.
 - Security/compliance: actual scoped external assessment and certification evidence if claimed.

@@ -1,5 +1,5 @@
 {
-  "verified_at_utc": "2026-10-06 11:28:09 UTC",
+  "verified_at_utc": "2026-10-06 11:44:58 UTC",
   "regression": {
     "tests": 615,
     "errors": 0,
@@ -51,9 +51,129 @@
     "No-match and historical-variation abstention",
     "Optional trajectory filter explicitly renders Any trajectory"
   ],
-  "ci": "pending at publication",
-  "hosted_verification": "pending at publication",
-  "packaged_release": "Research-3 contains recovery repairs; connected-page package pending",
+  "ci": {
+    "url": "https://github.com/Nabilvisi/geodrill-pro/actions/runs/37456692927",
+    "ubuntu": {
+      "tests": 615,
+      "conclusion": "success"
+    },
+    "windows": {
+      "tests": 615,
+      "conclusion": "success"
+    },
+    "warning": "Existing Starlette/httpx TestClient deprecation"
+  },
+  "hosted_verification": {
+    "url": "https://geodrill-pro.streamlit.app/",
+    "restarted_at_utc": "2026-10-06T11:32:40Z",
+    "examples": "synthetic",
+    "navigation_pages": 26,
+    "saved_offset_calculation_id": "40e5a4bb-64b2-4800-b096-6d3890c7327f",
+    "geometry_revision_id": "1c79eaf7-a1a1-4003-b7aa-849d26d1b52f",
+    "input_dataset_id": "560085d8-f87c-4862-9cd8-b0e99022d1ef",
+    "input_sha256": "5a4fd4d19c416412aebd23250681ee2ae456c474f71352ad7ece394089a9f857",
+    "calculation_citation_sha256": "945153fa748349ae17e1c9488f37bc344004e0e411e800204d9346fda295ebf6",
+    "reopened_seed_study": true,
+    "new_study_saved_through_ui": true,
+    "cohort_records": 3,
+    "projected_duration_days": [
+      2.17,
+      2.5,
+      2.83
+    ],
+    "historical_total_cost_usd": [
+      1120000,
+      1200000,
+      1280000
+    ],
+    "separate_rig_time_cost_usd": [
+      216666.67,
+      250000,
+      283333.33
+    ],
+    "query": "offset-benchmarking",
+    "citations": 3,
+    "domains": 2,
+    "cited_calculation_opened": true,
+    "changed_query_cleared_prior_results": true,
+    "no_match_abstained": true,
+    "served_js": {
+      "name": "index-L8L7q0c6.js",
+      "size_bytes": 390917,
+      "sha256": "c11185f1eaf37f6eeac185749d99de4b0af6020b096ce664ce09cadeb9c01d96",
+      "full_download_matches": true
+    }
+  },
+  "packaged_release": {
+    "release_url": "https://github.com/Nabilvisi/geodrill-pro/releases/tag/research-4",
+    "published_at_utc": "2026-10-06T11:37:37Z",
+    "source_commit": "e03d35c510d369759961c374def0928147442364",
+    "release_run": "https://github.com/Nabilvisi/geodrill-pro/actions/runs/37456819995",
+    "conclusion": "success",
+    "regression": {
+      "tests": 615,
+      "failures": 0,
+      "warning": "Existing Starlette/httpx TestClient deprecation"
+    },
+    "installer": {
+      "existing_restore_destination_preserved": true,
+      "restored_signing_identity_preserved": true,
+      "wrong_hash_restore_rejected": true,
+      "extra_user_file_preserved": true,
+      "clearance_generated": false,
+      "uninstall_exit_code": 0,
+      "backup_archive_sha256": "ca2956c9d043c3f76bf143f462cd97013a902fb3301f7bcca750214ab080a35b",
+      "installer_sha256": "32d41490cb76a5200a36bdeffab4545068db320dc980f22112085d111073999d",
+      "passed": true,
+      "smoke_exit_code": 0,
+      "source_snapshot_sha256": "731894305f0f264aceb99d0e46fc08e382286fa48ece9b3a81a67705ee8654aa",
+      "equipment_control": false,
+      "packaged_restore_exit_code": 0,
+      "persistent_evidence_preserved": true,
+      "restored_smoke_exit_code": 0,
+      "installed_executable_sha256": "9d359499c642859fb31c1ba02d67931a6aaddc46b7da203681b21d4232e65a7c",
+      "packaged_backup_exit_code": 0,
+      "install_exit_code": 0,
+      "signing_mode": "unsigned"
+    },
+    "downloaded_assets": [
+      {
+        "name": "GeoDrillPro-Setup.exe",
+        "size_bytes": 111283640,
+        "sha256": "32d41490cb76a5200a36bdeffab4545068db320dc980f22112085d111073999d",
+        "full_download_matches": true
+      },
+      {
+        "name": "GeoDrillPro-Windows-x64.zip",
+        "size_bytes": 173277889,
+        "sha256": "2806b60181aad38687c3e470d97b3994301b3089f0d317236a7c2531dac59451",
+        "full_download_matches": true
+      },
+      {
+        "name": "release-manifest.json",
+        "size_bytes": 1281,
+        "sha256": "28116a52e528a94b03a03c139eb827fe5b53fa3deee89dbc35061cd795ea2ba2",
+        "full_download_matches": true
+      },
+      {
+        "name": "SHA256SUMS.txt",
+        "size_bytes": 273,
+        "sha256": "3fdc929fef3e358da32dfb79eaff8c3ba449b492a4cbb8f4eb22f42e760035c0",
+        "full_download_matches": true
+      }
+    ],
+    "portable_executable_sha256": "9d359499c642859fb31c1ba02d67931a6aaddc46b7da203681b21d4232e65a7c",
+    "source_snapshot": {
+      "file_count": 143,
+      "sha256": "731894305f0f264aceb99d0e46fc08e382286fa48ece9b3a81a67705ee8654aa",
+      "canonical_digest_verified": true,
+      "included_in_portable": true,
+      "source_has_uncommitted_changes": true,
+      "note": "The build regenerates Streamlit frontend metadata. The snapshot identifies packaged source bytes and is not a clean-tree declaration."
+    },
+    "signing_mode": "unsigned",
+    "downloaded_installer_authenticode_status": "NotSigned"
+  },
   "remaining_software": [
     "Read-only ETP/WITSML adapter",
     "Automatic update/channel selection and binary rollback",
@@ -67,5 +187,6 @@
     "Scoped external security/compliance assessment"
   ],
   "equipment_control": false,
-  "clearance_generated": false
+  "clearance_generated": false,
+  "source_commit": "e03d35c510d369759961c374def0928147442364"
 }

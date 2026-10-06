@@ -516,3 +516,12 @@ The subsequent offset benchmarking and evidence search integration is described 
 
 The complete local regression passed 615 tests (zero failures/errors/skips; one existing Starlette/httpx TestClient deprecation). The production frontend compiled successfully. The internal Bandit scope reported zero findings across 9,904 lines with six existing suppressed checks. Local browser checks reopened an offset study, rendered cohort quantiles, found original-file and complete-calculation citations, inspected the cited study and verified no-match abstention. See evidence/connected-increments-verification.json and the GD-A14/GD-A18 implementation guides. Final remote CI, hosted and packaged evidence are recorded separately after completion.
 
+
+
+## Published connected workflows — 6 October 2026
+
+Research-4 at e03d35c510d369759961c374def0928147442364 is published. All 615 tests passed locally, on Windows/Ubuntu CI and in the Windows release job. The hosted app was restarted and verified through saved offset-study reopening, a new study saved through the UI, three source/calculation citations, cited-record inspection, changed-query clearing and no-match abstention. The served frontend JavaScript bytes match the recorded hash.
+
+Actual installed-EXE backup/restore, wrong-hash rejection, existing-destination preservation, signer preservation, restored diagnostics, install and uninstall passed again. All four full public downloads match their hashes, and the portable EXE and canonical source-snapshot digest match the manifest. The installer is unsigned (NotSigned); independent engineering qualification and external security assessment remain pending. See [current evidence](evidence/connected-increments-verification.json), [release](https://github.com/Nabilvisi/geodrill-pro/releases/tag/research-4), [offset implementation](GD-A14-IMPLEMENTATION.md) and [evidence search implementation](GD-A18-IMPLEMENTATION.md).
+
+This closes this increment's source, hosted and package checks. Read-only ETP/WITSML streaming, automatic update/binary rollback, dedicated team/directional/geomechanics integration, broader qualified model closures and representative operator acceptance remain open in [the delivery matrix](IMPROVEMENT-PLAN.md).

@@ -1,6 +1,6 @@
 # GeoDrill Pro Engineering Workstation
 
-Published research-3 verification: **602 tests passed on Windows and Linux**, with actual installed-EXE backup/restore and installer install/execute/uninstall verified. [Published recovery evidence](docs/evidence/published-recovery-verification.json) identifies exact source and downloaded asset hashes. Further connected workflow changes and remaining software gaps are tracked in [the delivery matrix](docs/IMPROVEMENT-PLAN.md).
+Published [research-4](https://github.com/Nabilvisi/geodrill-pro/releases/tag/research-4) verification: **615 tests passed locally, on Windows and Linux CI, and in the Windows release job**. Offset benchmarking and project evidence search are connected and verified on the hosted app. Actual installed-EXE backup/restore and installer install/execute/uninstall passed; all four complete public downloads matched their hashes. [Connected release evidence](docs/evidence/connected-increments-verification.json) identifies exact source, hosted assets and downloaded package hashes. Remaining software and qualification gaps are tracked in [the delivery matrix](docs/IMPROVEMENT-PLAN.md).
 
 
 **Version 0.8.0 — Engineering research workstation (GD-A01–A18).** The audited engineering workstation links source data → studies → scenario comparisons → programme governance → verified export and recovery.
@@ -8,7 +8,7 @@ Published research-3 verification: **602 tests passed on Windows and Linux**, wi
 See **[Current Improvement Plan](docs/IMPROVEMENT-PLAN.md)** for reconciled roadmap status, delivered increments, and pending gates. [VERIFICATION.md](docs/VERIFICATION.md) records dated, reproducible test evidence across the implemented modules, including the connected project journey and ISCWSA diagnostic benchmarks. [PROGRESS-AND-ROADMAP.md](docs/PROGRESS-AND-ROADMAP.md) provides the complete implementation sequence.
 
 > [!NOTE]
-> See docs/evidence/repair-verification.json for the current regression and artifact evidence. The 6 October claim that all commercial gates were closed has been withdrawn. Unsigned Windows research packaging, trusted publisher signing, public deployment, independent petroleum engineering qualification and external security review are tracked separately. Do not assume this checkout, the Windows executable, and the hosted Streamlit deployment contain identical releases without explicit verification. Equipment control and autonomous rig actuation remain strictly excluded (`equipment_control: false`).
+> See docs/evidence/connected-increments-verification.json for current regression, hosted and artifact evidence; repair-verification.json records earlier repairs. The 6 October claim that all commercial gates were closed has been withdrawn. Unsigned Windows research packaging, trusted publisher signing, public deployment, independent petroleum engineering qualification and external security review are tracked separately. Release evidence binds each verified surface to its actual revision or asset hash. Equipment control and autonomous rig actuation remain strictly excluded (`equipment_control: false`).
 
 [MODULES-1-17.md](docs/MODULES-1-17.md) maps delivered capabilities and boundaries. [MODEL-SPECS-0.8.md](docs/MODEL-SPECS-0.8.md) declares equations and applicability.
 
