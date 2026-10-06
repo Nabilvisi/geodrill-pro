@@ -4,6 +4,7 @@ import json
 import os
 import sqlite3
 import zipfile
+import re
 from contextlib import contextmanager
 from contextvars import ContextVar
 from datetime import datetime, timezone
@@ -90,6 +91,34 @@ class Store:
         payload = canonical({"at": now(), "actor": actor or current_actor.get(), "action": action, "project_id": project_id, "details": details})
         hashed = digest((previous + payload).encode())
         db.execute("INSERT INTO audit(payload,previous_hash,hash) VALUES(?,?,?)", (payload, previous, hashed))
+
+    @contextmanager
+    def _restore_transaction(self):
+        created_files = []
+        try:
+            with self.connect() as db:
+                yield db, created_files
+        except BaseException:
+            for path, expected_hash in created_files:
+                if path.resolve().is_relative_to(self.root.resolve()) and path.is_file() and not path.is_symlink() and digest(path.read_bytes()) == expected_hash:
+                    path.unlink()
+            raise
+
+    def _restore_file(self, path, data, created_files):
+        if not path.resolve().is_relative_to(self.root.resolve()):
+            raise ValueError("Restored evidence path escaped the data directory")
+        if path.exists():
+            if path.is_symlink() or digest(path.read_bytes()) != digest(data):
+                raise ValueError("Restored evidence conflicts with an existing file")
+            return
+        staged = path.parent / (uuid4().hex + ".tmp")
+        try:
+            with staged.open("xb") as output:
+                output.write(data)
+            os.link(staged, path)
+            created_files.append((path, digest(data)))
+        finally:
+            staged.unlink(missing_ok=True)
 
     def project(self, project_id):
         with self.connect() as db:
@@ -265,7 +294,7 @@ class Store:
     def calculations(self, project_id, model=None):
         self.project(project_id)
         history=self.audit_history()
-        evidence={e["details"].get("id"):e["details"] for e in history["entries"] if e["action"]=="calculation.executed" and e["project_id"]==project_id}
+        evidence={e["details"].get("id"):e["details"] for e in history["entries"] if e["action"] in {"calculation.executed", "calculation.restored"} and e["project_id"]==project_id}
         with self.connect() as db:
             values=[json.loads(r[0]) for r in db.execute("SELECT payload FROM calculations WHERE project_id=? ORDER BY created_at DESC", (project_id,))]
         for value in values:
@@ -301,6 +330,9 @@ class Store:
 
             _add("project.json", canonical(project).encode("utf-8"))
             _add("keys/server_attestation.pub", self._public_key.public_bytes_raw())
+            for fingerprint, public_key in sorted(self._trusted_keys.items()):
+                if fingerprint != self.attestation_fingerprint:
+                    _add(f"keys/trusted/{fingerprint}.pub", public_key.public_bytes_raw())
 
             with self.connect() as db:
                 datasets = [dict(r) for r in db.execute("SELECT * FROM datasets WHERE project_id=?", (project_id,)).fetchall()]
@@ -383,25 +415,39 @@ class Store:
         return buf.getvalue()
 
     def restore_bundle(self, bundle_bytes: bytes) -> dict:
+        if len(bundle_bytes) > 20 * 1024 * 1024:
+            raise ValueError("Bundle exceeds the 20 MiB archive limit")
         try:
             zf = zipfile.ZipFile(io.BytesIO(bundle_bytes), "r")
         except Exception as e:
             raise ValueError(f"Corrupted bundle archive: {e}")
 
-        for name in zf.namelist():
-            if name.startswith("/") or name.startswith("\\") or ".." in name:
+        infos = zf.infolist()
+        names = zf.namelist()
+        if len(names) != len(set(names)) or len(names) > 20_000:
+            raise ValueError("Bundle contains duplicate or excessive archive entries")
+        if sum(i.file_size for i in infos) > 128 * 1024 * 1024:
+            raise ValueError("Bundle exceeds the 128 MiB expanded limit")
+        for name in names:
+            if name.startswith("/") or "\\" in name or ":" in name or ".." in name:
                 raise ValueError(f"Insecure bundle entry path: {name}")
 
         if "manifest.json" not in zf.namelist():
             raise ValueError("Invalid bundle: manifest.json is missing")
 
+        if zf.getinfo("manifest.json").file_size > 2 * 1024 * 1024:
+            raise ValueError("Bundle manifest exceeds the 2 MiB limit")
         manifest_raw = zf.read("manifest.json")
         try:
             manifest = json.loads(manifest_raw.decode("utf-8"))
         except Exception:
             raise ValueError("Corrupted bundle manifest")
 
+        if not isinstance(manifest, dict) or manifest.get("format") != "geodrill-project-bundle" or manifest.get("format_version") != "1.0":
+            raise ValueError("Unsupported project bundle format")
         file_hashes = manifest.get("file_hashes", {})
+        if not isinstance(file_hashes, dict) or set(file_hashes) != set(names) - {"manifest.json"}:
+            raise ValueError("Bundle manifest does not cover the complete archive")
         for relpath, expected_sha in file_hashes.items():
             if relpath not in zf.namelist():
                 raise ValueError(f"Corrupted bundle: missing file {relpath}")
@@ -412,29 +458,99 @@ class Store:
             if digest(data) != expected_sha:
                 raise ValueError(f"Corrupted bundle: hash mismatch for {relpath}")
 
-        if "keys/server_attestation.pub" in zf.namelist():
-            server_pub_raw = zf.read("keys/server_attestation.pub")
-            self.add_trusted_key(server_pub_raw)
-        elif "server_public_key" in manifest:
-            self.add_trusted_key(bytes.fromhex(manifest["server_public_key"]))
-
         manifest_copy = {k: v for k, v in manifest.items() if k != "signature"}
         sig = manifest.get("signature")
         fp = manifest.get("server_fingerprint")
-        if sig and not self.verify_attestation(canonical(manifest_copy).encode("utf-8"), sig, fp):
+        try:
+            server_pub_raw = zf.read("keys/server_attestation.pub")
+            pub_key = ed25519.Ed25519PublicKey.from_public_bytes(server_pub_raw)
+            if fp != digest(server_pub_raw) or manifest.get("server_public_key") != server_pub_raw.hex() or not sig:
+                raise ValueError("Missing or inconsistent signer identity")
+            pub_key.verify(bytes.fromhex(sig), canonical(manifest_copy).encode("utf-8"))
+        except (KeyError, ValueError, InvalidSignature, TypeError):
             raise ValueError("Corrupted bundle: manifest signature verification failed")
+        supplied_keys = {manifest["server_fingerprint"]: pub_key}
+        for name in names:
+            match = re.fullmatch(r"keys/trusted/([a-f0-9]{64})\.pub", name)
+            if match:
+                raw_key = zf.read(name)
+                if digest(raw_key) != match[1]:
+                    raise ValueError("Bundle public-key fingerprint mismatch")
+                supplied_keys[match[1]] = ed25519.Ed25519PublicKey.from_public_bytes(raw_key)
 
         try:
             project = json.loads(zf.read("project.json").decode("utf-8"))
         except Exception as e:
             raise ValueError(f"Corrupted project.json in bundle: {e}")
         project_id = project["id"]
+        if not isinstance(project_id, str) or not re.fullmatch(r"[A-Za-z0-9_-]{1,128}", project_id) or manifest.get("project_id") != project_id:
+            raise ValueError("Bundle project identity is invalid or inconsistent")
+        scoped_files = ("datasets/datasets.json", "events/events.json", "revisions/revisions.json",
+                        "calculations/calculations.json", "reports/reports.json", "programmes/programmes.json",
+                        "members/members.json")
+        for entry in scoped_files:
+            rows = json.loads(zf.read(entry))
+            if not isinstance(rows, list) or any(not isinstance(r, dict) or r.get("project_id") != project_id for r in rows):
+                raise ValueError("Bundle record belongs to a different project")
+        for record in json.loads(zf.read("datasets/datasets.json")):
+            if not isinstance(record.get("id"), str) or not re.fullmatch(r"[A-Za-z0-9_-]{1,128}", record["id"]) or not isinstance(record.get("source_hash"), str) or not re.fullmatch(r"[a-f0-9]{64}", record["source_hash"]):
+                raise ValueError("Bundle dataset file reference is invalid")
+            raw_name = f"datasets/raw/{record['source_hash']}"
+            parquet_name = f"datasets/parquet/{record['id']}.parquet"
+            payload = json.loads(record["payload"])
+            if file_hashes.get(raw_name) != record["source_hash"] or file_hashes.get(parquet_name) != payload.get("parquet_sha256"):
+                raise ValueError("Bundle dataset source/normalized evidence hash is inconsistent")
+        users_to_restore = json.loads(zf.read("users/users.json"))
+        user_columns = {"id", "username", "display_name", "role", "password_hash", "active", "failed_count", "locked_until", "created_at"}
+        if not isinstance(users_to_restore, list) or any(not isinstance(u, dict) or set(u) != user_columns for u in users_to_restore):
+            raise ValueError("Bundle user record contains unsupported fields")
+        programme_ids = {r["id"] for r in json.loads(zf.read("programmes/programmes.json"))}
+        versions = json.loads(zf.read("programmes/versions.json"))
+        if any(v.get("programme_id") not in programme_ids for v in versions):
+            raise ValueError("Bundle programme version belongs to another project")
+        version_ids = {v["id"] for v in versions}
+        transitions = json.loads(zf.read("programmes/transitions.json"))
+        if any(t.get("version_id") not in version_ids for t in transitions):
+            raise ValueError("Bundle transition belongs to another programme")
+        for entry in ("reports/reports.json", "revisions/revisions.json"):
+            for record in json.loads(zf.read(entry)):
+                if digest(record["payload"].encode()) != record["sha256"]:
+                    raise ValueError("Bundle report/revision evidence hash mismatch")
+        for version in versions:
+            if digest(version["content"].encode()) != version["content_sha256"]:
+                raise ValueError("Bundle programme content hash mismatch")
+            previous = "0" * 64
+            for transition in sorted((t for t in transitions if t["version_id"] == version["id"]), key=lambda t: t["sequence"]):
+                payload = canonical({"version_id": version["id"], "content_sha256": version["content_sha256"],
+                                     "from": transition["from_state"], "to": transition["to_state"],
+                                     "actor_id": transition["actor_id"], "actor_role": transition["actor_role"],
+                                     "note": transition["note"], "at": transition["at"]})
+                original = (previous + payload).encode()
+                if transition["previous_hash"] != previous or transition["hash"] != digest(original):
+                    raise ValueError("Bundle programme transition chain mismatch")
+                try:
+                    supplied_keys[transition["signer_fingerprint"]].verify(bytes.fromhex(transition["signature"]), original)
+                except (KeyError, ValueError, InvalidSignature, TypeError):
+                    raise ValueError("Bundle programme transition signature mismatch")
+                previous = transition["hash"]
 
-        with self.connect() as db:
+        with self._restore_transaction() as (db, created_files):
             db.execute("BEGIN IMMEDIATE")
             existing = db.execute("SELECT id FROM projects WHERE id=?", (project_id,)).fetchone()
             if existing:
                 raise ValueError(f"Project '{project_id}' already exists in this workstation")
+
+            for query, entry in (("SELECT 1 FROM datasets WHERE id=?", "datasets/datasets.json"), ("SELECT 1 FROM events WHERE id=?", "events/events.json"),
+                                 ("SELECT 1 FROM engineering_revisions WHERE id=?", "revisions/revisions.json"), ("SELECT 1 FROM calculations WHERE id=?", "calculations/calculations.json"),
+                                 ("SELECT 1 FROM reports WHERE id=?", "reports/reports.json"), ("SELECT 1 FROM programmes WHERE id=?", "programmes/programmes.json"),
+                                 ("SELECT 1 FROM programme_versions WHERE id=?", "programmes/versions.json")):
+                for record in json.loads(zf.read(entry)):
+                    if db.execute(query, (record["id"],)).fetchone():
+                        raise ValueError("Bundle identifier conflicts with existing workstation evidence")
+            for user in users_to_restore:
+                old = db.execute("SELECT * FROM users WHERE id=? OR username=?", (user["id"], user["username"])).fetchone()
+                if old and dict(old) != user:
+                    raise ValueError("Bundle user identity conflicts with an existing account")
 
             payload_keys = {k: v for k, v in project.items() if k not in ("id", "created_at")}
             db.execute("INSERT INTO projects VALUES(?,?,?)", (project_id, canonical(payload_keys), project["created_at"]))
@@ -452,11 +568,11 @@ class Store:
                 raw_entry = f"datasets/raw/{d['source_hash']}"
                 if raw_entry in zf.namelist():
                     raw_data = zf.read(raw_entry)
-                    (self.root / "raw" / d["source_hash"]).write_bytes(raw_data)
+                    self._restore_file(self.root / "raw" / d["source_hash"], raw_data, created_files)
                 parquet_entry = f"datasets/parquet/{d['id']}.parquet"
                 if parquet_entry in zf.namelist():
                     parquet_data = zf.read(parquet_entry)
-                    (self.root / "parquet" / f"{d['id']}.parquet").write_bytes(parquet_data)
+                    self._restore_file(self.root / "parquet" / f"{d['id']}.parquet", parquet_data, created_files)
                 db.execute("INSERT OR REPLACE INTO datasets VALUES(?,?,?,?,?,?)",
                            (d["id"], d["project_id"], d["kind"], d["source_hash"], d["payload"], d["created_at"]))
 
@@ -474,6 +590,7 @@ class Store:
             for c in calculations:
                 db.execute("INSERT OR REPLACE INTO calculations VALUES(?,?,?,?)",
                            (c["id"], c["project_id"], c["payload"], c["created_at"]))
+                self.audit(db, "calculation.restored", project_id, json.loads(c["payload"]))
 
             reports = json.loads(zf.read("reports/reports.json").decode("utf-8"))
             for rep in reports:
@@ -495,15 +612,20 @@ class Store:
             for t in p_transitions:
                 sig = t.get("signature", "")
                 fp = t.get("signer_fingerprint", "")
-                db.execute("INSERT OR REPLACE INTO programme_transitions(sequence,version_id,from_state,to_state,actor_id,actor_role,note,at,previous_hash,hash,signature,signer_fingerprint) VALUES(?,?,?,?,?,?,?,?,?,?,?,?)",
-                           (t["sequence"], t["version_id"], t["from_state"], t["to_state"], t["actor_id"], t["actor_role"], t["note"], t["at"], t["previous_hash"], t["hash"], sig, fp))
+                db.execute("INSERT INTO programme_transitions(version_id,from_state,to_state,actor_id,actor_role,note,at,previous_hash,hash,signature,signer_fingerprint) VALUES(?,?,?,?,?,?,?,?,?,?,?)",
+                           (t["version_id"], t["from_state"], t["to_state"], t["actor_id"], t["actor_role"], t["note"], t["at"], t["previous_hash"], t["hash"], sig, fp))
 
             members = json.loads(zf.read("members/members.json").decode("utf-8"))
             for m in members:
                 db.execute("INSERT OR REPLACE INTO project_members VALUES(?,?,?,?)",
                            (m["project_id"], m["user_id"], m["added_by"], m["added_at"]))
 
-            self.audit(db, "bundle.restored", project_id, {"manifest_hash": digest(manifest_raw)})
+            self.audit(db, "bundle.restored", project_id, {"manifest_hash": digest(manifest_raw),
+                       "original_history": json.loads(zf.read("audit/audit.json")),
+                       "supplied_signer_fingerprint": manifest["server_fingerprint"], "independently_trusted_signer": False})
+
+        for public_key in supplied_keys.values():
+            self.add_trusted_key(public_key.public_bytes_raw())
 
         return {
             "restored": True,

@@ -30,6 +30,8 @@ def role_denial(method: str, path: str, user: dict) -> str | None:
     """Return a reason string if this user's role may not call this route, else None."""
     if path == "/api/audit" or path.startswith("/api/audit/"):
         return None if user["role"] == "admin" else "Administrator role required"
+    if path == "/api/projects/bundle/restore":
+        return None if user["role"] == "admin" else "Administrator role required for identity-bearing project restore"
     if method.upper() in SAFE_METHODS or _SELF_AUTHORISED.match(path):
         return None
     if user["role"] not in WRITE_ROLES:

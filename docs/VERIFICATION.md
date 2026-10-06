@@ -482,3 +482,25 @@ for workflow URLs, exact hashes and remaining external qualification gates.
 
 Trusted publisher signing, independent engineering qualification and external
 security/compliance assessment remain pending. No operational authority is issued.
+
+## 6 October 2026 — recovery source repair and completion audit
+
+Local source regression: 602 passed, zero failures/errors/skips, one existing
+Starlette/httpx warning, 229.095 seconds in JUnit. Command:
+python -m pytest -q --tb=short --junitxml=build/completion-audit-tests.xml.
+
+Atomic failed migrations, no database initialization on imports, whole-workstation
+recovery, tamper/path/existing-target refusal, restored study reopening, supplied
+source-history retention, signature/key re-export, cross-project identity protection,
+failed restore file/database rollback and team restore roles are exercised. Actual
+installed EXE acceptance is extended for packaged backup and fresh restore.
+
+Bandit over services, packages, tools/backup_restore.py and tools/desktop_app.py:
+zero findings, 9,875 lines, six existing suppressed checks. This is internal verification,
+not external certification. Installer PowerShell parses without syntax errors.
+Source evidence: docs/evidence/recovery-verification.json.
+
+The code audit corrects absent ETP/WITSML streaming, automatic updater/binary rollback,
+incomplete API/kernel-to-UI integration and restricted hydraulic/contact closures.
+IMPROVEMENT-PLAN.md preserves these open requirements. Research-2 evidence remains
+tied to its original revision; this source requires separate CI/package verification.

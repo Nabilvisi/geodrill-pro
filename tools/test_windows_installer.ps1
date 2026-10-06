@@ -26,9 +26,32 @@ $expectedHash = (Get-FileHash -LiteralPath (Join-Path $projectRoot 'dist\GeoDril
 $installedHash = (Get-FileHash -LiteralPath $installedExe).Hash
 if ($installedHash -ne $expectedHash) { throw 'Installed executable hash differs from the packaged build.' }
 $previousDataDirectory = $env:GEODRILL_DATA_DIR
+$backupArchive = Join-Path $verificationRoot 'workstation-backup.zip'
+$restoredDataRoot = Join-Path $verificationRoot 'restored-evidence'
+$rejectedDataRoot = Join-Path $verificationRoot 'rejected-restore'
 try {
     $env:GEODRILL_DATA_DIR = $testDataRoot
     $smoke = Start-Process -FilePath $installedExe -ArgumentList '--smoke-test','--no-browser' -WindowStyle Hidden -Wait -PassThru
+    if ($smoke.ExitCode -ne 0) { throw 'Installed API smoke failed before backup verification.' }
+    $backup = Start-Process -FilePath $installedExe -ArgumentList @('--backup',('"' + $backupArchive + '"')) -WindowStyle Hidden -Wait -PassThru
+    $receiptPath = $backupArchive + '.receipt.json'
+    if ($backup.ExitCode -ne 0 -or -not (Test-Path -LiteralPath $receiptPath)) { throw 'Packaged workstation backup failed.' }
+    $backupReceipt = Get-Content -LiteralPath $receiptPath -Raw | ConvertFrom-Json
+    if ($backupReceipt.sha256 -ne (Get-FileHash -LiteralPath $backupArchive).Hash.ToLowerInvariant()) { throw 'Backup receipt hash mismatch.' }
+    $rejectedRestore = Start-Process -FilePath $installedExe -ArgumentList @('--restore',('"' + $backupArchive + '"'),'--destination',('"' + $rejectedDataRoot + '"'),'--expected-sha256',('0' * 64)) -WindowStyle Hidden -Wait -PassThru
+    if ($rejectedRestore.ExitCode -eq 0 -or (Test-Path -LiteralPath $rejectedDataRoot)) { throw 'Packaged restore accepted the wrong hash.' }
+    $restore = Start-Process -FilePath $installedExe -ArgumentList @('--restore',('"' + $backupArchive + '"'),'--destination',('"' + $restoredDataRoot + '"'),'--expected-sha256',$backupReceipt.sha256) -WindowStyle Hidden -Wait -PassThru
+    if ($restore.ExitCode -ne 0) { throw 'Packaged fresh-directory restore failed.' }
+    $originalKey = Get-FileHash -LiteralPath (Join-Path $testDataRoot 'keys\server_ed25519.key')
+    $restoredKey = Get-FileHash -LiteralPath (Join-Path $restoredDataRoot 'keys\server_ed25519.key')
+    if ($originalKey.Hash -ne $restoredKey.Hash) { throw 'Restore did not preserve the signing identity.' }
+    $restoredDatabase = Join-Path $restoredDataRoot 'geodrill.sqlite3'
+    $beforeRefusedOverwrite = (Get-FileHash -LiteralPath $restoredDatabase).Hash
+    $refusedOverwrite = Start-Process -FilePath $installedExe -ArgumentList @('--restore',('"' + $backupArchive + '"'),'--destination',('"' + $restoredDataRoot + '"'),'--expected-sha256',$backupReceipt.sha256) -WindowStyle Hidden -Wait -PassThru
+    if ($refusedOverwrite.ExitCode -eq 0 -or (Get-FileHash -LiteralPath $restoredDatabase).Hash -ne $beforeRefusedOverwrite) { throw 'Existing restore destination was overwritten.' }
+    $env:GEODRILL_DATA_DIR = $restoredDataRoot
+    $restoredSmoke = Start-Process -FilePath $installedExe -ArgumentList '--smoke-test','--no-browser' -WindowStyle Hidden -Wait -PassThru
+    if ($restoredSmoke.ExitCode -ne 0 -or -not (Test-Path -LiteralPath (Join-Path $restoredDataRoot 'smoke-test.json'))) { throw 'Restored workstation failed packaged API diagnostics.' }
 } finally {
     $env:GEODRILL_DATA_DIR = $previousDataDirectory
 }
@@ -51,6 +74,13 @@ $evidence = @{
     uninstall_exit_code = $uninstalled.ExitCode
     extra_user_file_preserved = $true
     persistent_evidence_preserved = $true
+    packaged_backup_exit_code = $backup.ExitCode
+    packaged_restore_exit_code = $restore.ExitCode
+    restored_smoke_exit_code = $restoredSmoke.ExitCode
+    wrong_hash_restore_rejected = $true
+    existing_restore_destination_preserved = $true
+    restored_signing_identity_preserved = $true
+    backup_archive_sha256 = $backupReceipt.sha256
     signing_mode = $releaseManifest.signing_mode
     source_snapshot_sha256 = $releaseManifest.source_snapshot_sha256
     equipment_control = $false

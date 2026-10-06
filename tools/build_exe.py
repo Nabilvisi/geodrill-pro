@@ -39,6 +39,7 @@ def build(mode: str, cert: Path | None = None) -> Path:
         "--hidden-import", "uvicorn.loops.auto",
         "--hidden-import", "uvicorn.protocols.http.auto",
         "--hidden-import", "uvicorn.lifespan.on",
+        "--hidden-import", "tools.backup_restore",
         str(ROOT / "tools" / "desktop_app.py"),
     ]
     subprocess.run(command, cwd=ROOT, check=True)

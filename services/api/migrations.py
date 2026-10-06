@@ -108,17 +108,28 @@ def latest_version() -> int:
 
 
 def migrate(db: sqlite3.Connection) -> list[int]:
-    """Apply pending migrations in order. Returns the versions applied."""
+    """Apply pending migrations atomically, preserving the old schema on failure."""
     versions = [v for v, _ in MIGRATIONS]
     if versions != sorted(set(versions)):
         raise RuntimeError("Migration versions must be unique and increasing")
     version = current_version(db)
     if version > latest_version():
         raise RuntimeError(f"Database schema v{version} is newer than this application (v{latest_version()})")
-    applied = []
-    for target, script in MIGRATIONS:
-        if target > version:
-            db.executescript(script)
-            db.execute(f"PRAGMA user_version={int(target)}")
-            applied.append(target)
-    return applied
+    pending = [(target, script) for target, script in MIGRATIONS if target > version]
+    if not pending:
+        return []
+    if db.in_transaction:
+        raise RuntimeError("Migrations require a connection without an active transaction")
+    # journal_mode cannot change inside a transaction. Establish WAL before the
+    # historical baseline script repeats this pragma inside the atomic batch.
+    db.execute("PRAGMA journal_mode=WAL")
+    statements = ["BEGIN IMMEDIATE;"]
+    for target, script in pending:
+        statements.extend((script, f"PRAGMA user_version={int(target)};"))
+    statements.append("COMMIT;")
+    try:
+        db.executescript("\n".join(statements))
+    except BaseException:
+        db.rollback()
+        raise
+    return [target for target, _ in pending]

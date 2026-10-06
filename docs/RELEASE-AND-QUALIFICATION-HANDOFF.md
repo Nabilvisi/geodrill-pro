@@ -62,3 +62,12 @@ does not establish it.
 
 Equipment control and automated drilling clearance remain unavailable throughout
 these release and review steps.
+
+## Additional software scope found by the completion audit
+
+The current IMPROVEMENT-PLAN.md supersedes the earlier implication that only external
+review/signing remained. Read-only ETP/WITSML streaming, automatic update/binary
+rollback, dedicated workflows for API/kernel-only increments and broader validated
+hydraulic/contact/transient closures remain unfinished. Original backlog acceptance
+criteria are retained. The new recovery repair has separate source evidence in
+recovery-verification.json and must pass its own packaged release checks.

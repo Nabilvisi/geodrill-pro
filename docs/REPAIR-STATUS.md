@@ -57,3 +57,18 @@ Required external steps:
 The merge, hosted repair and unsigned research publication are complete. Full independent qualification and trusted publisher distribution remain open while the external requirements are missing. Equipment control and automated drilling clearance remain false.
 
 See [release and independent-review handoff](RELEASE-AND-QUALIFICATION-HANDOFF.md) for the concrete remaining inputs and acceptance evidence.
+
+## Completion audit and subsequent recovery repair
+
+The broader code audit found remaining software scope beyond the three external gates:
+ETP/WITSML streaming is absent; automatic update/binary rollback is absent; several
+advanced capabilities have only API/kernel paths, and broader hydraulic/contact
+closures remain unsupported. These are unfinished requirements. The former statement
+that only external qualification remained is superseded by IMPROVEMENT-PLAN.md.
+
+Subsequent recovery source passes 602 tests locally. It adds atomic failed migrations,
+whole-workstation backup/restore, explicit imported-study audit records, signature/key
+preservation through re-export, archive/identity validation and packaged recovery
+arguments. See evidence/recovery-verification.json and GD-A08-IMPLEMENTATION.md.
+Research-2 remains the verified earlier publication; these changes require their own
+CI and packaged-release acceptance before a newer binary is claimed.

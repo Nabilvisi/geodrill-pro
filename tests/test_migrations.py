@@ -58,3 +58,35 @@ def test_store_creates_schema_and_audit_chain_still_append_only(tmp_path):
         assert current_version(db) == latest_version()
         with pytest.raises(sqlite3.DatabaseError, match="append-only"):
             db.execute("DELETE FROM audit")
+
+
+def test_failed_migration_rolls_back_schema_data_and_version(tmp_path, monkeypatch):
+    db = sqlite3.connect(tmp_path / "rollback.sqlite3")
+    migrate(db)
+    before = current_version(db)
+    db.execute("INSERT INTO projects VALUES('preserved','{}','2026-01-01')")
+    db.commit()
+    monkeypatch.setattr(migrations, "MIGRATIONS", [*migrations.MIGRATIONS,
+        (before + 1, "ALTER TABLE projects ADD COLUMN temporary_column TEXT; DELETE FROM projects;"),
+        (before + 2, "CREATE TABLE transient_table(x); INSERT INTO missing_table VALUES(1);")])
+    with pytest.raises(sqlite3.OperationalError, match="missing_table"):
+        migrate(db)
+    assert current_version(db) == before
+    assert db.execute("SELECT id FROM projects").fetchall() == [("preserved",)]
+    assert "temporary_column" not in [r[1] for r in db.execute("PRAGMA table_info(projects)")]
+    assert not db.execute("SELECT name FROM sqlite_master WHERE name='transient_table'").fetchone()
+    assert db.in_transaction is False
+    db.close()
+
+
+def test_migration_refuses_to_commit_callers_pending_transaction(tmp_path, monkeypatch):
+    db = sqlite3.connect(tmp_path / "pending.sqlite3")
+    migrate(db)
+    db.execute("INSERT INTO projects VALUES('pending','{}','2026-01-01')")
+    monkeypatch.setattr(migrations, "MIGRATIONS", [*migrations.MIGRATIONS, (latest_version() + 1, "CREATE TABLE t(x);")])
+    with pytest.raises(RuntimeError, match="active transaction"):
+        migrate(db)
+    assert db.in_transaction is True
+    db.rollback()
+    assert not db.execute("SELECT id FROM projects").fetchone()
+    db.close()

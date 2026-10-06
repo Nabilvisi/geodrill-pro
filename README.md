@@ -1,6 +1,6 @@
 # GeoDrill Pro Engineering Workstation
 
-Current repair verification: **577 passed, zero failures/errors**; Windows research installer install/execute/uninstall verified. See [repair status](docs/REPAIR-STATUS.md) for current gates and artifact evidence.
+Published research-2 verification: **578 tests passed on Windows and Linux**, with installer install/execute/uninstall verified. Subsequent recovery repairs and remaining software gaps are tracked separately in [the delivery matrix](docs/IMPROVEMENT-PLAN.md).
 
 
 **Version 0.8.0 — Engineering research workstation (GD-A01–A18).** The audited engineering workstation links source data → studies → scenario comparisons → programme governance → verified export and recovery.
@@ -102,9 +102,9 @@ M4 requires compatible total physical porosity and wet-shale volume assumptions.
 - M16 native binary EOS is not actual-mud solubility. External phase flags remain supplied evidence; batch replay does not solve coupled wellbore momentum, energy or slip transport.
 - M17 has a simulated plant and validator only. It has no rig network adapter, hardware-command endpoint or authority to control equipment (`equipment_control: false`).
 - MSE uses surface observations for imports. Downhole energy losses, motor power and synchronization error are not inferred.
-- Replay supports **source-time playback** and **ETP 1.2 / WITSML 2.1 read-only streaming ingestion** with arrival-time vs source-time gap inspection (GD-A07).
+- Replay supports **source-time playback**. ETP/WITSML streaming and arrival-time reconstruction remain unimplemented; see [GD-A07 status](docs/GD-A07-IMPLEMENTATION.md).
 - Directional surveying includes WGS84 UTM projections, ISCWSA MWD Rev5.11 positional uncertainty propagation benchmarked against diagnostic cases, tie-in covariance, multi-tool intervals, and 3D closest approach (GD-A10, `clearance_generated: false`).
-- Advanced engineering includes non-Newtonian Herschel-Bulkley hydraulics with dynamic cuttings bed transport (GD-A11), 3D stiff-string torque & drag with calibrated friction and vibration screening (GD-A12), API TR 5C3 / ISO 10400 casing collapse and operational load lines (GD-A13), offset well P10/P50/P90 benchmarking (GD-A14), 8-position IADC dull grading bit wear mechanics (GD-A15), passive anomaly advisory with disjoint validation (GD-A16), 3D in-situ stresses and Mogi-Coulomb geomechanics (GD-A17), and permission-aware evidence search with SHA-256 citations (GD-A18).
+- Added research calculations include laminar Herschel-Bulkley hydraulics and no-slip cuttings mixture density, a reduced bending-gradient torque/drag extension with supplied calibration/holdout points, casing-collapse/load-envelope screens, IADC inspection progression and offline causal anomaly replay. Dynamic deviated cuttings beds and clearance-dependent stiff-string contact remain unsupported. Offset percentile and Mogi-Coulomb kernels have tests but are not connected app workflows. Evidence search is available through the API. [The delivery matrix](docs/IMPROVEMENT-PLAN.md) records remaining integration and qualification requirements.
 - Multi-user governance supports named roles (Engineer/Author, Reviewer, Approver, Admin), four-eyes review controls, and Ed25519 digital server attestations (GD-A09).
 - Project backup and disaster recovery supports scoped `.gdpz` archives and verified fresh-directory restoration with preserved cryptographic hashes and signatures (GD-A08).
 - Standalone Windows packaging provides portable `dist/GeoDrillPro-Windows-x64.zip` containing `GeoDrillPro.exe` (PyInstaller 6.22.3). Installer code-signing and external third-party security audits remain separate pending gates.
@@ -115,7 +115,7 @@ By default, data is under `data/`: SQLite state, original sources in `raw/`, nor
 
 **This checkout is in OneDrive. The operating system's OneDrive client may synchronize its contents independently of GeoDrill.** For real project data, use an approved non-synchronized directory by setting `GEODRILL_DATA_DIR` before starting the app. Stop the application before switching the data directory. Existing data is not automatically moved.
 
-For backup, GeoDrill Pro provides complete `.gdpz` project archives (`tools/backup_restore.py`, `packages/engineering/scenarios.py`) and consistent SQLite backup. Restoring into a fresh directory re-verifies all source hashes, calculation identities, and digital attestations before reopening. Signed/encrypted installers and crash/disk-full recovery qualification remain future work.
+For project exchange, the API provides `.gdpz` archives through `services/api/storage.py`. Current source also provides whole-workstation SQLite/file recovery through `tools/backup_restore.py` and desktop recovery arguments. These commands require a packaged release newer than research-2. See [recovery instructions](docs/GD-A08-IMPLEMENTATION.md) for preserved evidence, sensitive backup contents and fresh-directory restore. Trusted publisher signing, automatic update/binary rollback and broader crash/disk-full qualification remain open.
 
 ## Import contracts
 

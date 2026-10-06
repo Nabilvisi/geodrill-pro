@@ -380,6 +380,9 @@ def test_complete_connected_project_journey(test_setup, tmp_path_factory):
 
     restored_ds = fresh_client.get(f"/api/projects/{proj_id}/datasets/{survey_ds_id}", headers=fresh_author_auth).json()
     assert restored_ds["source_hash"] == survey_hash
+    restored_studies = fresh_client.get(f"/api/projects/{proj_id}/calculations", headers=fresh_author_auth)
+    assert restored_studies.status_code == 200
+    assert any(s["id"] == study3_id for s in restored_studies.json())
 
     restored_prog = fresh_client.get(f"/api/team/programmes/{prog_id}", headers=fresh_author_auth).json()
     assert restored_prog["versions"][0]["state"] == "issued"

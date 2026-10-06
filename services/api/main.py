@@ -497,8 +497,10 @@ def create_app(data_dir: Path | None = None, mode: str | None = None):
 
     @app.post("/api/projects/bundle/restore", status_code=201)
     async def project_bundle_restore(file: UploadFile = File(...)):
-        raw = await file.read(MAX_FILE_BYTES * 10)
+        raw = await file.read(MAX_FILE_BYTES + 1)
         await file.close()
+        if len(raw) > MAX_FILE_BYTES:
+            raise HTTPException(413, "Bundle exceeds the 2 MiB HTTP import limit; use local workstation backup/restore for larger recovery.")
         if len(raw) == 0:
             raise HTTPException(400, "Empty bundle file uploaded.")
         def execute():
@@ -873,4 +875,5 @@ def create_app(data_dir: Path | None = None, mode: str | None = None):
     return app
 
 
-app = create_app()
+# Server launchers use this module's create_app factory. Importing the API must
+# not initialize or migrate a default data directory before a caller selects it.
