@@ -1,0 +1,22 @@
+{
+  "workflow_run": 37509703148,
+  "job_id": 112427356875,
+  "persistent_evidence_preserved": true,
+  "install_exit_code": 0,
+  "wrong_hash_restore_rejected": true,
+  "restored_signing_identity_preserved": true,
+  "equipment_control": false,
+  "packaged_backup_exit_code": 0,
+  "restored_smoke_exit_code": 0,
+  "uninstall_exit_code": 0,
+  "packaged_restore_exit_code": 0,
+  "existing_restore_destination_preserved": true,
+  "extra_user_file_preserved": true,
+  "smoke_exit_code": 0,
+  "clearance_generated": false,
+  "passed": true,
+  "origin": "GitHub Actions Windows release runner; status fields from original job log",
+  "release_tag": "research-6",
+  "installer_sha256": "61a22c8ba0c65a540ae984b1b54162f4bc9c83d0af1c0b5559d0b95a37008bbb",
+  "installed_executable_sha256": "3693ee88579f6ed64076fca26490fbd663a931d86103384577b7fe7ae40397b7"
+}

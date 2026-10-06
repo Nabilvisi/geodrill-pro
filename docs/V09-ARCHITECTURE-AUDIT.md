@@ -40,7 +40,11 @@ The application is labelled **0.9.0-alpha.1**, an engineering research workstati
 
 ## Evidence and practical limits
 
-[The progress record](../GEODRILL_PRO_V0.9_PROGRESS.md) follows the supplied template and records final commands, local/remote revisions, package hashes and manual verification. [Machine-readable verification](evidence/v09-verification.json) separates local tests, local packages, GitHub builds and rendered Streamlit evidence. Historical release records are retained with their original revision identities.
+The approved publication is complete: PR #2 merged at `8dd27e7`, both main CI platforms passed 683 tests, Streamlit renders the matching 0.9.0-alpha.1 assets, and unsigned `research-6` is public. Original hosted survey/report bytes, mobile selection, and the actual downloaded executable's import → geometry → calculation → report flow were verified. Local and release-runner installer recovery evidence are recorded separately. Screenshots show [the hosted update](evidence/v09-hosted-workstation.jpg) and [the packaged workstation](evidence/v09-packaged-workstation.jpg).
+
+The release manifest truthfully records a dirty build because generated frontend release-directory identities differ from the committed component manifest. Its source snapshot reconciles 208 source files to the application commit's LF or CRLF bytes, plus two generated build identity files; no unexplained source differences were found. Binary integrity and qualification/signing states remain separately declared.
+
+[The progress record](../GEODRILL_PRO_V0.9_PROGRESS.md) follows the supplied template and records final commands, local/remote revisions, package hashes and manual verification. [Machine-readable verification](evidence/v09-verification.json) separates local tests, package results, GitHub builds and rendered Streamlit evidence without exposing host-specific metadata. Detailed local machine records are retained outside Git. Historical release records are retained with their original revision identities.
 
 The source guard is portable across LF/CRLF checkouts, while Windows `SOURCE-SNAPSHOT.json` deliberately hashes the actual packaged bytes. Different release runners can produce different binary hashes; verify against the manifest for the package actually downloaded.
 

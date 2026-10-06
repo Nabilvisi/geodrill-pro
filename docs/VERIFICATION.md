@@ -1,5 +1,9 @@
 # Verification record — 6 October 2026 / version 0.8.0
 
+**Verified publication — 7 October 2026:** [PR #2](https://github.com/Nabilvisi/geodrill-pro/pull/2) is merged into `main` at `8dd27e73331e97305109518be200a0bf29b3a3c6`. [Streamlit](https://geodrill-pro.streamlit.app/) renders **0.9.0-alpha.1** with matching compiled asset hashes and a verified original survey/report workflow. [Windows research-6](https://github.com/Nabilvisi/geodrill-pro/releases/tag/research-6) is published as an explicitly unsigned prerelease. The downloaded executable passed survey import, saved geometry, calculation and canonical report checks. Local and Windows/Linux source CI each passed **683 tests**; the Windows release job also passed 683 tests and installer/backup/restore/uninstall checks. Full v0.9 architecture acceptance remains open. [Detailed verification](evidence/v09-verification.json).
+
+The version 0.8 records below are historical observations at their recorded revisions.
+
 Current repair verification: **568 passed, zero failures/errors**; Windows research installer install/execute/uninstall verified. See [repair status](REPAIR-STATUS.md) for current gates and artifact evidence.
 
 
@@ -140,7 +144,7 @@ Final served release: dist/release-9f8bb45481c74142a36dc2c5ccf66bc9.
 
 The final identity-checked launcher restart changed service PID from 36056 to 40440. The six final calculations and five saved report snapshots were unchanged. Live HTML, JavaScript and CSS bytes match the selected completed build. Health reports version 0.8.0, mode local-research and equipment_control=false. The session has equipment_authority=none. Registered API declarations contain no hardware-command route; attempted command/equipment-write URLs return 404. The 110-entry local hash-linked audit chain verifies.
 
-Installation: C:\Users\HP\OneDrive\Project Drill\geodrill-pro. This is the preserved existing installation, distinct from the obsolete Project Apps location. No previous project or report was replaced.
+Installation: the active geodrill-pro checkout. This is the preserved existing installation, distinct from the obsolete Project Apps location. No previous project or report was replaced.
 
 ### Fixed report integrity
 
@@ -223,7 +227,7 @@ Final CSS: index-COztpBjD.css, SHA-256 556b9b79d44041b0a6a073cf5c65c47a8d412b8f3
 
 Report 7a89c96a-ce8d-486c-8424-57e0e6779d1d has canonical snapshot SHA-256 d612f6c6fbe8bbb485ff1823e8882348c6e7734bace86eff9a2cf77feaecc21a. The fixed exported evidence is evidence/modules1-10-report.json; live verification is evidence/modules1-10-live-verification.json. Screenshots are module7-stability.png, module8-transport.png, module9-surge-swab.png, module10-torque-drag.png, module10-mobile.png and module710-final-report.png.
 
-The installation remains C:\Users\HP\OneDrive\Project Drill\geodrill-pro. Existing projects and prior reports were retained. MODEL-SPECS-0.6.md declares each reduced model and open qualification requirement. This evidence completes the software research-build task through M10; it does not qualify live operational use, native EM inversion, coupled geomechanics, cuttings beds, complete trip hydrodynamics or equipment control.
+The installation remains the active geodrill-pro checkout. Existing projects and prior reports were retained. MODEL-SPECS-0.6.md declares each reduced model and open qualification requirement. This evidence completes the software research-build task through M10; it does not qualify live operational use, native EM inversion, coupled geomechanics, cuttings beds, complete trip hydrodynamics or equipment control.
 
 # Prior verification record — 3 October 2026 / version 0.5.0
 
