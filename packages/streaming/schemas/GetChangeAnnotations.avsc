@@ -1,0 +1,47 @@
+{
+  "type": "record",
+  "namespace": "Energistics.Etp.v12.Protocol.ChannelSubscribe",
+  "name": "GetChangeAnnotations",
+  "protocol": "21",
+  "messageType": "14",
+  "senderRole": "customer",
+  "protocolRoles": "store,customer",
+  "multipartFlag": false,
+  "fields": [
+    {
+      "name": "channels",
+      "type": {
+        "type": "map",
+        "values": {
+          "type": "record",
+          "namespace": "Energistics.Etp.v12.Datatypes.ChannelData",
+          "name": "ChannelChangeRequestInfo",
+          "fields": [
+            {
+              "name": "sinceChangeTime",
+              "type": "long"
+            },
+            {
+              "name": "channelIds",
+              "type": {
+                "type": "array",
+                "items": "long"
+              }
+            }
+          ],
+          "fullName": "Energistics.Etp.v12.Datatypes.ChannelData.ChannelChangeRequestInfo",
+          "depends": []
+        }
+      }
+    },
+    {
+      "name": "latestOnly",
+      "type": "boolean",
+      "default": false
+    }
+  ],
+  "fullName": "Energistics.Etp.v12.Protocol.ChannelSubscribe.GetChangeAnnotations",
+  "depends": [
+    "Energistics.Etp.v12.Datatypes.ChannelData.ChannelChangeRequestInfo"
+  ]
+}

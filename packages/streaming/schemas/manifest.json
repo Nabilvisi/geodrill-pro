@@ -1,0 +1,155 @@
+{
+  "source": "https://github.com/geosiris-technologies/etptypes-python",
+  "package": "etptypes==1.2.0",
+  "wheel_sha256": "078c194d04b2b56f480e22b723e7a14e5d528be75622640d742262f137f83163",
+  "license": "Apache-2.0",
+  "copyright": "Copyright (c) 2022-2023 Geosiris; schema model Energistics ETP 1.2",
+  "normative_specification": "https://docs.energistics.org/EO_Resources/ETP_Specification_v1.2_Doc_v1.1.pdf",
+  "notice": "Schema strings extracted without importing Pydantic-1 classes. These generated schemas are not independent conformance certification.",
+  "files": [
+    {
+      "path": "Acknowledge.avsc",
+      "sha256": "c6ec86b3817571da744f31ecd25b005ac6bbbfc294d290add439c6cbb2f925a3",
+      "protocol": "0",
+      "messageType": "1001"
+    },
+    {
+      "path": "ChannelData.avsc",
+      "sha256": "7b606d7001528388bbb3e4cf9b043f17e6ff77750186e4fa43cd487f8f2bdaa6",
+      "protocol": "21",
+      "messageType": "4"
+    },
+    {
+      "path": "ChannelsTruncated.avsc",
+      "sha256": "6dd4d591c7d198722e32bbbc374bbe9989cdae117234df150b10835e7c8df787",
+      "protocol": "21",
+      "messageType": "13"
+    },
+    {
+      "path": "CloseSession.avsc",
+      "sha256": "29ec37ac7b96c29999e02e84d8193c71bf5d2d37e3662cbb45d04a9a5a61449c",
+      "protocol": "0",
+      "messageType": "5"
+    },
+    {
+      "path": "GetChangeAnnotations.avsc",
+      "sha256": "55d065e886c8c38bd62d7e0ec7d814a38fdc5e67e30cd031722052530ebaf33d",
+      "protocol": "21",
+      "messageType": "14"
+    },
+    {
+      "path": "GetChangeAnnotationsResponse.avsc",
+      "sha256": "64cc3748205248e9a5d90690c13c6ee0c802ed73654c86c94b36f46dd221e1f4",
+      "protocol": "21",
+      "messageType": "15"
+    },
+    {
+      "path": "GetChannelMetadata.avsc",
+      "sha256": "f719d014d22fc3761400c88b067ac877d4ba6ceefe38d165b2699efaf01d7027",
+      "protocol": "21",
+      "messageType": "1"
+    },
+    {
+      "path": "GetChannelMetadataResponse.avsc",
+      "sha256": "1b56366685506fcfe62b6677a0c6e0c3b315ff3436bf23c293484ae5c3e42dbd",
+      "protocol": "21",
+      "messageType": "2"
+    },
+    {
+      "path": "GetDataObjects.avsc",
+      "sha256": "2d4192f111ec3a4b85f9262f1528bc1903a2c710400d86fbab41cc3497a2adeb",
+      "protocol": "4",
+      "messageType": "1"
+    },
+    {
+      "path": "GetDataObjectsResponse.avsc",
+      "sha256": "75cbe532fd1367e8eea0fb1bb6a1b88389410b904924c775bc69d02a61994fce",
+      "protocol": "4",
+      "messageType": "4"
+    },
+    {
+      "path": "GetRanges.avsc",
+      "sha256": "fabeaa26e0901e074c382120e36f8766d9e6b2fb69dfca6e97fe31bc1e1d625a",
+      "protocol": "21",
+      "messageType": "9"
+    },
+    {
+      "path": "GetRangesResponse.avsc",
+      "sha256": "e4acaf84c7cd27b0345019e1d163825c0a82217a1e0a1d5233fbd0cdb0346d4d",
+      "protocol": "21",
+      "messageType": "10"
+    },
+    {
+      "path": "MessageHeader.avsc",
+      "sha256": "74f7c69fe032dd2bc843124a9e493231c8d390c49b22ff2ce2fd8bfde21ffade",
+      "protocol": null,
+      "messageType": null
+    },
+    {
+      "path": "MessageHeaderExtension.avsc",
+      "sha256": "8e0b63559fda3806b06c97332698ae8589c511933aa83bb3bd69e78246f01496",
+      "protocol": null,
+      "messageType": null
+    },
+    {
+      "path": "OpenSession.avsc",
+      "sha256": "984800acec9715ee0d6928be9ad01a9b2fa6ff7cd2c977ca31c4ea1e04ed09a6",
+      "protocol": "0",
+      "messageType": "2"
+    },
+    {
+      "path": "Ping.avsc",
+      "sha256": "0bd9673799e4c41983d413a366f51bb7187f311b24313382c29b7c902db570a9",
+      "protocol": "0",
+      "messageType": "8"
+    },
+    {
+      "path": "Pong.avsc",
+      "sha256": "55f1e6fd7fa486db9f17615f83675a741297323814219696d76aed26f74694e5",
+      "protocol": "0",
+      "messageType": "9"
+    },
+    {
+      "path": "ProtocolException.avsc",
+      "sha256": "7649e7fe373fd542ddcfd93f043ce15b2d2fda808942d4b4a86c7e30e096dfb9",
+      "protocol": "0",
+      "messageType": "1000"
+    },
+    {
+      "path": "RangeReplaced.avsc",
+      "sha256": "ea7c53da20dbdc5fc5d97582bc7a09dac50f0c44c71497d82d5729800cc7c7f5",
+      "protocol": "21",
+      "messageType": "6"
+    },
+    {
+      "path": "RequestSession.avsc",
+      "sha256": "fb58f7ba2f7f6e2ea30f9578d397954ceb5242c4e76dd1c837a08ec16eddffb6",
+      "protocol": "0",
+      "messageType": "1"
+    },
+    {
+      "path": "SubscribeChannels.avsc",
+      "sha256": "05979f6e84f1fa82a69babc73e657dde6355f53c15979e17e3cdb444e89fe2bd",
+      "protocol": "21",
+      "messageType": "3"
+    },
+    {
+      "path": "SubscribeChannelsResponse.avsc",
+      "sha256": "0f05838d9a00ee80d07c25d72cab434495cc13518e3a83e3acfc8746ec346dd4",
+      "protocol": "21",
+      "messageType": "12"
+    },
+    {
+      "path": "SubscriptionsStopped.avsc",
+      "sha256": "d44cee512342573cd58d52586b41f60d6daadc54ef6c6764e740255c580d69f0",
+      "protocol": "21",
+      "messageType": "8"
+    },
+    {
+      "path": "UnsubscribeChannels.avsc",
+      "sha256": "a2d1b8aefd39cf607f74bda1f2f54fb13c29e87ef6c9f38407573c1c1acb3b54",
+      "protocol": "21",
+      "messageType": "7"
+    }
+  ]
+}

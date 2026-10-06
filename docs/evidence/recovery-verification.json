@@ -1,0 +1,52 @@
+{
+  "regression": {
+    "tests": 602,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "seconds": 229.095,
+    "command": "python -m pytest -q --tb=short --junitxml=build/completion-audit-tests.xml",
+    "warning": "Existing Starlette/httpx TestClient deprecation"
+  },
+  "bandit": {
+    "issues": 0,
+    "lines": 9875,
+    "suppressed": 6,
+    "scope": [
+      "services",
+      "packages",
+      "tools/backup_restore.py",
+      "tools/desktop_app.py"
+    ]
+  },
+  "verified_at_utc": "2026-10-06T10:46:18.494Z",
+  "scope": "Recovery repair source; published research-2 evidence remains a separate revision",
+  "repairs": [
+    "Atomic pending migration batch and rollback",
+    "No data initialization on API/desktop imports",
+    "Whole-workstation WAL-consistent snapshot and fresh restore",
+    "Original source/normalized/report/revision/audit integrity checks",
+    "Packaged recovery arguments and receipt",
+    "Reopen restored studies against explicit import audit",
+    "Preserve programme signatures and public keys through re-export",
+    "Reject unsigned/tampered/incompletely manifested archives",
+    "Prevent cross-project identity replacement and transition-sequence collisions",
+    "Rollback newly created evidence files after failed project import",
+    "Admin-only team identity-bearing project restore",
+    "Expand actual installed EXE recovery acceptance"
+  ],
+  "remaining_software": [
+    "Read-only ETP/WITSML adapter and arrival-time/reconnect/order/quarantine workflow",
+    "Automatic update/channel selection and binary rollback",
+    "Dedicated team/directional/offset/geomechanics/evidence-search UI integration and acceptance",
+    "Broader hydraulic/contact/transient closures with required datasets",
+    "Broader interrupted-write/disk-full qualification"
+  ],
+  "external_requirements": [
+    "Trusted publisher certificate and actual signature verification",
+    "Original observations and independently reviewed holdout engineering qualification",
+    "Actual external security/compliance assessment"
+  ],
+  "equipment_control": false,
+  "clearance_generated": false
+}

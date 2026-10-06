@@ -1,0 +1,242 @@
+{
+  "date_utc": "2026-10-06T08:59:54.626323+00:00",
+  "regression": {
+    "command": "python -m pytest -q --tb=short --junitxml=build/continuation-tests.xml",
+    "tests": 577,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "seconds": 191.174,
+    "warning": "Starlette/httpx TestClient deprecation"
+  },
+  "frontend": {
+    "command": "python tools/build.py; python tools/build_streamlit.py",
+    "passed": true,
+    "manifest": {
+      "version": "0.8.0",
+      "source_release": "dist/release-a37a6617c6c3443480881980f2aae84f",
+      "assets": [
+        {
+          "path": "assets/index-CG2D8Y8e.js",
+          "sha256": "e488e856987958f7d23356a74c50232b7f41b4c0bb00ae987d44731269733a93"
+        },
+        {
+          "path": "assets/index-DQfLpxdr.css",
+          "sha256": "aef49db358eabb760ad692bb7f65f9e370c9fcf6ea66d380980caabfb4a0d87f"
+        }
+      ]
+    }
+  },
+  "bandit": {
+    "command": "python -m bandit -r services packages -f json -o build/continuation-bandit-results.json",
+    "issues": 0,
+    "existing_suppressions": 6,
+    "scope": [
+      "services",
+      "packages"
+    ]
+  },
+  "dependency_audit": {
+    "command": "python -m pip_audit -r requirements-lock.txt --no-deps --disable-pip --cache-dir build/audit-cache",
+    "dependencies": 93,
+    "known_vulnerabilities": 0,
+    "skipped": [],
+    "scope": "Every pinned applicable dependency in the recorded local environment"
+  },
+  "windows_release": {
+    "version": "0.8.0",
+    "created_at_utc": "2026-10-06T08:57:23.996420+00:00",
+    "source_commit": "5ec7ca5652b5bd7f354c498119ab2f2131c349c8",
+    "source_has_uncommitted_changes": true,
+    "source_snapshot_sha256": "50bc719ab66a1c3fdfd699cd4f1c922c7c41e16517c48933f1bdbbfc1877744e",
+    "source_snapshot_file_count": 138,
+    "source_snapshot_scope": "Git-listed application, package, service, tool, test, workflow and original-source files; root build/dependency files. Generated verification reports excluded.",
+    "signing_mode": "unsigned",
+    "trusted_signature_verification": {
+      "GeoDrillPro.exe": false,
+      "GeoDrillPro-Setup.exe": false
+    },
+    "independent_engineering_qualification": "pending",
+    "external_security_audit": "pending",
+    "equipment_control": false,
+    "clearance_generated": false,
+    "assets": [
+      {
+        "name": "GeoDrillPro-Setup.exe",
+        "size_bytes": 111439051,
+        "sha256": "966f11f123dd1ec8e31d1e3a60982875915f90636900795f73cb5025de018881"
+      },
+      {
+        "name": "GeoDrillPro-Windows-x64.zip",
+        "size_bytes": 173740994,
+        "sha256": "5af0e825bb961ed5d038a48a092e91f12cffeaa32cbb1f4d043897ce9488a98d"
+      }
+    ],
+    "executable_sha256": "06448df47519a0ac1f9f41c63d6a026330230c17f9cd4dae8ffd0323e399874a"
+  },
+  "packaged_smoke": {
+    "exit_code": 0,
+    "api_health": "ok",
+    "projects_status": 200,
+    "diagnostic_cases": 3,
+    "diagnostics_passed": true,
+    "evidence": "build/packaged-continuation-smoke-7eee218cc128412bb091cc401e1ccbd9/smoke-test.json",
+    "executable_sha256": "06448df47519a0ac1f9f41c63d6a026330230c17f9cd4dae8ffd0323e399874a"
+  },
+  "installer_recovery": {
+    "uninstall_exit_code": 0,
+    "smoke_exit_code": 0,
+    "passed": true,
+    "installer_sha256": "966f11f123dd1ec8e31d1e3a60982875915f90636900795f73cb5025de018881",
+    "extra_user_file_preserved": true,
+    "install_exit_code": 0,
+    "persistent_evidence_preserved": true,
+    "equipment_control": false,
+    "source_snapshot_sha256": "50bc719ab66a1c3fdfd699cd4f1c922c7c41e16517c48933f1bdbbfc1877744e",
+    "clearance_generated": false,
+    "installed_executable_sha256": "06448df47519a0ac1f9f41c63d6a026330230c17f9cd4dae8ffd0323e399874a",
+    "signing_mode": "unsigned"
+  },
+  "forge_survey": {
+    "benchmark": "FORGE 16A(78)-32 published trajectory reproduction",
+    "source_url": "https://gdr.openei.org/files/1283/16A%2878%29-32%20Survey.xlsx",
+    "source_sha256": "ad03773329769f702f748c96244a9e1cba16cd1d762d4e8b93b8c8fea9d36b8d",
+    "doi": "10.15121/1776602",
+    "license": "CC BY 4.0",
+    "attribution": "McLennan, John, University of Utah Energy and Geoscience Institute, 2021. Utah FORGE: Well 16A(78)-32 Drilling Data. Geothermal Data Repository.",
+    "sheet": "Sheet1",
+    "source_rows": "77-498",
+    "source_columns": "C:MD,D:Incl,E:Az,G:TVD,I:North,J:East",
+    "native_length_unit": "US survey foot (usft declared in source report)",
+    "length_conversion_m_per_unit": 0.3048006096012192,
+    "absolute_3d_tolerance_m": 1.0,
+    "stations_evaluated": 422,
+    "stations_excluded": 0,
+    "max_3d_error_m": 0.0025573096208818887,
+    "passed": true,
+    "field_qualified": false,
+    "equipment_control": false,
+    "clearance_generated": false
+  },
+  "browser_verification": {
+    "local": {
+      "url": "http://127.0.0.1:8765",
+      "synthetic_project_loaded": true,
+      "overview_values_and_charts_rendered": true,
+      "hydraulics_navigation_and_withholding_rendered": true,
+      "console_errors": 0
+    },
+    "public": {
+      "url": "https://geodrill-pro.streamlit.app/",
+      "observed_status": "working_verified",
+      "dependencies_rebuilt": true,
+      "synthetic_project_loaded": true,
+      "telemetry_records": 240,
+      "overview_values_and_charts_rendered": true,
+      "hydraulics_navigation_and_withholding_rendered": true,
+      "report_creation_verified": true,
+      "native_report_download_verified": true,
+      "report_snapshot_hash_verified": true,
+      "report_id": "945ea89f-530a-43b6-9518-6b22a31d3a92",
+      "report_file_sha256": "6424f2a4a6ca405563e142c668bedd657feefd967fbf6dc9ccd81aa4f72733b2",
+      "report_snapshot_sha256": "746e4976797ffda61fd6f306acab7df138ac32bc4bd8e11067da610ad4c4ef2f",
+      "published_download_links_verified": true,
+      "download_link_tag": "research-2"
+    }
+  },
+  "pending_gates": [
+    "Trusted publisher certificate and signed artifact verification",
+    "Independent source-backed engineering qualification and reviewer sign-off",
+    "External security/compliance assessment"
+  ],
+  "equipment_control": false,
+  "clearance_generated": false,
+  "benchmark_provenance": {
+    "direct_calls_withhold_independent_validation": true,
+    "unverified_licenses_unset": true,
+    "reflected_trajectory_rejected": true,
+    "native_forge_vibration_targets_verified": false,
+    "source_review": "docs/evidence/FORGE-DYNAMICS-SOURCE-REVIEW.md"
+  },
+  "release_pipeline": {
+    "installer_recovery_required": true,
+    "source_snapshot_required": true,
+    "remote_release_run_verified": true
+  },
+  "publication_verified_at_utc": "2026-10-06T09:59:01.993Z",
+  "published_release": {
+    "tag": "research-2",
+    "url": "https://github.com/Nabilvisi/geodrill-pro/releases/tag/research-2",
+    "workflow_url": "https://github.com/Nabilvisi/geodrill-pro/actions/runs/37444938024",
+    "workflow_conclusion": "success",
+    "regression_tests": 578,
+    "prerelease": true,
+    "manifest": {
+      "version": "0.8.0",
+      "created_at_utc": "2026-10-06T09:50:30.301635+00:00",
+      "source_commit": "b213c1f861ea508590886751ea9febcee2c27656",
+      "source_has_uncommitted_changes": true,
+      "source_snapshot_sha256": "71f2339fffd5b0665b3d58a89491074e4ba2023707edac05227ff25a1ff3ba90",
+      "source_snapshot_file_count": 138,
+      "source_snapshot_scope": "Git-listed application, package, service, tool, test, workflow and original-source files; root build/dependency files. Generated verification reports excluded.",
+      "signing_mode": "unsigned",
+      "trusted_signature_verification": {
+        "GeoDrillPro.exe": false,
+        "GeoDrillPro-Setup.exe": false
+      },
+      "independent_engineering_qualification": "pending",
+      "external_security_audit": "pending",
+      "equipment_control": false,
+      "clearance_generated": false,
+      "assets": [
+        {
+          "name": "GeoDrillPro-Setup.exe",
+          "size_bytes": 111252716,
+          "sha256": "c1baae74d3df029f21e57fe59f485a3014fac5f7278b18513c74bf619161425c"
+        },
+        {
+          "name": "GeoDrillPro-Windows-x64.zip",
+          "size_bytes": 173252615,
+          "sha256": "ea95871bc1e1307068f357260c4c8dadc39c3f80173f791300e3a740807021c9"
+        }
+      ],
+      "executable_sha256": "05ae8a3f8799555ac48355bf1f16accda67b2a4bf25add032cd0b8beeaed6b90"
+    },
+    "installer_recovery": {
+      "installed_executable_sha256": "05ae8a3f8799555ac48355bf1f16accda67b2a4bf25add032cd0b8beeaed6b90",
+      "install_exit_code": 0,
+      "installer_sha256": "c1baae74d3df029f21e57fe59f485a3014fac5f7278b18513c74bf619161425c",
+      "extra_user_file_preserved": true,
+      "persistent_evidence_preserved": true,
+      "source_snapshot_sha256": "71f2339fffd5b0665b3d58a89491074e4ba2023707edac05227ff25a1ff3ba90",
+      "uninstall_exit_code": 0,
+      "equipment_control": false,
+      "clearance_generated": false,
+      "passed": true,
+      "signing_mode": "unsigned",
+      "smoke_exit_code": 0
+    },
+    "downloaded_assets_match_manifest": true,
+    "zip_executable_matches_manifest": true,
+    "zip_source_snapshot_matches_manifest": true
+  },
+  "final_code_ci": {
+    "url": "https://github.com/Nabilvisi/geodrill-pro/actions/runs/37444825114",
+    "conclusion": "success",
+    "tests_per_platform": 578,
+    "platforms": [
+      "windows-latest",
+      "ubuntu-latest"
+    ],
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "warning": "Existing Starlette/httpx TestClient deprecation"
+  },
+  "merge": {
+    "pull_request": 1,
+    "url": "https://github.com/Nabilvisi/geodrill-pro/pull/1",
+    "merged": true,
+    "merge_commit": "509be9b9a96fda0604be2ce1eda205e9ea691280"
+  }
+}

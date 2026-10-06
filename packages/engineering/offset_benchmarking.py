@@ -27,8 +27,8 @@ class OffsetWellRecord(Contract):
     formation: str = Field(min_length=1, max_length=100)
     trajectory_type: Literal["vertical", "slant", "horizontal", "s_curve"]
     spud_date: str
-    drilled_interval_m: float = Field(gt=0.0, le=15000.0)
-    drilling_hours: float = Field(gt=0.0, le=5000.0)
+    drilled_interval_m: float = Field(ge=0.01, le=15000.0)
+    drilling_hours: float = Field(ge=1e-6, le=5000.0)
     npt_hours: float = Field(ge=0.0, le=5000.0)
     total_cost: float = Field(gt=0.0, le=1e10)
     cost_currency: str = Field(default="USD", pattern=r"^[A-Z]{3}$")
@@ -53,7 +53,7 @@ class CohortSelectionCriteria(Contract):
 
 
 class OffsetBenchmarkingInput(StudyInput):
-    planned_interval_m: float = Field(gt=0.0, le=15000.0)
+    planned_interval_m: float = Field(ge=0.01, le=15000.0)
     criteria: CohortSelectionCriteria
     offset_wells: List[OffsetWellRecord] = Field(min_length=1, max_length=200)
     planned_rig_rate_per_day: float = Field(gt=0.0, le=1e7)
@@ -74,12 +74,14 @@ def calculate_offset_benchmarks(
 ) -> Dict[str, Any]:
     """Calculate ROP, NPT, duration, and cost benchmarks from historical offset well cohort."""
     out = base(
-        "GD-A14-offset-benchmarking-1",
+        "GD-A14-offset-benchmarking-2",
         "Empirical percentile benchmarking (P10, P50, P90) from historical offset well cohort; ROP and cost learning.",
         [
             "Descriptive historical cohort statistics only; not a guaranteed delivery duration or AFEs commitment.",
-            "Normal/empirical distributions assume representative offset operational conditions without unseen geohazards.",
-            "Adjudicated records verify NPT classification integrity; unadjudicated records are excluded under strict review mode.",
+            "Empirical quantiles describe the selected records; they are not calibrated forecast probabilities or confidence intervals.",
+            "Adjudication state and notes are supplied by the record author; unadjudicated records are excluded under strict review mode.",
+            "Adjudication notes and per-record source hashes are supplied assertions; independent DDR reconciliation is not established by this study.",
+            "Costs are pooled only within the selected currency; no exchange-rate, inflation, scope or vintage harmonization is performed.",
             "No drilling clearance, automated operational authorization, or equipment control is generated.",
         ]
     )
@@ -100,6 +102,8 @@ def calculate_offset_benchmarks(
             reasons.append(f"Trajectory '{w.trajectory_type}' does not match target '{criteria.target_trajectory_type}'")
         if criteria.require_adjudicated_only and not w.is_adjudicated:
             reasons.append("Unadjudicated NPT/DDR record rejected by strict policy")
+        if w.cost_currency != v.cost_currency:
+            reasons.append(f"Cost currency '{w.cost_currency}' does not match study currency '{v.cost_currency}'; no conversion is assumed")
 
         if reasons:
             excluded_wells.append({
@@ -127,17 +131,22 @@ def calculate_offset_benchmarks(
             "total_cost": w.total_cost,
             "cost_per_m": round(w.total_cost / w.drilled_interval_m, 2),
             "source_hash": w.evidence_source_hash,
+            "is_adjudicated": w.is_adjudicated,
+            "adjudication_note": w.adjudication_note,
+            "cost_currency": w.cost_currency,
         }
         for w in eligible_wells
     ]
 
     # Withholding rule: minimum cohort size >= 3
-    if len(eligible_wells) < 3:
+    if len(eligible_wells) < 3 or v.evidence_state == "unknown":
         out["status"] = "withheld"
-        out["reasons"] = [
+        out["reasons"] = ([
             f"Eligible cohort size ({len(eligible_wells)}) is below statistical threshold of 3 wells. "
             "Broaden selection criteria or supply verified offset records."
-        ]
+        ] if len(eligible_wells) < 3 else [])
+        if v.evidence_state == "unknown":
+            out["reasons"].append("Input evidence is unknown; review source provenance before calculating cohort projections.")
         out["benchmarks"] = None
         out["projections"] = None
         return out
@@ -182,13 +191,12 @@ def calculate_offset_benchmarks(
 
     # Planned section projections for v.planned_interval_m
     planned_dist_k_m = v.planned_interval_m / 1000.0
-    p10_days = dur_1000m_stats["p10"] * planned_dist_k_m
-    p50_days = dur_1000m_stats["p50"] * planned_dist_k_m
-    p90_days = dur_1000m_stats["p90"] * planned_dist_k_m
+    projected_days = percentiles(durations_per_1000m_days * planned_dist_k_m)
+    p10_days, p50_days, p90_days = (projected_days[k] for k in ("p10", "p50", "p90"))
 
-    p10_cost = cost_per_m_stats["p10"] * v.planned_interval_m
-    p50_cost = cost_per_m_stats["p50"] * v.planned_interval_m
-    p90_cost = cost_per_m_stats["p90"] * v.planned_interval_m
+    projected_cost = percentiles(cost_per_m * v.planned_interval_m)
+    p10_cost, p50_cost, p90_cost = (projected_cost[k] for k in ("p10", "p50", "p90"))
+    rig_cost = percentiles(durations_per_1000m_days * planned_dist_k_m * v.planned_rig_rate_per_day)
 
     out["status"] = "calculated"
     out["reasons"] = []
@@ -203,14 +211,22 @@ def calculate_offset_benchmarks(
         "planned_interval_m": v.planned_interval_m,
         "projected_duration_days": {
             "p10_favorable": round(p10_days, 2),
-            "p50_expected": round(p50_days, 2),
+            "p50_median": round(p50_days, 2),
             "p90_conservative": round(p90_days, 2),
         },
         "projected_total_cost": {
             "p10_favorable": round(p10_cost, 2),
-            "p50_expected": round(p50_cost, 2),
+            "p50_median": round(p50_cost, 2),
             "p90_conservative": round(p90_cost, 2),
             "currency": v.cost_currency,
+        },
+        "rig_time_cost_scenario": {
+            "daily_rate": v.planned_rig_rate_per_day,
+            "currency": v.cost_currency,
+            "p10_favorable": rig_cost["p10"],
+            "p50_median": rig_cost["p50"],
+            "p90_conservative": rig_cost["p90"],
+            "basis": "Selected cohort duration scaled to planned interval, multiplied by supplied daily rate; excludes other costs and is not added to the historical total-cost estimate.",
         },
     }
     return out

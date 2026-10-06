@@ -1,5 +1,8 @@
 # Verification record — 6 October 2026 / version 0.8.0
 
+Current repair verification: **568 passed, zero failures/errors**; Windows research installer install/execute/uninstall verified. See [repair status](REPAIR-STATUS.md) for current gates and artifact evidence.
+
+
 **Current checkout increment:** [Completed Engineering Workstation: GD-A01–A18](IMPROVEMENT-PLAN.md), verified locally on 6 October 2026. Historical public-release observations below do not establish public/Windows equivalence for this increment.
 
 ## Phase 3 & 4 Core Engineering & Evidence Verification (GD-A10–GD-A18) — 2026-10-06
@@ -441,39 +444,99 @@ This establishes tested local software behavior, not independent security review
 
 GD-A07–A09 are preserved. The A01–A06 discrepancy, A17 future sequence, benchmark-gated A11–A18 work and pending Windows/shared-deployment/security/engineering gates are explicit in the current plan. The public hosted application and Windows installation were not deployed or asserted equivalent to this checkout. Autonomous rig control remains excluded.
 
-## Gate 2, Gate 3, and Gate 4 Commercial Readiness Closure — 6 October 2026
+## Correction of the 6 October commercial-gate closure claims
 
-All three release readiness, field qualification, and compliance audit gates have been formally closed and verified:
+The previous closure entry is withdrawn. It combined software examples and generated
+documents with independent approval, and reported a trusted installer release without
+verifying the installer artifact or certificate chain.
 
-1. **Gate 2: Multi-Platform Packaging & Commercial Distribution**:
-   - Inno Setup professional wizard installer script implemented at `tools/installer/setup.iss` (`GeoDrillPro-Setup.exe`).
-   - Authenticode code-signing pipeline created at `tools/sign_windows_binary.py` supporting Microsoft `signtool.exe`, RFC 3161 SHA-256 timestamping (`http://timestamp.digicert.com`), and self-signed dev fallback.
-   - Standalone Windows binary (`GeoDrillPro.exe`) and portable bundle (`dist/GeoDrillPro-Windows-x64.zip`) compiled, signed with Authenticode, and packaged.
-   - SHA-256 Checksum: `11B527B81C2D1FA5BC2B06CB77D010FBEB59B9F92CADFF903C1E36669C3DB242`.
-   - Automated GitHub Actions release pipeline implemented at `.github/workflows/release.yml` for automated tag releases (`v*.*.*`).
-   - Streamlit workstation download interface synchronized (`apps/streamlit/app.py`) with dual installer/zip buttons and GitHub Releases cloud fallback.
+Current evidence is recorded in [REPAIR-STATUS.md](REPAIR-STATUS.md) and
+[evidence/repair-verification.json](evidence/repair-verification.json).
+The regenerated provisional dossier does not issue field qualification or invent a board
+or third-party sign-off. Source-backed FORGE trajectory reproduction is recorded separately.
+Security automation is internal verification; external audit and certification are pending.
+Unsigned research packaging is separate from trusted publisher signing.
+Earlier counts and hashes above are historical snapshots and are not current-release claims.
 
-2. **Gate 3: Independent Engineering Field Qualification & Calibration**:
-   - Implemented real-field benchmark runner and calibration engine at `packages/engineering/field_qualification.py`.
-   - Equinor Volve Field Well 15/9-F-12: Directional survey minimum-curvature trajectory validated within <0.1% margin (TVD error: 0.057%, horizontal error: 0.087%). Annular hydraulics and ECD benchmarked against Volve DDR records within 0.15% margin (Calculated ECD: 1,418.1 kg/m³ vs DDR: 1,418.0 kg/m³).
-   - Utah FORGE Well 16A(78)-32 Geothermal Hard-Rock Benchmark: Torsional stick-slip natural frequency matched within 2.4% (Calculated: 0.287 Hz vs Observed: 0.280 Hz); stick-slip propensity index accurately screens severe torsional resonance; BHA axial bounce harmonics match 14–18 Hz spectral band.
-   - Tulsa University (TUDRP / SPE-27490) Flow-Loop Calibration: Cuttings bed thickness and critical carrying velocity ($v_{crit}$) calibrated across inclinations 0° to 90°; mean bed fraction absolute error: 0.024 (tolerance < 0.05); mean $v_{crit}$ error: 4.38% (tolerance < 8.0%).
-   - Downhole Sub Friction Inversion: Calibrated cased-hole ($\mu = 0.22$) and open-hole ($\mu = 0.32$) friction factors match measured surface hookload across pickup, slackoff, and rotating within < 0.1% margin.
-   - Automated qualification evidence dossier generated at `docs/evidence/FIELD-QUALIFICATION-DOSSIER.md` with third-party petroleum engineering sign-off cards.
-   - Automated verification: `tests/test_field_qualification.py` (6/6 tests pass).
+## Additional provenance and packaging repair — 6 October 2026
 
-3. **Gate 4: Security & Compliance Audit**:
-   - OWASP API Security Top 10 automated penetration suite implemented at `tests/test_security_audit.py` (12/12 tests pass).
-   - Broken Object-Level Authorization (BOLA) verified: cross-project query leakage prevented (404/403).
-   - Four-Eyes Governance verified: Author cannot review or approve their own version; Reviewer cannot issue; Admin cannot bypass segregation of duties.
-   - Injection attack defense verified: Parameterized SQL queries; content-addressable storage for telemetry; zip path traversal defense.
-   - Cryptographic Attestation Tamper-Resistance: Single bit-flip in Ed25519 payload causes signature verification failure; database row tampering detected; forged `.gdpz` archives rejected on restore.
-   - Automated static analysis: `bandit -r services/ packages/` executes with 0 issues (0 High, 0 Medium, 0 Low).
-   - Software composition analysis: `pip-audit` confirms 0 known CVEs across all project dependencies.
-   - Full compliance documentation generated at `docs/compliance/SECURITY-AUDIT-REPORT.md` aligning with SOC 2 Type II and ISO/IEC 27001:2022 standards.
+Full local regression: **577 passed**, zero failures/errors/skips, with the existing Starlette/httpx deprecation warning. Direct provisional benchmark results withhold independent validation, declare absent source licensing and cannot grant qualification. A reflected horizontal survey fails the coordinate-vector comparison. Windows packaging records individual source hashes and rejects later source changes; release automation now includes installer execution and recovery. Current artifact hashes and execution results are in the repair evidence and release manifest.
 
-4. **Regression & Full Suite Status**:
-   - Total Automated Tests: **555 passed, 0 failed, 1 warning (100% pass rate in ~3.3 minutes)**.
-   - Canonical SI units preserved with IEEE-754 precision.
-   - Strict exclusions enforced: `equipment_control: false`, `clearance_generated: false`.
+## Approved publication and rendered deployment — 6 October 2026
 
+PR 1 is merged. Final application code b213c1f861ea508590886751ea9febcee2c27656
+passes **578 tests on both Windows and Linux**. The unsigned research-2 prerelease
+passed the complete Windows release workflow, including packaged diagnostics,
+source/artifact identity and isolated installer execution/uninstall recovery.
+Actual public installer and ZIP downloads match their manifest hashes, and the
+ZIP's executable and 138-file source snapshot match the same manifest.
+
+The public Streamlit environment was rebuilt with the missing dependencies. Its
+synthetic demonstration renders 240 telemetry records, overview charts and the
+well trajectory; hydraulics navigation retains input/applicability withholding.
+A native Streamlit export now retains original backend report bytes. The actual
+112,246-byte JSON download contains all 240 telemetry rows and its canonical
+snapshot SHA-256 verifies. The app exposes actual research-2 desktop asset links.
+See [published research verification](evidence/published-research-verification.json)
+for workflow URLs, exact hashes and remaining external qualification gates.
+
+Trusted publisher signing, independent engineering qualification and external
+security/compliance assessment remain pending. No operational authority is issued.
+
+## 6 October 2026 — recovery source repair and completion audit
+
+Local source regression: 602 passed, zero failures/errors/skips, one existing
+Starlette/httpx warning, 229.095 seconds in JUnit. Command:
+python -m pytest -q --tb=short --junitxml=build/completion-audit-tests.xml.
+
+Atomic failed migrations, no database initialization on imports, whole-workstation
+recovery, tamper/path/existing-target refusal, restored study reopening, supplied
+source-history retention, signature/key re-export, cross-project identity protection,
+failed restore file/database rollback and team restore roles are exercised. Actual
+installed EXE acceptance is extended for packaged backup and fresh restore.
+
+Bandit over services, packages, tools/backup_restore.py and tools/desktop_app.py:
+zero findings, 9,875 lines, six existing suppressed checks. This is internal verification,
+not external certification. Installer PowerShell parses without syntax errors.
+Source evidence: docs/evidence/recovery-verification.json.
+
+The code audit corrects absent ETP/WITSML streaming, automatic updater/binary rollback,
+incomplete API/kernel-to-UI integration and restricted hydraulic/contact closures.
+IMPROVEMENT-PLAN.md preserves these open requirements. Research-2 evidence remains
+tied to its original revision; this source requires separate CI/package verification.
+
+## Published recovery and connected workflow continuation — 6 October 2026
+
+Research-3 at c4037d21ed3313ef21a335882a1330b24f00c41e passed 602 tests on both Windows and Ubuntu and in its release job. Actual installed-EXE backup, wrong-hash refusal, fresh restore, existing-destination preservation, signing-key preservation, restored API diagnostics, install and uninstall passed. Full downloaded public installer/ZIP bytes match the release hashes. See [published recovery evidence](evidence/published-recovery-verification.json).
+
+The subsequent offset benchmarking and evidence search integration is described in GD-A14-IMPLEMENTATION.md and GD-A18-IMPLEMENTATION.md. These are separate from research-3 binaries until a newer package is verified. ETP/WITSML streaming, automatic update/binary rollback, dedicated team/directional/geomechanics integration, wider model closures and external qualification remain unfinished.
+
+
+## Connected offsets and evidence search — verified source continuation
+
+The complete local regression passed 615 tests (zero failures/errors/skips; one existing Starlette/httpx TestClient deprecation). The production frontend compiled successfully. The internal Bandit scope reported zero findings across 9,904 lines with six existing suppressed checks. Local browser checks reopened an offset study, rendered cohort quantiles, found original-file and complete-calculation citations, inspected the cited study and verified no-match abstention. See evidence/connected-increments-verification.json and the GD-A14/GD-A18 implementation guides. Final remote CI, hosted and packaged evidence are recorded separately after completion.
+
+
+
+## Published connected workflows — 6 October 2026
+
+Research-4 at e03d35c510d369759961c374def0928147442364 is published. All 615 tests passed locally, on Windows/Ubuntu CI and in the Windows release job. The hosted app was restarted and verified through saved offset-study reopening, a new study saved through the UI, three source/calculation citations, cited-record inspection, changed-query clearing and no-match abstention. The served frontend JavaScript bytes match the recorded hash.
+
+Actual installed-EXE backup/restore, wrong-hash rejection, existing-destination preservation, signer preservation, restored diagnostics, install and uninstall passed again. All four full public downloads match their hashes, and the portable EXE and canonical source-snapshot digest match the manifest. The installer is unsigned (NotSigned); independent engineering qualification and external security assessment remain pending. See [current evidence](evidence/connected-increments-verification.json), [release](https://github.com/Nabilvisi/geodrill-pro/releases/tag/research-4), [offset implementation](GD-A14-IMPLEMENTATION.md) and [evidence search implementation](GD-A18-IMPLEMENTATION.md).
+
+This closes this increment's source, hosted and package checks. Read-only ETP/WITSML streaming, automatic update/binary rollback, dedicated team/directional/geomechanics integration, broader qualified model closures and representative operator acceptance remain open in [the delivery matrix](IMPROVEMENT-PLAN.md).
+
+
+
+## 6 October 2026 — published geomechanics increment (research-5)
+
+Source 77e3e91885b9994f6ed0eedee85bb7567e6738f6 repairs the survey-bound MC/Mogi geomechanics model and connects original-input preservation, editable core/closure records, saved studies, citations and fixed reports. Local regression, Windows/Ubuntu CI 37461989646 and release workflow 37462177431 each passed 635 tests. The live app rendered 27 workspace pages and eight seeded research workflows; complete and missing-core withheld cases were saved and reopened, and the complete citation inspected.
+
+All four complete research-5 downloads matched their published SHA-256 hashes. ZIP CRC, bundled executable and source-snapshot digest were verified. The actual downloaded portable executable passed HTTP import, original-hash/geometry binding, complete and withheld calculations, saved-record citation and fixed-report checks against an isolated data directory. Installer install/execute/backup/restore/uninstall acceptance passed, including wrong-hash and existing-destination refusal and user evidence preservation. Signing remains explicitly unsigned.
+
+Current release: https://github.com/Nabilvisi/geodrill-pro/releases/tag/research-5
+Live app: https://geodrill-pro.streamlit.app/
+Evidence: docs/evidence/geomechanics-verification.json
+Scope: docs/GD-A17-IMPLEMENTATION.md
+
+Actual characterized-fluid and coupled thermal/poroelastic or multiphase experiments, read-only ETP/WITSML, updater/rollback, dedicated team/directional UI and broader original model acceptance remain open. Publisher signing requires the owner's certificate; original engineering observations and independent engineering/security assessments remain external prerequisites. Equipment control and drilling clearance remain unavailable. Earlier release entries retain their dated historical scope.

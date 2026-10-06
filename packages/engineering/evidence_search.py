@@ -9,6 +9,8 @@ Provides:
 from __future__ import annotations
 
 import re
+import hashlib
+import json
 from typing import Any, Dict, List, Literal, Optional, TypedDict
 from pydantic import Field, model_validator
 
@@ -152,9 +154,9 @@ def search_project_evidence(
                     "domain": "calculations",
                     "entity_id": calc.get("id", ""),
                     "title": study_name,
-                    "sha256_hash": result.get("geometry_sha256", calc.get("id", "")),
+                    "sha256_hash": hashlib.sha256(json.dumps(calc, sort_keys=True, separators=(",", ":"), allow_nan=False).encode()).hexdigest(),
                     "revision_id": inputs.get("geometry_revision_id"),
-                    "interval_or_depth": f"TD: {result.get('total_depth_md_m', 'N/A')} m",
+                    "interval_or_depth": f"Geometry revision: {inputs.get('geometry_revision_id', 'not supplied')}",
                     "matched_snippet": f"Model '{model}' study with status '{result.get('status', 'complete')}'",
                     "model_version": result.get("model_version", "1.0.0"),
                     "created_at": calc.get("created_at"),
@@ -164,59 +166,45 @@ def search_project_evidence(
     if "programmes" in domains:
         for prog in programmes:
             title = prog.get("title", "Programme")
-            haystack = f"{title} {prog.get('status', '')} {prog.get('id', '')}".lower()
-            if any(term in haystack for term in q_terms):
+            for version in prog.get("versions", [prog]):
+                state = version.get("state", prog.get("status", "unknown"))
+                haystack = f"{title} {state} {prog.get('id', '')} {version.get('id', '')}".lower()
+                if not any(term in haystack for term in q_terms):
+                    continue
                 citations.append({
                     "domain": "programmes",
                     "entity_id": prog.get("id", ""),
                     "title": title,
-                    "sha256_hash": prog.get("sha256", "unknown"),
-                    "revision_id": prog.get("revision_id"),
-                    "interval_or_depth": f"Bound studies: {len(prog.get('bound_study_ids', []))}",
-                    "matched_snippet": f"Programme '{title}' in status '{prog.get('status', '')}' with {len(prog.get('attestations', []))} attestations",
+                    "sha256_hash": version.get("content_sha256", prog.get("sha256", "unknown")),
+                    "revision_id": version.get("id") if "versions" in prog else prog.get("revision_id"),
+                    "interval_or_depth": f"Evidence bindings: {len(version.get('evidence_bindings', []))}",
+                    "matched_snippet": f"Programme '{title}' version {version.get('version_no', 'unknown')} in status '{state}'",
                     "model_version": None,
-                    "created_at": prog.get("created_at"),
+                    "created_at": version.get("created_at", prog.get("created_at")),
                 })
 
     # 6. Check for Conflicting Versions across Geometries
     conflicts: List[ConflictingVersionRecord] = []
-    if len(geometry_revisions) >= 2:
-        rev_a = geometry_revisions[0]
-        rev_b = geometry_revisions[1]
-        casings_a = {c.get("name"): c for c in rev_a.get("input", {}).get("casings", [])}
-        casings_b = {c.get("name"): c for c in rev_b.get("input", {}).get("casings", [])}
-
-        common_casing_names = set(casings_a.keys()).intersection(casings_b.keys())
-        for cname in common_casing_names:
-            ca = casings_a[cname]
-            cb = casings_b[cname]
-            if ca.get("bottom_md_m") != cb.get("bottom_md_m") or ca.get("inside_diameter_m") != cb.get("inside_diameter_m"):
+    # Historical changes are disclosed only for matching geometry queries. They
+    # do not manufacture a result for an unrelated question with zero citations.
+    if "geometry" in domains and any(c["domain"] == "geometry" for c in citations):
+        histories: Dict[str, List[Dict[str, Any]]] = {}
+        for rev in geometry_revisions:
+            for casing in rev.get("input", {}).get("casings", []):
+                histories.setdefault(casing.get("name", "Unnamed casing"), []).append({
+                    "revision_id": rev.get("id"), "sha256": rev.get("sha256"),
+                    "shoe_md_m": casing.get("bottom_md_m"), "id_m": casing.get("inside_diameter_m"),
+                    "change_note": rev.get("change_note"),
+                })
+        for cname, history in histories.items():
+            if len({(r["shoe_md_m"], r["id_m"]) for r in history}) > 1:
                 conflicts.append({
-                    "parameter_name": f"Casing '{cname}' Shoe Depth / ID",
-                    "revisions": [
-                        {
-                            "revision_id": rev_a.get("id"),
-                            "sha256": rev_a.get("sha256"),
-                            "shoe_md_m": ca.get("bottom_md_m"),
-                            "id_m": ca.get("inside_diameter_m"),
-                            "change_note": rev_a.get("change_note"),
-                        },
-                        {
-                            "revision_id": rev_b.get("id"),
-                            "sha256": rev_b.get("sha256"),
-                            "shoe_md_m": cb.get("bottom_md_m"),
-                            "id_m": cb.get("inside_diameter_m"),
-                            "change_note": rev_b.get("change_note"),
-                        },
-                    ],
-                    "conflict_summary": (
-                        f"Conflict detected for casing '{cname}': Revision {rev_a.get('id', '')[:8]} "
-                        f"has shoe at {ca.get('bottom_md_m')} m vs Revision {rev_b.get('id', '')[:8]} at {cb.get('bottom_md_m')} m."
-                    ),
+                    "parameter_name": f"Casing '{cname}' Shoe Depth / ID", "revisions": history,
+                    "conflict_summary": f"Casing '{cname}' has different shoe depths or inside diameters across {len(history)} historical revisions. Select the intended immutable revision before interpreting a study.",
                 })
 
     # 7. Abstention Evaluation
-    if not citations and not conflicts:
+    if not citations:
         return {
             "query": query_input.query,
             "project_id": qid,
@@ -239,8 +227,8 @@ def search_project_evidence(
         "project_id": qid,
         "authorized": True,
         "authorization_error": None,
-        "abstention": False,
-        "abstention_reason": None,
+        "abstention": bool(conflicts),
+        "abstention_reason": "Historical geometry values differ. Citations are retained, but a single current engineering answer is withheld until the intended revision is selected." if conflicts else None,
         "conflicting_versions": conflicts,
         "citations": citations,
         "answer_summary": " ".join(summary_parts),

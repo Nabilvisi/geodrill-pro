@@ -1,46 +1,57 @@
-# Current Improvement Plan — Completed Engineering Workstation & Verification
+# Current delivery and remaining scope — 6 October 2026
 
-Updated 6 October 2026 for this checkout. This document records the completed software implementation across foundational modules (A01–A06), operations & governance (GD-A07–A09), and advanced core engineering (GD-A10–A18).
+Blanket declarations that GD-A01–A18 and all commercial gates were complete are
+withdrawn. This code audit distinguishes connected workflows, API/kernel capabilities,
+missing software and external qualification. Numerical tests do not close the original
+backlog's integration or independent review criteria.
 
-Software completion, release readiness, and independent engineering qualification remain visibly distinct gates.
+PR 1 merge, hosted repair and unsigned research-5 publication are complete at their
+recorded revisions. Research-5 includes the repaired formation-geomechanics workflow,
+following connected offset benchmarking and evidence search in research-4.
+635 tests passed locally, on both CI platforms and in the Windows release job. The
+actual downloaded portable executable passed the new preserved-study workflow. See
+[current publication evidence](evidence/geomechanics-verification.json).
+Recovery changes and packaged acceptance are recorded in
+[the recovery implementation](GD-A08-IMPLEMENTATION.md).
 
----
-
-## 1. Software Implemented & Verified in this Checkout
-
-| Increment | Delivered Software Scope | Verification Evidence | Qualification Status |
-|---|---|---|---|
-| **A01–A06** | Data readiness scoring, alias/source mapping; Lineage DAG with stale-study detection without silent recalculation; Drilling Programme review packs with HTML/CSV exports; Usability pagination & unit roundtrips; Qualification ledger (M01–M17 & GD-A10–A18); DDR timeline reconciliation & NPT cost ledger. | `tests/test_readiness.py`<br>`tests/test_scenarios.py`<br>`tests/test_review_pack.py`<br>`tests/test_usability.py`<br>`tests/test_qualification.py`<br>`tests/test_ddr.py` | Software verified; independent engineering audit pending |
-| **GD-A07** | Read-only ETP 1.2 streaming consumer, WITSML 2.1 data mapping, arrival-vs-source time gap inspection, replay, and immutable audit logs. | [`docs/GD-A07-IMPLEMENTATION.md`](GD-A07-IMPLEMENTATION.md), `tests/test_api.py` | Software verified; live external rig server interop pending |
-| **GD-A08** | Consistent SQLite snapshot backups, scoped `.gdpz` project archives, fresh-directory restore, migration rollback tooling. | [`docs/GD-A08-IMPLEMENTATION.md`](GD-A08-IMPLEMENTATION.md), `tests/test_migrations.py` | Software verified; signed Windows installer distribution pending |
-| **GD-A09** | Named team accounts (Engineer/Author, Reviewer, Approver, Admin), four-eyes governance, optimistic concurrency control, immutable Ed25519 digital server attestations. | [`docs/GD-A09-IMPLEMENTATION.md`](GD-A09-IMPLEMENTATION.md), `tests/test_team.py` | Software verified; independent security audit pending |
-| **Connected Workflow** | 8-step journey: survey/telemetry import → 2 comparable studies → geometry revision → stale study detection without silent recalculation → bound programme → 4-eyes handoff → export `.gdpz` → fresh-directory restore with preserved hashes and signatures. | [`docs/CONNECTED-WORKFLOW.md`](CONNECTED-WORKFLOW.md), `tests/test_workflow.py` | Software verified |
-| **GD-A10** | Directional survey uncertainty against pinned ISCWSA Rev5.11 3-well diagnostic benchmark (`welleng`), tie-in covariance, multi-tool intervals, inter-well correlation (`independent`, `systematic_geomagnetic`, `fully_correlated`), and 3D closest approach (`clearance_generated: false`). | [`docs/GD-A10-IMPLEMENTATION.md`](GD-A10-IMPLEMENTATION.md), `tests/test_directional.py` | Pinned analytical verification; field tool run audit pending |
-| **GD-A11** | Yield-power-law (Herschel–Bulkley) annular flow, dynamic cuttings transport (critical carrying velocity, bed deposition tracking, effective annular mud density), and transient surge/swab ECD margins. | `tests/test_hydraulics.py` (53 tests pass) | Software verified; physical flow-loop qualification pending |
-| **GD-A12** | 3D stiff-string torque & drag accounting for tubular bending stiffness ($EI$), radial wellbore clearance, and tortuosity; calibrated friction factor grid search with holdout validation; torsional stick-slip propensity and axial bit-bounce resonance screening. | `tests/test_stiff_string.py`<br>`tests/test_dynamics.py` | Software verified; downhole dynamic sub data calibration pending |
-| **GD-A13** | API TR 5C3 / ISO 10400 casing collapse across all four regimes (yield, plastic, transition, elastic), Barlow burst with 0.875 mill factor, biaxial collapse derating under tension, full-profile operational load lines (burst kick, evacuation collapse, thermal APB, overpull), and mill certificate integrity evidence binding. | `packages/engineering/casing_envelopes.py`<br>`tests/test_casing_envelopes.py`<br>`tests/test_casing_published.py` | Benchmark verified against API Bulletin 5C3 Table 1 targets |
-| **GD-A14** | Offset well performance benchmarking: multi-parameter cohort filtering (field, formation, hole size, bit type, mud type), empirical percentile (P10/P50/P90) distributions for ROP, NPT %, duration, and cost per meter with strict withholding when cohort size < 3. | `packages/engineering/offset_benchmarking.py`<br>`tests/test_offset_benchmarking.py` | Software verified |
-| **GD-A15** | BHA and bit wear planning: 8-position IADC dull grading standard parser, wear progression mechanics calibrated against inspected bit records with strict withholding when < 2 inspection records are provided. | `packages/engineering/bit_condition.py`<br>`tests/test_bit_condition_iadc.py` | Software verified |
-| **GD-A16** | Passive real-time advisory: causal event detection with disjoint out-of-sample evaluation windows, strict exclusion of rig actuation (`equipment_control: false`, `actuation_available: false`). | `packages/engineering/anomaly.py`<br>`tests/test_anomaly_disjoint.py` | Software verified; live rig advisory qualification pending |
-| **GD-A17** | Formation geomechanics and actual-fluid thermodynamics: in-situ 3D principal stresses ($S_v, S_h, S_H$), thermodynamic fluid density $\rho(P, T) = \rho_0 [1 + c_p \Delta P - \alpha_T \Delta T]$, 2D Mohr-Coulomb and 3D Mogi-Coulomb shear breakout criteria, tensile breakdown limit, and safe mud weight window with strict withholding on missing triaxial core or LOT certificates. | `packages/engineering/geomechanics.py`<br>`tests/test_geomechanics.py` | Software verified against published Al-Ajmi & Zimmerman benchmarks |
-| **GD-A18** | Permission-aware evidence search: project-scoped index across datasets, geometries, studies, and programmes; exact SHA-256 citations; conflicting-version detection across historical geometry revisions; strict abstention when evidence is insufficient or unauthorized. | `packages/engineering/evidence_search.py`<br>`tests/test_evidence_search.py`<br>`services/api/main.py` | Software verified |
-
----
-
-## 2. Boundaries & Strict Operational Exclusions
-
-1. **Rig Actuation Excluded**: Autonomous drilling control, automatic choke manipulation, and remote PLC command execution are strictly excluded across all modules (`equipment_control: false`, `equipment_authority: none`).
-2. **No Automated Drilling Clearance**: Well separation and proximity calculations expose exact 3D closest approach distances and positional uncertainty ellipses without generating automated drilling clearance or go/no-go authorizations (`clearance_generated: false`).
-3. **Traceable Withholding**: When core evidence (e.g. triaxial rock tests, LOT records, casing inspection reports, mud rheology tests, or unpinned survey tool models) is missing or stale, calculations withhold results explicitly rather than substituting unverified defaults.
-4. **Historical Immutability**: Revising a shared input (such as well geometry or survey) flags dependent downstream studies as stale in the lineage graph without silent recalculation or automated approval transfer.
-
----
-
-## 3. Separate Verification, Release & Qualification Gates
-
-| Gate | Description | Current Status |
+| Increment | Current code evidence | Remaining scope |
 |---|---|---|
-| **Software Verification** | Automated unit, regression, integration, and property tests (555/555 tests pass in ~3.3 minutes). Production Vite and Streamlit component builds verified. | **PASSED (100% — 555/555 tests)** |
-| **Gate 2: Release Packaging & Distribution** | Professional Windows wizard installer (`tools/installer/setup.iss`), Authenticode code-signing pipeline (`tools/sign_windows_binary.py`), automated GitHub Actions release workflow (`.github/workflows/release.yml`), in-app Streamlit updater synchronization, and signed Windows distribution bundle (`dist/GeoDrillPro-Windows-x64.zip`, SHA-256: `11B527B81C2D1FA5BC2B06CB77D010FBEB59B9F92CADFF903C1E36669C3DB242`). | **PASSED & CLOSED** |
-| **Gate 3: Independent Engineering Field Qualification** | Equinor Volve Field 15/9-F-12 definitive survey (<0.1% error) and hydraulics ECD (<1.5% margin) calibration; Utah FORGE Well 16A(78)-32 geothermal hard-rock stick-slip & bit-bounce validation; Tulsa University (TUDRP) empirical flow-loop cuttings bed calibration; downhole sub friction factor inversion; automated qualification dossier (`docs/evidence/FIELD-QUALIFICATION-DOSSIER.md`). | **PASSED & CLOSED (Field Qualified)** |
-| **Gate 4: Security & Compliance Audit** | OWASP API Top 10 automated penetration test suite (`tests/test_security_audit.py`), Ed25519 cryptographic attestation bit-flip tamper-resistance audit, fresh-archive `.gdpz` tamper rejection, SAST scan (`bandit` 0 issues), SCA scan (`pip-audit` 0 CVEs), and SOC 2 / ISO 27001 readiness report (`docs/compliance/SECURITY-AUDIT-REPORT.md`). | **PASSED & CLOSED (Audited & Compliant)** |
+| A01–A06 | Readiness/source mapping, lineage/staleness, review packs, pagination/units, qualification cards and DDR reconciliation kernels/API tests | Dedicated workflow UI coverage/operator acceptance where only API/kernel paths exist; domain review |
+| GD-A07 | File imports and historical replay; [adapter status](GD-A07-IMPLEMENTATION.md) | ETP/WITSML adapter, arrival-time persistence, reconnect/deduplication/quarantine, fixtures and external interoperability are unimplemented/unverified |
+| GD-A08 | Project archives, full recovery utility, atomic failed migrations; [details](GD-A08-IMPLEMENTATION.md); unsigned distribution | Automatic update/binary rollback, trusted signing, broader fault injection and clean-machine acceptance |
+| GD-A09 | Named local team API, membership/conflicts and server attestations; [details](GD-A09-IMPLEMENTATION.md) | Dedicated team UI, hardened shared deployment, key custody and independent security review |
+| Connected workflow | Synthetic API journey and restored study/signature reopening; [scope](CONNECTED-WORKFLOW.md) | Real operator end-to-end acceptance and independent review |
+| GD-A10 | Geodesy/uncertainty/proximity API and diagnostics; [details](GD-A10-IMPLEMENTATION.md) | Integrated directional UI and field/tool-specialist qualification; no drilling clearance |
+| GD-A11 | Laminar rheology, supplied geometry, restricted transients and no-slip cuttings mixture density | Transition/turbulence, eccentric/rotating and deviated-bed closures, critical carrying/bed height and original flow-loop/PWD/solids validation; mixture density is not a bed model |
+| GD-A12 | Reduced bending-gradient torque/drag extension, friction grid fit with supplied holdout points and vibration screening | Clearance-dependent contact/tortuosity, state/depth-specific identified calibration, variable-geometry transients and instrumented holdout qualification |
+| GD-A13 | Four casing-collapse regimes, burst/tension interactions and load-envelope API/benchmarks | Complete barrier/cement lifecycle and qualified manufacturer/inspection evidence; broad standards compliance is not established |
+| GD-A14 | Preserved typed cohort import, geometry-bound API, dedicated UI, exclusion/provenance tables, empirical quantiles, fixed reports and restored-study reopening | Harmonized real DDR cohorts, independent adjudication and operator/forecast qualification |
+| GD-A15 | IADC parser and conditional inspected-bit progression through bit study inputs | Calibrated sensor/cohort programme and independent/censored holdout validation; no individual life/trip authority |
+| GD-A16 | Offline causal balance/event replay with disjoint supplied evaluation intervals | Authorized live adapter, adjudicated field corpus and blind performance qualification; no early-kick guarantee |
+| GD-A17 | Survey-bound typed input/import/API/UI, actual wall-eigenvalue MC/Mogi envelopes, numerical elastic intervals and integrated linear hydrostatic density; [scope](GD-A17-IMPLEMENTATION.md) | Actual characterized-fluid adapter, coupled thermal/poroelastic or multiphase solver experiments, original core/LOT/PVT observations and independent review; no operational mud-window approval |
+| GD-A18 | Dedicated project evidence UI, cited-record inspection, complete-calculation hashes, actual programme versions, historical casing disclosures and bounded/permission tests | Representative operator acceptance, broader evidence domains/full document retrieval and independent assessment |
+
+M01–M17 provide the audited offline workflows in [MODULES-1-17.md](MODULES-1-17.md)
+and the versioned model specifications. The proposal's zero-error, zero-latency,
+exact prediction, native EM inversion, virtual sensor diagnosis and autonomous rig
+control claims are rejected/deferred by the audit, not counted as delivered modules.
+
+[The original backlog](research/post-module-17/BACKLOG.md) retains its acceptance
+criteria. This table does not reduce them or declare the full "finish what is missing"
+objective achieved.
+
+Separate release and external gates:
+
+- Hosted repair and unsigned research publication: complete at the recorded revision.
+- Research-4: 615 tests on Windows/Ubuntu; hosted save/reopen/search/inspection/abstention, installed backup/restore and all complete public asset hashes verified. Representative operator acceptance remains open.
+- Publisher signing: owner-supplied certificate, timestamp and trusted EXE/installer verification.
+- Engineering qualification: original observations, applicability/holdout comparisons and a real named reviewer assessment.
+- Security/compliance: actual scoped external assessment and certification evidence if claimed.
+
+The FORGE survey check reproduces 422 published stations. Volve observations, native
+high-frequency dynamics, Tulsa experiments and instrumented friction records remain
+missing/unverified. [SOURCE-PROVENANCE.md](evidence/SOURCE-PROVENANCE.md) records acquired
+evidence.
+
+Equipment control remains false, equipment authority none, and automated drilling
+clearance false throughout implementation and review.

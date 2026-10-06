@@ -1,0 +1,19 @@
+{
+  "type": "record",
+  "namespace": "Energistics.Etp.v12.Protocol.Core",
+  "name": "CloseSession",
+  "protocol": "0",
+  "messageType": "5",
+  "senderRole": "client,server",
+  "protocolRoles": "client, server",
+  "multipartFlag": false,
+  "fields": [
+    {
+      "name": "reason",
+      "type": "string",
+      "default": ""
+    }
+  ],
+  "fullName": "Energistics.Etp.v12.Protocol.Core.CloseSession",
+  "depends": []
+}

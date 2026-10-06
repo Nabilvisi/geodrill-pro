@@ -1,0 +1,26 @@
+{
+  "type": "record",
+  "namespace": "Energistics.Etp.v12.Protocol.ChannelSubscribe",
+  "name": "SubscriptionsStopped",
+  "protocol": "21",
+  "messageType": "8",
+  "senderRole": "store",
+  "protocolRoles": "store,customer",
+  "multipartFlag": true,
+  "fields": [
+    {
+      "name": "reason",
+      "type": "string"
+    },
+    {
+      "name": "channelIds",
+      "type": {
+        "type": "map",
+        "values": "long"
+      },
+      "default": {}
+    }
+  ],
+  "fullName": "Energistics.Etp.v12.Protocol.ChannelSubscribe.SubscriptionsStopped",
+  "depends": []
+}

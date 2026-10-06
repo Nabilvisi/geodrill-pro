@@ -8,3 +8,11 @@ python-multipart==0.0.32
 pytest==9.1.1
 httpx==0.28.1
 hypothesis==6.139.2
+cryptography==50.0.2
+numpy==2.5.3
+pyproj==3.8.0
+welleng==0.29.1
+defusedxml==0.7.1
+websockets==17.2
+fastavro==1.13.0
+filelock==4.0.4

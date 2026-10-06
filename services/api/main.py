@@ -51,9 +51,14 @@ from packages.engineering.directional import (
 from packages.engineering.review_pack import build_programme_pack, export_pack_to_html, export_pack_to_csv
 from packages.engineering.usability import convert_unit, paginate_and_search_records, UNIT_PROFILES
 from packages.engineering.evidence_search import SearchQuery, search_project_evidence
+from packages.engineering.offset_benchmarking import OffsetBenchmarkingInput, calculate_offset_benchmarks
+from packages.engineering.geomechanics import GeomechanicsInput, calculate_geomechanics
 from packages.engineering.ddr import create_daily_drilling_report, export_ddr_to_xml
 from packages.frontend import frontend_dist
 from . import demo, programmes
+from packages.domain.errors import GeoDrillDomainError
+from .errors import domain_error_handler, api_error_handler, APIError
+from .routers import projects_router, directional_router, engineering_router, qualification_router, wells_router
 
 import sys
 ROOT = Path(sys._MEIPASS).resolve() if getattr(sys, "frozen", False) and hasattr(sys, "_MEIPASS") else Path(__file__).resolve().parents[2]
@@ -135,6 +140,15 @@ def create_app(data_dir: Path | None = None, mode: str | None = None):
     @app.exception_handler(PermissionError)
     async def forbidden(request, error):
         return JSONResponse({"detail": str(error)}, status_code=403)
+
+    app.add_exception_handler(GeoDrillDomainError, domain_error_handler)
+    app.add_exception_handler(APIError, api_error_handler)
+
+    app.include_router(projects_router)
+    app.include_router(directional_router)
+    app.include_router(engineering_router)
+    app.include_router(qualification_router)
+    app.include_router(wells_router)
 
     if team_mode:
         app.include_router(build_router(store))
@@ -366,7 +380,7 @@ def create_app(data_dir: Path | None = None, mode: str | None = None):
                           survey_source_sha256=source["source_hash"],survey_parquet_sha256=source["parquet_sha256"])
             return store.calculation(project_id,"hydraulics",value.model_dump(),result)
 
-    research_models={"stability":StabilityInput,"transport":TransportInput,"surge-swab":SurgeInput,"torque-drag":TorqueDragInput,"buckling":BucklingInput,"dynamics":DynamicsInput,"bit-condition":BitInput,"wear-fatigue":WearInput,"anomaly":AnomalyInput,"gas-phase":GasInput,"supervision":SupervisionInput}
+    research_models={"stability":StabilityInput,"transport":TransportInput,"surge-swab":SurgeInput,"torque-drag":TorqueDragInput,"buckling":BucklingInput,"dynamics":DynamicsInput,"bit-condition":BitInput,"wear-fatigue":WearInput,"anomaly":AnomalyInput,"gas-phase":GasInput,"supervision":SupervisionInput,"offset-benchmarking":OffsetBenchmarkingInput,"geomechanics":GeomechanicsInput}
 
     @app.get("/api/research/schemas")
     def research_schemas():
@@ -452,7 +466,7 @@ def create_app(data_dir: Path | None = None, mode: str | None = None):
         return explain_study(calcs[calc_id], project, ds, revs)
 
     @app.get("/api/projects/{project_id}/evidence/search")
-    def search_evidence(project_id: str, q: str = Query(..., min_length=1), request: Request = None):
+    def search_evidence(project_id: str, q: str = Query(..., min_length=1, max_length=500), request: Request = None):
         user = getattr(request.state, "user", None) if request and hasattr(request, "state") else None
         role = user.get("role", "viewer") if user else "viewer"
         user_id = user.get("id", "current_user") if user else "current_user"
@@ -461,10 +475,7 @@ def create_app(data_dir: Path | None = None, mode: str | None = None):
         ds = store.datasets(project_id)
         revs = store.revisions(project_id, "M1")
         calcs = store.calculations(project_id)
-        try:
-            progs = programmes.list_programmes(store, project_id)
-        except Exception:
-            progs = []
+        progs = [programmes.get_programme(store, p["id"]) for p in programmes.list_programmes(store, project_id)]
 
         query_input = SearchQuery(
             query=q,
@@ -484,6 +495,14 @@ def create_app(data_dir: Path | None = None, mode: str | None = None):
             user_project_memberships=memberships,
         )
 
+    @app.get("/api/projects/{project_id}/programmes/{programme_id}")
+    def cited_programme(project_id: str, programme_id: str):
+        store.project(project_id)
+        value = programmes.get_programme(store, programme_id)
+        if value["project_id"] != project_id:
+            raise KeyError("Programme not found in this project")
+        return value
+
     @app.get("/api/projects/{project_id}/bundle/export")
     def project_bundle_export(project_id: str):
         project = store.project(project_id)
@@ -497,8 +516,10 @@ def create_app(data_dir: Path | None = None, mode: str | None = None):
 
     @app.post("/api/projects/bundle/restore", status_code=201)
     async def project_bundle_restore(file: UploadFile = File(...)):
-        raw = await file.read(MAX_FILE_BYTES * 10)
+        raw = await file.read(MAX_FILE_BYTES + 1)
         await file.close()
+        if len(raw) > MAX_FILE_BYTES:
+            raise HTTPException(413, "Bundle exceeds the 2 MiB HTTP import limit; use local workstation backup/restore for larger recovery.")
         if len(raw) == 0:
             raise HTTPException(400, "Empty bundle file uploaded.")
         def execute():
@@ -572,6 +593,8 @@ def create_app(data_dir: Path | None = None, mode: str | None = None):
         revision=checked_geometry(project_id,value.geometry_revision_id)
         if value.depth_datum!=project["datum"]:
             raise ValueError("Research depth datum must match the project.")
+        if hasattr(value,"stress_north_reference") and value.stress_north_reference!=project["north_reference"]:
+            raise ValueError("Stress azimuth reference must match the project's accepted survey north reference.")
         if value.evidence_state=="synthetic" and project["origin"]!="synthetic":
             raise ValueError("Synthetic research evidence is restricted to synthetic projects.")
         geometry=GeometryInput.model_validate(revision["input"])
@@ -618,8 +641,8 @@ def create_app(data_dir: Path | None = None, mode: str | None = None):
 
     @app.post("/api/projects/{project_id}/research/{model}/imports",status_code=201)
     async def import_research_inputs(project_id: str,model: str,file: UploadFile = File(...)):
-        if model not in {"dynamics","bit-condition","wear-fatigue","anomaly","gas-phase","supervision"}:
-            raise ValueError("JSON research imports are available for Modules 12–17.")
+        if model not in {"dynamics","bit-condition","wear-fatigue","anomaly","gas-phase","supervision","offset-benchmarking","geomechanics"}:
+            raise ValueError("JSON research imports are available for Modules 12–17, offset benchmarking and geomechanics.")
         raw=await file.read(MAX_FILE_BYTES+1);await file.close()
         if len(raw)>MAX_FILE_BYTES:raise HTTPException(413,"File exceeds the 2 MiB release limit.")
         filename=(file.filename or "untitled").replace("\\","/").split("/")[-1][:160]
@@ -638,6 +661,10 @@ def create_app(data_dir: Path | None = None, mode: str | None = None):
     @app.post("/api/projects/{project_id}/calculations/stability")
     def calculate_stability(project_id: str,value: StabilityInput):
         return research_save(project_id,value,"stability",stability)
+
+    @app.post("/api/projects/{project_id}/calculations/geomechanics")
+    def geomechanics_study(project_id: str,value: GeomechanicsInput):
+        return research_save(project_id,value,"geomechanics",calculate_geomechanics)
 
     @app.post("/api/projects/{project_id}/calculations/transport")
     def calculate_transport(project_id: str,value: TransportInput):
@@ -678,6 +705,10 @@ def create_app(data_dir: Path | None = None, mode: str | None = None):
     @app.post("/api/projects/{project_id}/calculations/supervision")
     def calculate_supervision(project_id: str,value: SupervisionInput):
         return research_save(project_id,value,"supervision",supervision)
+
+    @app.post("/api/projects/{project_id}/calculations/offset-benchmarking")
+    def calculate_offsets(project_id: str, value: OffsetBenchmarkingInput):
+        return research_save(project_id, value, "offset-benchmarking", calculate_offset_benchmarks)
 
     def ingest_em_vendor(project_id, filename, raw):
         project=store.project(project_id)
@@ -873,4 +904,5 @@ def create_app(data_dir: Path | None = None, mode: str | None = None):
     return app
 
 
-app = create_app()
+# Server launchers use this module's create_app factory. Importing the API must
+# not initialize or migrate a default data directory before a caller selects it.

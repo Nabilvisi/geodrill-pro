@@ -91,11 +91,53 @@ WORKFLOW_V5 = '''
 '''
 
 # (version, SQL script). Versions must be strictly increasing.
+WELLS_V6 = '''
+    CREATE TABLE IF NOT EXISTS fields(
+        id TEXT PRIMARY KEY,
+        project_id TEXT NOT NULL REFERENCES projects(id),
+        name TEXT NOT NULL,
+        payload TEXT NOT NULL,
+        created_at TEXT NOT NULL);
+
+    CREATE TABLE IF NOT EXISTS wells(
+        id TEXT PRIMARY KEY,
+        project_id TEXT NOT NULL REFERENCES projects(id),
+        field_id TEXT REFERENCES fields(id),
+        name TEXT NOT NULL,
+        uwi TEXT NOT NULL DEFAULT '',
+        payload TEXT NOT NULL,
+        created_at TEXT NOT NULL);
+
+    CREATE TABLE IF NOT EXISTS wellbores(
+        id TEXT PRIMARY KEY,
+        well_id TEXT NOT NULL REFERENCES wells(id),
+        name TEXT NOT NULL,
+        uwi TEXT NOT NULL DEFAULT '',
+        sidetrack_parent_id TEXT REFERENCES wellbores(id),
+        wellbore_type TEXT NOT NULL DEFAULT 'original',
+        payload TEXT NOT NULL,
+        created_at TEXT NOT NULL);
+
+    CREATE TABLE IF NOT EXISTS targets(
+        id TEXT PRIMARY KEY,
+        wellbore_id TEXT NOT NULL REFERENCES wellbores(id),
+        name TEXT NOT NULL,
+        geometry_type TEXT NOT NULL DEFAULT 'circle',
+        payload TEXT NOT NULL,
+        created_at TEXT NOT NULL);
+
+    CREATE INDEX IF NOT EXISTS idx_wells_project ON wells(project_id);
+    CREATE INDEX IF NOT EXISTS idx_wellbores_well ON wellbores(well_id);
+    CREATE INDEX IF NOT EXISTS idx_targets_wellbore ON targets(wellbore_id);
+'''
+
+# (version, SQL script). Versions must be strictly increasing.
 MIGRATIONS: list[tuple[int, str]] = [
     (2, BASELINE_V2),
     (3, TEAM_V3),
     (4, MEMBERS_V4),
     (5, WORKFLOW_V5),
+    (6, WELLS_V6),
 ]
 
 
@@ -108,17 +150,28 @@ def latest_version() -> int:
 
 
 def migrate(db: sqlite3.Connection) -> list[int]:
-    """Apply pending migrations in order. Returns the versions applied."""
+    """Apply pending migrations atomically, preserving the old schema on failure."""
     versions = [v for v, _ in MIGRATIONS]
     if versions != sorted(set(versions)):
         raise RuntimeError("Migration versions must be unique and increasing")
     version = current_version(db)
     if version > latest_version():
         raise RuntimeError(f"Database schema v{version} is newer than this application (v{latest_version()})")
-    applied = []
-    for target, script in MIGRATIONS:
-        if target > version:
-            db.executescript(script)
-            db.execute(f"PRAGMA user_version={int(target)}")
-            applied.append(target)
-    return applied
+    pending = [(target, script) for target, script in MIGRATIONS if target > version]
+    if not pending:
+        return []
+    if db.in_transaction:
+        raise RuntimeError("Migrations require a connection without an active transaction")
+    # journal_mode cannot change inside a transaction. Establish WAL before the
+    # historical baseline script repeats this pragma inside the atomic batch.
+    db.execute("PRAGMA journal_mode=WAL")
+    statements = ["BEGIN IMMEDIATE;"]
+    for target, script in pending:
+        statements.extend((script, f"PRAGMA user_version={int(target)};"))
+    statements.append("COMMIT;")
+    try:
+        db.executescript("\n".join(statements))
+    except BaseException:
+        db.rollback()
+        raise
+    return [target for target, _ in pending]

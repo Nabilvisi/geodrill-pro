@@ -1,0 +1,236 @@
+{
+  "verified_at_utc": "2026-10-06T12:37:48.631771+00:00",
+  "model_version": "GD-A17-geomechanics-stability-2",
+  "regression": {
+    "tests": 635,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "seconds": 210.21,
+    "warning": "Existing Starlette/httpx TestClient deprecation"
+  },
+  "focused_checks": {
+    "tests": 41,
+    "failures": 0,
+    "scope": [
+      "geomechanics",
+      "Streamlit cloud"
+    ]
+  },
+  "frontend": {
+    "build": "passed",
+    "asset": "index-CVotoqRw.js",
+    "sha256": "f9a7c9495634ac6993b6ef7128c836ae7f127fdde804df5a21fe895ea2ba3001"
+  },
+  "internal_bandit": {
+    "issues": 0,
+    "lines": 9931,
+    "suppressed": 6,
+    "independent_assessment": false
+  },
+  "independent_numerical_checks": [
+    "Mogi/MC triaxial equivalence and intermediate-stress response",
+    "Vertical principal-stress pressure boundaries",
+    "Survey rotation/eigenvalue invariants",
+    "Linear hydrostatic integral against independent RK4",
+    "Zero-coefficient hydrostatic limit",
+    "Explicit evidence/calibration/density withholding"
+  ],
+  "local_browser": {
+    "nested_core_and_calibration_fields_rendered": true,
+    "engineering_units_rendered": true,
+    "missing_core_saved_as_withheld": true,
+    "withheld_calculation_id": "087c1da8-6063-4ee2-a54b-077aef7f77f9",
+    "saved_seed_reopened": true,
+    "complete_study_saved_through_ui": true,
+    "complete_calculation_id": "d82672eb-9d38-4f22-b115-38d6b347c2aa",
+    "wall_plot_and_pressure_intervals_rendered": true,
+    "examples": "synthetic"
+  },
+  "connected_checks": [
+    "Original byte/hash preservation",
+    "Immutable geometry and true/grid reference",
+    "Saved-calculation citation hash",
+    "Complete fixed report",
+    "Restart and archive restoration",
+    "Changed input comparison",
+    "Team viewer/membership boundaries"
+  ],
+  "ci": {
+    "run_id": 37461989646,
+    "url": "https://github.com/Nabilvisi/geodrill-pro/actions/runs/37461989646",
+    "head_sha": "77e3e91885b9994f6ed0eedee85bb7567e6738f6",
+    "conclusion": "success",
+    "ubuntu_tests": 635,
+    "windows_tests": 635,
+    "failures": 0
+  },
+  "hosted": {
+    "url": "https://geodrill-pro.streamlit.app/",
+    "rebooted_at_utc": "2026-10-06T12:18:44.649Z",
+    "navigation_pages": 27,
+    "seeded_research_models": 8,
+    "nested_core_and_calibration_fields_rendered": true,
+    "complete_study_saved": true,
+    "complete_calculation_id": "a52bb656-5378-4ebf-ac85-546c0730ff2f",
+    "withheld_calculation_id": "722b111c-8d6a-448d-87c2-e38ad8686947",
+    "geometry_revision_id": "f5f489b0-1083-4996-94db-7ae7bcab0479",
+    "input_document_id": "9be01bc8-30b6-4d51-9dc7-a0509c632a99",
+    "input_document_sha256": "0c382627dae39d80ae24ed319f815ce6756bb8e66bfc95fbbd9ad39aa6368048",
+    "calculation_citation_sha256": "362f88d62874b9161aeda315398b460e8d9bf231ebbd148c20fe9e7e6b2febfe",
+    "citations_found": 4,
+    "cited_record_inspected": true,
+    "profile_points": 360,
+    "numerical_refinement_passed": true,
+    "frontend_sha256": "f9a7c9495634ac6993b6ef7128c836ae7f127fdde804df5a21fe895ea2ba3001",
+    "examples": "synthetic",
+    "screenshot": "build/geomechanics-verification/hosted-geomechanics.png"
+  },
+  "packaged_release": {
+    "tag": "research-5",
+    "url": "https://github.com/Nabilvisi/geodrill-pro/releases/tag/research-5",
+    "workflow_run_id": 37462177431,
+    "workflow_conclusion": "success",
+    "release_job_tests": 635,
+    "manifest": {
+      "version": "0.8.0",
+      "created_at_utc": "2026-10-06T12:24:56.799359+00:00",
+      "source_commit": "77e3e91885b9994f6ed0eedee85bb7567e6738f6",
+      "source_has_uncommitted_changes": true,
+      "source_snapshot_sha256": "2da4dad45ca360f73cc85e1e2f607febda37115130768cda6de21993bace9fba",
+      "source_snapshot_file_count": 143,
+      "source_snapshot_scope": "Git-listed application, package, service, tool, test, workflow and original-source files; root build/dependency files. Generated verification reports excluded.",
+      "signing_mode": "unsigned",
+      "trusted_signature_verification": {
+        "GeoDrillPro.exe": false,
+        "GeoDrillPro-Setup.exe": false
+      },
+      "independent_engineering_qualification": "pending",
+      "external_security_audit": "pending",
+      "equipment_control": false,
+      "clearance_generated": false,
+      "assets": [
+        {
+          "name": "GeoDrillPro-Setup.exe",
+          "size_bytes": 111311475,
+          "sha256": "0f6a3388b5b74f5aae4c9f74e4f9a32e79bca4a7f7cac1340710a59dfacb4ca0"
+        },
+        {
+          "name": "GeoDrillPro-Windows-x64.zip",
+          "size_bytes": 173284516,
+          "sha256": "521a5e60ad39dc96d419ddbc4efc3afb3c666c707989d64a14c5635cb1ef6814"
+        }
+      ],
+      "executable_sha256": "5db7299968bb5d0f37241bc9aa3a7c7ef2c8831524c0583d8c7dcb22cfb6c5b1"
+    },
+    "complete_downloads": [
+      {
+        "name": "GeoDrillPro-Setup.exe",
+        "url": "https://github.com/Nabilvisi/geodrill-pro/releases/download/research-5/GeoDrillPro-Setup.exe",
+        "size": 111311475,
+        "digest": "sha256:0f6a3388b5b74f5aae4c9f74e4f9a32e79bca4a7f7cac1340710a59dfacb4ca0",
+        "actual_sha256": "0f6a3388b5b74f5aae4c9f74e4f9a32e79bca4a7f7cac1340710a59dfacb4ca0",
+        "verified": true
+      },
+      {
+        "name": "GeoDrillPro-Windows-x64.zip",
+        "url": "https://github.com/Nabilvisi/geodrill-pro/releases/download/research-5/GeoDrillPro-Windows-x64.zip",
+        "size": 173284516,
+        "digest": "sha256:521a5e60ad39dc96d419ddbc4efc3afb3c666c707989d64a14c5635cb1ef6814",
+        "actual_sha256": "521a5e60ad39dc96d419ddbc4efc3afb3c666c707989d64a14c5635cb1ef6814",
+        "verified": true
+      },
+      {
+        "name": "release-manifest.json",
+        "url": "https://github.com/Nabilvisi/geodrill-pro/releases/download/research-5/release-manifest.json",
+        "size": 1281,
+        "digest": "sha256:4a0b1178d9a0faa59b07fd7e14af0641648203aa0a3b534c22beca7b1cf50567",
+        "actual_sha256": "4a0b1178d9a0faa59b07fd7e14af0641648203aa0a3b534c22beca7b1cf50567",
+        "verified": true
+      },
+      {
+        "name": "SHA256SUMS.txt",
+        "url": "https://github.com/Nabilvisi/geodrill-pro/releases/download/research-5/SHA256SUMS.txt",
+        "size": 273,
+        "digest": "sha256:8033a6b02b3f08939c9585f5dde02364ebee00f5043c305d8bfa11609d38d1ee",
+        "actual_sha256": "8033a6b02b3f08939c9585f5dde02364ebee00f5043c305d8bfa11609d38d1ee",
+        "verified": true
+      }
+    ],
+    "installer_acceptance": {
+      "install_exit_code": 0,
+      "clearance_generated": false,
+      "installed_executable_sha256": "5db7299968bb5d0f37241bc9aa3a7c7ef2c8831524c0583d8c7dcb22cfb6c5b1",
+      "restored_smoke_exit_code": 0,
+      "persistent_evidence_preserved": true,
+      "signing_mode": "unsigned",
+      "equipment_control": false,
+      "passed": true,
+      "restored_signing_identity_preserved": true,
+      "wrong_hash_restore_rejected": true,
+      "backup_archive_sha256": "da1012014ffa2df4496b0f8a458f2379fa462eddf6885e19868c40522145894f",
+      "uninstall_exit_code": 0,
+      "packaged_restore_exit_code": 0,
+      "extra_user_file_preserved": true,
+      "source_snapshot_sha256": "2da4dad45ca360f73cc85e1e2f607febda37115130768cda6de21993bace9fba",
+      "installer_sha256": "0f6a3388b5b74f5aae4c9f74e4f9a32e79bca4a7f7cac1340710a59dfacb4ca0",
+      "existing_restore_destination_preserved": true,
+      "packaged_backup_exit_code": 0,
+      "smoke_exit_code": 0
+    },
+    "portable_geomechanics_workflow": {
+      "verified_at_utc": "2026-10-06T12:36:54Z",
+      "passed": true,
+      "health": {
+        "status": "ok",
+        "version": "0.8.0",
+        "mode": "local-research",
+        "equipment_control": false,
+        "instance_id": "42a14bded565c437",
+        "pid": 38264
+      },
+      "project_id": "51a446f1-b38f-4f8c-a398-eeaace79ee63",
+      "geometry_revision_id": "64e1edb2-d253-44db-942a-18757158e897",
+      "geometry_sha256": "c9ca79464bbaa01d1a6a135ec02a926a637ff4aea41462bd5de8eae5a2ad0a9e",
+      "input_document_sha256": "8bbe1e1d02be2e453f69e851262daafb876dbaa60340c5a85e38c13f200fc019",
+      "calculation_id": "f8f1875d-7f25-4691-9922-a5ff4ec17518",
+      "withheld_calculation_id": "8cc067e3-9181-462e-ba57-8cf6b240ff2d",
+      "model_version": "GD-A17-geomechanics-stability-2",
+      "profile_points": 360,
+      "numerical_refinement": {
+        "coarse_angles": 360,
+        "fine_angles": 1440,
+        "coarse_pressure_seeds": 81,
+        "fine_pressure_seeds": 161,
+        "maximum_boundary_change_pa": 0.0,
+        "boundary_tolerance_pa": 500,
+        "root_tolerance_pa": 1,
+        "passed": true
+      },
+      "original_input_matches": true,
+      "changed_inputs_withheld": true,
+      "fixed_report_contains_both_studies": true,
+      "cited_saved_record": true,
+      "report_id": "19c6be13-79ff-49b5-a9ed-3ad16c7252e6",
+      "frontend_sha256": "f9a7c9495634ac6993b6ef7128c836ae7f127fdde804df5a21fe895ea2ba3001",
+      "equipment_control": false,
+      "clearance_generated": false,
+      "data_directory": "isolated under published-research-5 build directory"
+    },
+    "zip_crc_verified": true,
+    "source_snapshot_digest_verified": true,
+    "authenticode_status": "NotSigned"
+  },
+  "remaining": [
+    "Original property/core/LOT/PVT observations and independent blind validation",
+    "Actual characterized-fluid adapter and thermal/poroelastic or multiphase solver experiments",
+    "Read-only ETP/WITSML adapter",
+    "Updater/channel selection and binary rollback",
+    "Dedicated team and directional UI",
+    "Broader hydraulic/contact closures and recovery fault injection",
+    "Trusted publisher signatures and external assessment"
+  ],
+  "equipment_control": false,
+  "clearance_generated": false,
+  "source_commit": "77e3e91885b9994f6ed0eedee85bb7567e6738f6"
+}

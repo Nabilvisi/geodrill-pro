@@ -9,8 +9,33 @@ import {ShalySand} from './ShalySand';
 import {EMVendor} from './EMVendor';
 import {Hydraulics} from './Hydraulics';
 import {ResearchStudy} from './ResearchStudy';
+import {EvidenceSearch} from './EvidenceSearch';
 import './research.css';
 import {CloudReportDownload} from './CloudReportDownload';
+import {DirectionalWorkspace} from './DirectionalWorkspace';
+import {Well3DWorkspace} from './Well3DWorkspace';
+import {
+  BrandMark,
+  WorkspaceHeader,
+  AssumptionsPanel,
+  IconProjects,
+  IconWellPlanning,
+  IconDirectional,
+  IconSurvey,
+  IconAntiCollision,
+  Icon3DWell,
+  IconHydraulics,
+  IconTorqueDrag,
+  IconCasing,
+  IconBHA,
+  IconGeomechanics,
+  IconRealtime,
+  IconOffsets,
+  IconEvidence,
+  IconReports,
+  IconQualification,
+  IconAdmin,
+} from './design-system';
 
 type Project = {id:string;name:string;well_name:string;datum:string;north_reference:string;origin:string;bit_diameter_m:number;created_at:string;formations?:{name:string;top_tvd_m:number;uncertainty_m:number}[]};
 type Row = {[key:string]:number|string|null};
@@ -19,8 +44,64 @@ type EventRecord = {id:string;dataset_id:string;row_index:number;code:string;sev
 type Calculation = {id:string;model:string;inputs_si:Record<string,number|string>;result:Record<string,unknown>;created_at:string};
 type Audit = {integrity:string;head:string;entries:{sequence:number;action:string;at:string;project_id:string;hash:string;details:Record<string,unknown>}[]};
 type Report = {sha256:string;snapshot:{id:string;created_at:string;intended_use:string;project:Project;datasets:Dataset[];events:EventRecord[];calculations:Calculation[];limitations:string[];engineering_revisions?:Revision[];audit_head:string}};
-type Page = 'Overview'|'Well geometry'|'Casing program'|'Log clustering'|'Shaly sand'|'EM vendor results'|'Hydraulics'|'Wellbore stability'|'Cuttings transport'|'Surge & swab'|'Torque & drag'|'Buckling assessment'|'BHA dynamics'|'Bit condition'|'Wear & fatigue'|'Flow anomalies'|'Gas & phase studies'|'Supervisory research'|'Data workspace'|'Engineering lab'|'Events & review'|'Module roadmap'|'Audit trail'|'Reports';
-const menu:{name:Page;icon:typeof Activity}[] = [{name:'Overview',icon:Activity},{name:'Well geometry',icon:Map},{name:'Casing program',icon:Layers3},{name:'Log clustering',icon:SlidersHorizontal},{name:'Shaly sand',icon:Layers3},{name:'EM vendor results',icon:Activity},{name:'Hydraulics',icon:Activity},{name:'Wellbore stability',icon:Activity},{name:'Cuttings transport',icon:Activity},{name:'Surge & swab',icon:Activity},{name:'Torque & drag',icon:Activity},{name:'Buckling assessment',icon:Activity},{name:'BHA dynamics',icon:Activity},{name:'Bit condition',icon:Activity},{name:'Wear & fatigue',icon:Activity},{name:'Flow anomalies',icon:Activity},{name:'Gas & phase studies',icon:Activity},{name:'Supervisory research',icon:Activity},{name:'Data workspace',icon:Database},{name:'Engineering lab',icon:FlaskConical},{name:'Events & review',icon:Bell}];
+type Page = 'Overview'|'Directional engineering'|'3D well engineering'|'Well geometry'|'Casing program'|'Log clustering'|'Shaly sand'|'EM vendor results'|'Hydraulics'|'Wellbore stability'|'Cuttings transport'|'Surge & swab'|'Torque & drag'|'Buckling assessment'|'BHA dynamics'|'Bit condition'|'Wear & fatigue'|'Flow anomalies'|'Gas & phase studies'|'Supervisory research'|'Offset benchmarks'|'Formation geomechanics'|'Evidence search'|'Data workspace'|'Engineering lab'|'Events & review'|'Module roadmap'|'Audit trail'|'Reports';
+const navigationSections: { category: string; items: { name: Page; icon: React.ComponentType<{ size?: number | string; color?: string }> }[] }[] = [
+  {
+    category: 'PROJECTS',
+    items: [
+      { name: 'Overview', icon: IconProjects },
+      { name: 'Data workspace', icon: Database },
+    ],
+  },
+  {
+    category: 'PLAN & DESIGN',
+    items: [
+      { name: 'Directional engineering', icon: IconDirectional },
+      { name: '3D well engineering', icon: Icon3DWell },
+      { name: 'Well geometry', icon: IconSurvey },
+      { name: 'Casing program', icon: IconCasing },
+    ],
+  },
+  {
+    category: 'ENGINEERING',
+    items: [
+      { name: 'Hydraulics', icon: IconHydraulics },
+      { name: 'Torque & drag', icon: IconTorqueDrag },
+      { name: 'Buckling assessment', icon: Activity },
+      { name: 'Formation geomechanics', icon: IconGeomechanics },
+      { name: 'Wellbore stability', icon: Activity },
+      { name: 'Cuttings transport', icon: Activity },
+      { name: 'Surge & swab', icon: Activity },
+      { name: 'BHA dynamics', icon: IconBHA },
+      { name: 'Bit condition', icon: Activity },
+      { name: 'Wear & fatigue', icon: Activity },
+      { name: 'Log clustering', icon: SlidersHorizontal },
+      { name: 'Shaly sand', icon: Layers3 },
+      { name: 'EM vendor results', icon: Activity },
+      { name: 'Engineering lab', icon: FlaskConical },
+    ],
+  },
+  {
+    category: 'OPERATIONS',
+    items: [
+      { name: 'Offset benchmarks', icon: IconOffsets },
+      { name: 'Flow anomalies', icon: IconRealtime },
+      { name: 'Gas & phase studies', icon: Activity },
+      { name: 'Supervisory research', icon: Activity },
+      { name: 'Events & review', icon: Bell },
+    ],
+  },
+  {
+    category: 'GOVERNANCE',
+    items: [
+      { name: 'Evidence search', icon: IconEvidence },
+      { name: 'Reports', icon: IconReports },
+      { name: 'Module roadmap', icon: IconQualification },
+      { name: 'Audit trail', icon: IconAdmin },
+    ],
+  },
+];
+const menu = navigationSections.flatMap(s => s.items);
 const cloudSession = (window as Window & {GEODRILL_CLOUD?:boolean}).GEODRILL_CLOUD === true;
 const formatter = new Intl.NumberFormat('en-US',{maximumFractionDigits:1});
 const fmt = (v:unknown,d=1) => typeof v === 'number' && Number.isFinite(v) ? v.toLocaleString('en-US',{maximumFractionDigits:d,minimumFractionDigits:d}) : '—';
@@ -110,12 +191,44 @@ function App(){
   const seek=(index:number)=>{setPlaying(false);setCursor(index);};
   const field=units==='field';const depthFactor=field?1/0.3048:1,depthUnit=field?'ft':'m';
   const filteredEvents=events.filter(e=>`${e.code} ${e.message}`.toLowerCase().includes(query.toLowerCase()));
-  const title:Record<Page,string>={'Overview':'Well overview','Well geometry':'Well geometry','Casing program':'Casing programme','Log clustering':'Log response clustering','Shaly sand':'Shaly-sand interpretation','EM vendor results':'EM vendor result review','Hydraulics':'Hydraulics & pressure profiles','Wellbore stability':'Elastic & thermal stability','Cuttings transport':'Cuttings transport & solids balance','Surge & swab':'Offline surge & swab','Torque & drag':'Soft-string torque & drag','Buckling assessment':'Buckling & load transfer','BHA dynamics':'BHA dynamics','Bit condition':'Bit condition','Wear & fatigue':'Wear & fatigue','Flow anomalies':'Flow anomalies','Gas & phase studies':'Gas & phase studies','Supervisory research':'Supervisory research','Data workspace':'Your data, in context','Engineering lab':'Engineering calculations','Events & review':'Events & review','Module roadmap':'Capability roadmap','Audit trail':'Audit trail','Reports':'Saved reports'};
-  return <div className="app-shell"><aside className="sidebar"><div className="brand"><div className="brand-mark"><Layers3 size={23}/></div><div>GeoDrill<span>PRO</span><small>ENGINEERING WORKSTATION</small></div></div><div className="workspace-label">WORKSPACE <span>{cloudSession?'SESSION':'LOCAL'}</span></div><div className="project-switch"><FolderOpen size={17}/><select aria-label="Active project" value={project?.id??''} onChange={e=>{const p=projects.find(p=>p.id===e.target.value);if(p)void loadProject(p);}}><option value="" disabled>Select a project</option>{projects.map(p=><option key={p.id} value={p.id}>{p.name}</option>)}</select><ChevronDown size={14}/></div>
-    <div className="nav-label">ENGINEERING</div><nav>{menu.map(({name,icon:Icon})=><button aria-label={name} key={name} className={`nav-item ${page===name?'active':''}`} onClick={()=>setPage(name)}><Icon size={18}/><span>{name}</span>{name==='Events & review'&&pending>0&&<b>{pending}</b>}</button>)}</nav><div className="nav-label second">WORKSPACE TOOLS</div>{[{name:'Reports' as Page,icon:FileText},{name:'Module roadmap' as Page,icon:Box},{name:'Audit trail' as Page,icon:FileCheck2}].map(({name,icon:Icon})=><button aria-label={name} key={name} className={`nav-item ${page===name?'active':''}`} onClick={()=>setPage(name)}><Icon size={18}/><span>{name}</span></button>)}
-    <div className="sidebar-bottom"><div className="mode-card"><ShieldCheck size={20}/><strong>Engineering research</strong><p>{cloudSession?'Session analysis & historical replay.':'Local analysis & historical replay.'}<br/>No equipment authority.</p><div><span className={`dot ${online?'':'bad'}`}/>{online?(cloudSession?'Session workspace available':'Local service available'):(cloudSession?'Session workspace disconnected':'Local service disconnected')}</div></div><div className="version"><span>GeoDrill Pro</span><span>v0.8.0</span></div></div></aside>
+  const title:Record<Page,string>={'Overview':'Well overview','Directional engineering':'Directional well planning & survey analysis','3D well engineering':'3D interactive wellbore & horizon model','Well geometry':'Well geometry','Casing program':'Casing programme','Log clustering':'Log response clustering','Shaly sand':'Shaly-sand interpretation','EM vendor results':'EM vendor result review','Hydraulics':'Hydraulics & pressure profiles','Wellbore stability':'Elastic & thermal stability','Cuttings transport':'Cuttings transport & solids balance','Surge & swab':'Offline surge & swab','Torque & drag':'Soft-string torque & drag','Buckling assessment':'Buckling & load transfer','BHA dynamics':'BHA dynamics','Bit condition':'Bit condition','Wear & fatigue':'Wear & fatigue','Flow anomalies':'Flow anomalies','Gas & phase studies':'Gas & phase studies','Supervisory research':'Supervisory research','Formation geomechanics':'Formation geomechanics','Offset benchmarks':'Offset cohort benchmarks','Evidence search':'Project evidence search','Data workspace':'Your data, in context','Engineering lab':'Engineering calculations','Events & review':'Events & review','Module roadmap':'Capability roadmap','Audit trail':'Audit trail','Reports':'Saved reports'};
+  return <div className="app-shell"><aside className="sidebar"><div className="brand" style={{ padding: "0 4px" }}><BrandMark size={32} /></div><div className="workspace-label">WORKSPACE <span>{cloudSession?'SESSION':'LOCAL'}</span></div><div className="project-switch"><FolderOpen size={17}/><select aria-label="Active project" value={project?.id??''} onChange={e=>{const p=projects.find(p=>p.id===e.target.value);if(p)void loadProject(p);}}><option value="" disabled>Select a project</option>{projects.map(p=><option key={p.id} value={p.id}>{p.name}</option>)}</select><ChevronDown size={14}/></div>
+    <nav className="workstation-nav">{navigationSections.map(section => (
+      <div key={section.category} className="nav-section">
+        <div className="nav-label" style={{ marginTop: '18px', marginBottom: '6px' }}>{section.category}</div>
+        {section.items.map(({ name, icon: Icon }) => (
+          <button
+            aria-label={name}
+            key={name}
+            className={`nav-item ${page === name ? 'active' : ''}`}
+            onClick={() => setPage(name)}
+          >
+            <Icon size={18} />
+            <span>{name}</span>
+            {name === 'Events & review' && pending > 0 && <b>{pending}</b>}
+          </button>
+        ))}
+      </div>
+    ))}</nav>
+    <div className="sidebar-bottom"><div className="mode-card"><ShieldCheck size={20}/><strong>Engineering research</strong><p>{cloudSession?'Session analysis & historical replay.':'Local analysis & historical replay.'}<br/>No equipment authority.</p><div><span className={`dot ${online?'':'bad'}`}/>{online?(cloudSession?'Session workspace available':'Local service available'):(cloudSession?'Session workspace disconnected':'Local service disconnected')}</div></div><div className="version"><span>GeoDrill Pro</span><span>v0.9.0-workstation</span></div></div></aside>
     <div className="main-shell"><header className="topbar"><div className="breadcrumb">Workspace <ChevronRight size={14}/> <strong>{project?.well_name??'Getting started'}</strong></div><div className="top-actions"><span className="local-badge"><span className="dot"/> {cloudSession?'Cloud session':'Offline capable'}</span><button className="icon-button" aria-label="View events" onClick={()=>setPage('Events & review')}><Bell size={19}/>{pending>0&&<i/>}</button><div className="avatar" title={cloudSession?"Isolated browser-session workspace":"Single local workstation user"}>LE</div></div></header>
-    <main><label className="mobile-page-switch"><span>Open page</span><select aria-label="Open workspace page" value={page} onChange={e=>setPage(e.target.value as Page)}><optgroup label="Engineering">{menu.map(item=><option key={item.name} value={item.name}>{item.name}</option>)}</optgroup><optgroup label="Workspace tools">{(['Reports','Module roadmap','Audit trail'] as Page[]).map(name=><option key={name} value={name}>{name}</option>)}</optgroup></select></label><div className="page-heading"><div><div className="eyebrow">GEODRILL PRO / {project?.origin==='synthetic'?'SYNTHETIC RESEARCH PROJECT':'ENGINEERING WORKSPACE'}</div><h1>{title[page]}</h1><p>{page==='Overview'?'A clear view of your well. Every calculation, traceable.':page==='Data workspace'?'Import, inspect and preserve the evidence behind your analysis.':page==='Engineering lab'?'Explicit assumptions. Canonical SI units. Reproducible results.':page==='Module roadmap'?'The audited roadmap, with implementation status kept explicit.':'Explore the evidence behind your engineering decisions.'}</p></div><div className="heading-actions"><button className="button secondary" onClick={()=>setCreateOpen(true)} disabled={busy}><Plus size={16}/>New project</button><button className="button primary" onClick={exportReport} disabled={!project||busy||loading||!online}>{busy?<LoaderCircle className="spin" size={16}/>:<ArrowDownToLine size={16}/>}Create report</button></div></div>
+    <main><label className="mobile-page-switch"><span>Open page</span><select aria-label="Open workspace page" value={page} onChange={e=>setPage(e.target.value as Page)}><optgroup label="Engineering">{menu.map(item=><option key={item.name} value={item.name}>{item.name}</option>)}</optgroup><optgroup label="Workspace tools">{(['Reports','Module roadmap','Audit trail'] as Page[]).map(name=><option key={name} value={name}>{name}</option>)}</optgroup></select></label>{project && (
+        <div style={{ marginBottom: '16px' }}>
+          <WorkspaceHeader
+            projectName={project.name}
+            wellName={project.well_name}
+            wellboreName="Main Bore"
+            revisionName="Plan R01"
+            geometryRevision={geometryOverview?.id?.slice(0, 8) ?? 'GR-01'}
+            modelName={title[page]}
+            modelVersion="0.9.0"
+            qualificationStatus={page === 'Overview' || page === 'Directional engineering' || page === '3D well engineering' || page === 'Well geometry' || page === 'Hydraulics' ? 'verified' : 'research'}
+            unitProfile={field ? 'Field' : 'Metric SI'}
+            crs={project.datum}
+          />
+        </div>
+      )}
+      <div className="page-heading"><div><div className="eyebrow">GEODRILL PRO / {project?.origin==='synthetic'?'SYNTHETIC RESEARCH PROJECT':'ENGINEERING WORKSPACE'}</div><h1>{title[page]}</h1><p>{page==='Overview'?'A clear view of your well. Every calculation, traceable.':page==='Data workspace'?'Import, inspect and preserve the evidence behind your analysis.':page==='Engineering lab'?'Explicit assumptions. Canonical SI units. Reproducible results.':page==='Module roadmap'?'The audited roadmap, with implementation status kept explicit.':'Explore the evidence behind your engineering decisions.'}</p></div><div className="heading-actions"><button className="button secondary" onClick={()=>setCreateOpen(true)} disabled={busy}><Plus size={16}/>New project</button><button className="button primary" onClick={exportReport} disabled={!project||busy||loading||!online}>{busy?<LoaderCircle className="spin" size={16}/>:<ArrowDownToLine size={16}/>}Create report</button></div></div>
     {error&&<div role="alert" className="alert error"><strong>Action could not be completed.</strong> {error}<button aria-label="Dismiss error" onClick={()=>setError('')}><X size={16}/></button></div>}
     {!online&&<div className="alert error">{cloudSession?'Session workspace is unavailable.':'Local service is unavailable.'} Displayed data is a cached view; actions are paused.<button onClick={()=>location.reload()}>Reconnect</button></div>}
     {notice&&<div className="toast" role="status"><Check size={17}/>{notice}</div>}
@@ -138,6 +251,8 @@ function App(){
         </div><div className="geometry-panel panel"><div className="panel-heading"><div><h2>Well trajectory</h2><p>Minimum-curvature geometry</p></div><button className="icon-button" aria-label="Open well geometry" onClick={()=>setPage('Well geometry')}><ArrowUpRight size={18}/></button></div><WellView rows={geometryOverview?.result.samples??survey?.rows??[]} project={{...project,formations:geometryOverview?.input.formations??project.formations}}/><div className="well-footer"><span><span className="line-key"/>Survey path</span><span>{survey?.rows?.length??0} stations</span></div><div className="well-note">{project.formations?'Interpreted formation markers. ':''}Survey uncertainty not evaluated.</div></div></div>
         <div className="bottom-grid"><div className="panel"><div className="panel-heading"><div><h2>Review queue <span className="count">{pending}</span></h2><p>Data conditions worth a closer look</p></div><button className="text-button" onClick={()=>setPage('Events & review')}>View all <ArrowRight size={15}/></button></div>{events.filter(e=>!e.acknowledgement).slice(0,3).map(e=><button className="event-summary" key={e.id} onClick={()=>{if(e.dataset_id===telemetry?.id)seek(e.row_index);setPage('Events & review');}}><span className={`event-dot ${e.severity}`}/><div><strong>{e.code.replaceAll('_',' ').toLowerCase()}</strong><p>{e.message}</p></div><ChevronRight size={15}/></button>)}{!pending&&<div className="empty-inline"><Check size={18}/>No unacknowledged data events.</div>}</div><div className="panel provenance-card"><div className="panel-heading"><div><h2>Built on traceable evidence</h2><p>Sources and calculations stay connected</p></div><FileCheck2 size={22}/></div><div className="provenance-stats"><div><strong>{datasets.length}</strong><span>Preserved sources</span></div><div><strong>SI</strong><span>Canonical units</span></div><div><strong>Local</strong><span>Data storage</span></div></div><button className="text-button" onClick={()=>setPage('Audit trail')}>Inspect the audit trail <ArrowRight size={15}/></button></div></div>
       </>}
+      {page==='Directional engineering'&&<DirectionalWorkspace projectId={project.id} projectName={project.name} datum={project.datum} unitProfile={units} onError={setError} onNotice={setNotice}/>}
+      {page==='3D well engineering'&&<Well3DWorkspace/>}
       {(page==='Well geometry'||page==='Casing program')&&<GeometryWorkspace key={project.id+page} project={project} datasets={datasets} online={online} onError={setError} onNotice={setNotice} mode={page==='Well geometry'?'geometry':'casing'} onGeometryPage={()=>setPage('Well geometry')}/>}
       {page==='Data workspace'&&<><div className="data-grid"><div className="panel import-panel"><div className="panel-heading"><div><h2>Bring your data into focus</h2><p>Original files are preserved; normalized records are stored in Parquet.</p></div><Upload size={24}/></div><label className="field-label">Import type<select value={importKind} onChange={e=>setImportKind(e.target.value)}><option value="telemetry">Drilling telemetry · CSV</option><option value="survey">Directional survey · CSV</option><option value="las">Wireline curves · LAS 2.0</option></select></label><input type="file" ref={fileInput} hidden accept={importKind==='las'?'.las':'.csv'} onChange={e=>{const f=e.target.files?.[0];if(f)ingestFile(f);e.target.value='';}}/><button className="upload-zone" onClick={()=>fileInput.current?.click()} disabled={busy||!online}><div><Upload size={26}/></div><strong>Choose a {importKind==='las'?'LAS':'CSV'} file</strong><span>Up to 2 MiB / 10,000 rows per import</span></button><div className="import-footer"><span>Explicit units required. No silent coercion.</span><a href={`/api/templates/${importKind}`} download>Download sample <ArrowDownToLine size={14}/></a></div><details><summary>View the supported data contract</summary><p>{importKind==='telemetry'?'Required headers: timestamp, md[m], tvd[m], wob[kN], torque[kN.m], rpm[rpm], rop[m/h], spp[MPa], flow[L/min], state. Timezone required; time strictly increasing. States: drilling, connection, off_bottom, unknown. Alternate units are documented in README. Blank numeric cells are retained as missing; derived MSE is withheld.':'survey'===importKind?'Required headers: md[m], inclination[deg], azimuth[deg]. First station MD 0, increasing depths, inclination 0–180°, azimuth 0–<360°. Feet and radians also supported with explicit headers.':'LAS 2.0, WRAP.NO only. First curve DEPT/DEPTH in M or FT, declared NULL sentinel, unique curve names, consistent row widths, monotonic depth. Curves are stored with original units; no formation inference.'}</p></details></div><div className="panel"><div className="panel-heading"><div><h2>Source library</h2><p>{datasets.length} files · immutable import records</p></div></div>{datasets.map(d=><div className="source-item" key={d.id}><div className="file-icon"><FileText size={21}/></div><div><strong>{d.filename}</strong><p>{d.kind.toUpperCase()} · {formatter.format(d.row_count)} rows · {d.event_count} events</p><code title={d.source_hash}>SHA-256 {d.source_hash.slice(0,18)}…</code></div><button className="text-button" disabled={busy} onClick={()=>action(async()=>{const value=await api<Dataset>(`/projects/${project.id}/datasets/${d.id}`);if(d.kind==='telemetry'){setTelemetry(value);seek(0);}else if(d.kind==='survey')setSurvey(value);else setLog(value);setNotice(`${d.filename} is now the active ${d.kind} dataset.`);})}>Open</button></div>)}{!datasets.length&&<div className="empty-inline">Your imported sources will appear here.</div>}</div></div>
         <div className="panel data-preview"><div className="panel-heading"><div><h2>Telemetry preview <span className="badge neutral">Canonical SI</span></h2><p>{telemetry?.filename??'No telemetry loaded'} · first 100 records; full data is included in reports</p></div></div><div className="table-scroll"><table><thead><tr><th>Source time (UTC)</th><th>MD (m)</th><th>WOB (N)</th><th>Torque (N·m)</th><th>ROP (m/s)</th><th>MSE (Pa)</th><th>Quality</th></tr></thead><tbody>{rows.slice(0,100).map((r,i)=><tr key={i}><td>{utc(r.timestamp)}</td><td>{fmt(r.md_m)}</td><td>{fmt(r.wob_n,0)}</td><td>{fmt(r.torque_nm,0)}</td><td>{fmt(r.rop_m_s,5)}</td><td>{fmt(r.mse_pa,0)}</td><td><span title={String(r.reason)} className={`badge ${r.quality==='valid'?'green':'amber'}`}>{String(r.quality)}</span></td></tr>)}</tbody></table></div></div>
@@ -159,6 +274,9 @@ function App(){
       {page==='Flow anomalies'&&<ResearchStudy key={project.id+page} model="anomaly" project={project} online={online} onError={setError} onNotice={setNotice}/>}
       {page==='Gas & phase studies'&&<ResearchStudy key={project.id+page} model="gas-phase" project={project} online={online} onError={setError} onNotice={setNotice}/>}
       {page==='Supervisory research'&&<ResearchStudy key={project.id+page} model="supervision" project={project} online={online} onError={setError} onNotice={setNotice}/>}
+      {page==='Formation geomechanics'&&<ResearchStudy key={project.id+page} model="geomechanics" project={project} online={online} onError={setError} onNotice={setNotice}/>}
+      {page==='Offset benchmarks'&&<ResearchStudy key={project.id+page} model="offset-benchmarking" project={project} online={online} onError={setError} onNotice={setNotice}/>}
+      {page==='Evidence search'&&<EvidenceSearch key={project.id} project={project} online={online} onError={setError}/>}
       {page==='Engineering lab'&&<EngineeringLab project={project} onError={setError} onNotice={setNotice} online={online}/>}
       {page==='Reports'&&<div className="panel"><div className="panel-heading"><div><h2>Fixed evidence snapshots</h2><p>Reopen, download or print a saved report. Later reviews never change an earlier snapshot.</p></div></div>{reports.length?<div className="table-scroll"><table><thead><tr><th>Created (UTC)</th><th>Report</th><th>SHA-256</th><th/></tr></thead><tbody>{reports.map(r=><tr key={r.id}><td>{new Date(r.created_at).toISOString().replace('T',' ').slice(0,19)}</td><td><code>{r.id.slice(0,8)}</code></td><td><code>{r.sha256.slice(0,20)}…</code></td><td><button className="text-button" disabled={busy} onClick={()=>action(async()=>setReport(await api<Report>(`/projects/${project.id}/reports/${r.id}`)))}>Open report <ArrowUpRight size={14}/></button></td></tr>)}</tbody></table></div>:<div className="empty-inline"><FileText size={20}/>Create your first report using the button above.</div>}</div>}
       {page==='Events & review'&&<div className="panel"><div className="panel-heading"><div><h2>Data-quality events <span className="count">{events.length}</span></h2><p>Acknowledgement records your review; it does not resolve a condition or approve an operation.</p></div><label className="search-box"><Search size={16}/><input aria-label="Search events" placeholder="Search events…" value={query} onChange={e=>setQuery(e.target.value)}/></label></div>{filteredEvents.map(e=><div className="event-row" key={e.id}><div className={`event-icon ${e.severity}`}><CircleHelp size={18}/></div><div><div className="event-row-title"><strong>{e.code.replaceAll('_',' ')}</strong><span className={`badge ${e.acknowledgement?'green':'amber'}`}>{e.acknowledgement?'Acknowledged':'Awaiting review'}</span></div><p>{e.message}</p>{e.acknowledgement&&<small>Review note: {e.acknowledgement.note} · {new Date(e.acknowledgement.at).toLocaleString()}</small>}</div>{!e.acknowledgement&&<button className="button secondary" disabled={busy||!online} onClick={()=>setAck(e)}>Review</button>}</div>)}{!filteredEvents.length&&<div className="empty-inline"><Check size={18}/>No matching events.</div>}</div>}

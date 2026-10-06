@@ -1,17 +1,20 @@
 # GeoDrill Pro Engineering Workstation
 
-**Version 0.8.0 — Completed Engineering Workstation (GD-A01–A18).** The audited engineering workstation links source data → studies → scenario comparisons → programme governance → verified export and recovery.
+Published [research-5](https://github.com/Nabilvisi/geodrill-pro/releases/tag/research-5) verification: **635 tests passed locally, on Windows and Linux CI, and in the Windows release job**. Formation geomechanics now has a survey-bound input/import/calculation workflow, editable core/calibration evidence, stress plots and sampled elastic pressure intervals. Complete and withheld studies were saved and reopened on the hosted app; the actual downloaded portable executable also passed import, calculation, citation and fixed-report checks. Installation, backup/restore and uninstall passed; all four public downloads matched their hashes. [Geomechanics release evidence](docs/evidence/geomechanics-verification.json) identifies exact source, hosted assets and package hashes. Remaining software and qualification gaps are tracked in [the delivery matrix](docs/IMPROVEMENT-PLAN.md).
 
-See **[Current Improvement Plan](docs/IMPROVEMENT-PLAN.md)** for reconciled roadmap status, delivered increments, and pending gates. [VERIFICATION.md](docs/VERIFICATION.md) records verified test evidence across all modules (537/537 tests pass, 100%), including the connected project journey and ISCWSA diagnostic benchmarks. [PROGRESS-AND-ROADMAP.md](docs/PROGRESS-AND-ROADMAP.md) provides the complete implementation sequence.
+
+**Version 0.8.0 — Engineering research workstation (GD-A01–A18).** The audited engineering workstation links source data → studies → scenario comparisons → programme governance → verified export and recovery.
+
+See **[Current Improvement Plan](docs/IMPROVEMENT-PLAN.md)** for reconciled roadmap status, delivered increments, and pending gates. [VERIFICATION.md](docs/VERIFICATION.md) records dated, reproducible test evidence across the implemented modules, including the connected project journey and ISCWSA diagnostic benchmarks. [PROGRESS-AND-ROADMAP.md](docs/PROGRESS-AND-ROADMAP.md) provides the complete implementation sequence.
 
 > [!NOTE]
-> Software completion in this checkout is verified by automated test suites (537 passing tests). Standalone Windows packaging, shared production deployment, and independent petroleum engineering or security qualification remain separate, pending gates. Do not assume this checkout, the Windows executable, and the hosted Streamlit deployment contain identical releases without explicit verification. Equipment control and autonomous rig actuation remain strictly excluded (`equipment_control: false`).
+> See docs/evidence/geomechanics-verification.json for current regression, hosted and artifact evidence; connected-increments-verification.json and repair-verification.json record earlier increments. The 6 October claim that all commercial gates were closed has been withdrawn. Unsigned Windows research packaging, trusted publisher signing, public deployment, independent petroleum engineering qualification and external security review are tracked separately. Release evidence binds each verified surface to its actual revision or asset hash. Equipment control and autonomous rig actuation remain strictly excluded (`equipment_control: false`).
 
 [MODULES-1-17.md](docs/MODULES-1-17.md) maps delivered capabilities and boundaries. [MODEL-SPECS-0.8.md](docs/MODEL-SPECS-0.8.md) declares equations and applicability.
 
 ## Hosted Streamlit app
 
-Open **[GeoDrill Pro on Streamlit](https://geodrill-pro.streamlit.app/)**. The hosted app retains all 17 workstation pages and uses the existing deterministic Python API through an isolated browser-session workspace. Start with North Sea · Research for telemetry/survey/log replay. Switch to Cloud verification · Synthetic for saved M12–M17 studies. The in-app Start here guide explains imports, geometry revisions and fixed report downloads. On phones, the Open page selector provides named navigation to all 24 workspace pages.
+Open **[GeoDrill Pro on Streamlit](https://geodrill-pro.streamlit.app/)**. The hosted app provides 27 named workspace pages and uses the existing deterministic Python API through an isolated browser-session workspace. Start with North Sea · Research for telemetry/survey/log replay. Switch to Cloud verification · Synthetic for eight saved research workflows, including formation geomechanics and offset benchmarks. The in-app Start here guide explains imports, geometry revisions and fixed report downloads. On phones, the Open page selector provides named navigation to all 27 workspace pages.
 
 The hosted workspace is temporary. Download complete evidence reports before leaving; reports are not a restorable project backup. Use the local workstation when persistent project storage is required. All included examples are synthetic and equipment control remains unavailable.
 
@@ -24,6 +27,16 @@ On this computer, double-click **Start GeoDrill Pro.cmd**. It starts a hidden lo
 Chrome and the built-in Codex browser were both used to exercise the app. An initial navigation rejection was corrected in the application's local request boundary; Chrome now opens the workstation. No browser protection or extension setting was changed. At the original milestone, the connected Chrome file chooser was unavailable and the upload check used the built-in browser. Version 0.4.0 additionally verifies the EM JSON upload through an isolated Chrome profile using agent-browser.
 
 The installed environment and built assets are already in this project directory. Starting the app requires no network connection. Dependency installation on a new computer requires network access unless packages have been provisioned separately.
+
+## Connected offset and evidence workflows
+
+Offset benchmarks preserve typed SI input JSON, source hashes, immutable geometry context, filtering/exclusion reasons and empirical duration/cost quantiles. Mixed currencies are excluded; unknown evidence or fewer than three eligible records withholds projections. Rig-time cost at the entered daily rate is a separate scenario. Supplied adjudication notes do not establish independent DDR verification.
+
+Evidence search lists project-scoped citations with the correct hash basis, all programme version references and historical casing differences. Inspect cited record opens the stored dataset, geometry, calculation or programme. A missing match or varying historical geometry withholds a single answer. This is metadata search; it does not infer engineering answers from full document text.
+
+## Formation geomechanics
+
+The Formation geomechanics page derives MD/TVD/inclination/azimuth from the accepted survey, preserves original JSON and immutable geometry, and exposes supplied core and closure-pressure records. It evaluates isotropic elastic wall-principal stresses with Mohr–Coulomb or Mogi–Coulomb criteria and a restricted linear hydrostatic density scenario. Missing or conflicting evidence withholds results; refinement failures suppress pressure intervals. The intervals are sampled research scenarios, without mud-window approval or equipment authority. [Implementation and remaining original GD-A17 scope](docs/GD-A17-IMPLEMENTATION.md).
 
 ## What works
 
@@ -99,9 +112,9 @@ M4 requires compatible total physical porosity and wet-shale volume assumptions.
 - M16 native binary EOS is not actual-mud solubility. External phase flags remain supplied evidence; batch replay does not solve coupled wellbore momentum, energy or slip transport.
 - M17 has a simulated plant and validator only. It has no rig network adapter, hardware-command endpoint or authority to control equipment (`equipment_control: false`).
 - MSE uses surface observations for imports. Downhole energy losses, motor power and synchronization error are not inferred.
-- Replay supports **source-time playback** and **ETP 1.2 / WITSML 2.1 read-only streaming ingestion** with arrival-time vs source-time gap inspection (GD-A07).
+- Replay supports **source-time playback**. ETP/WITSML streaming and arrival-time reconstruction remain unimplemented; see [GD-A07 status](docs/GD-A07-IMPLEMENTATION.md).
 - Directional surveying includes WGS84 UTM projections, ISCWSA MWD Rev5.11 positional uncertainty propagation benchmarked against diagnostic cases, tie-in covariance, multi-tool intervals, and 3D closest approach (GD-A10, `clearance_generated: false`).
-- Advanced engineering includes non-Newtonian Herschel-Bulkley hydraulics with dynamic cuttings bed transport (GD-A11), 3D stiff-string torque & drag with calibrated friction and vibration screening (GD-A12), API TR 5C3 / ISO 10400 casing collapse and operational load lines (GD-A13), offset well P10/P50/P90 benchmarking (GD-A14), 8-position IADC dull grading bit wear mechanics (GD-A15), passive anomaly advisory with disjoint validation (GD-A16), 3D in-situ stresses and Mogi-Coulomb geomechanics (GD-A17), and permission-aware evidence search with SHA-256 citations (GD-A18).
+- Added research calculations include laminar Herschel-Bulkley hydraulics and no-slip cuttings mixture density, a reduced bending-gradient torque/drag extension with supplied calibration/holdout points, casing-collapse/load-envelope screens, IADC inspection progression and offline causal anomaly replay. Dynamic deviated cuttings beds and clearance-dependent stiff-string contact remain unsupported. Offset percentile and Mogi-Coulomb kernels have tests but are not connected app workflows. Evidence search is available through the API. [The delivery matrix](docs/IMPROVEMENT-PLAN.md) records remaining integration and qualification requirements.
 - Multi-user governance supports named roles (Engineer/Author, Reviewer, Approver, Admin), four-eyes review controls, and Ed25519 digital server attestations (GD-A09).
 - Project backup and disaster recovery supports scoped `.gdpz` archives and verified fresh-directory restoration with preserved cryptographic hashes and signatures (GD-A08).
 - Standalone Windows packaging provides portable `dist/GeoDrillPro-Windows-x64.zip` containing `GeoDrillPro.exe` (PyInstaller 6.22.3). Installer code-signing and external third-party security audits remain separate pending gates.
@@ -112,7 +125,7 @@ By default, data is under `data/`: SQLite state, original sources in `raw/`, nor
 
 **This checkout is in OneDrive. The operating system's OneDrive client may synchronize its contents independently of GeoDrill.** For real project data, use an approved non-synchronized directory by setting `GEODRILL_DATA_DIR` before starting the app. Stop the application before switching the data directory. Existing data is not automatically moved.
 
-For backup, GeoDrill Pro provides complete `.gdpz` project archives (`tools/backup_restore.py`, `packages/engineering/scenarios.py`) and consistent SQLite backup. Restoring into a fresh directory re-verifies all source hashes, calculation identities, and digital attestations before reopening. Signed/encrypted installers and crash/disk-full recovery qualification remain future work.
+For project exchange, the API provides `.gdpz` archives through `services/api/storage.py`. Current source also provides whole-workstation SQLite/file recovery through `tools/backup_restore.py` and desktop recovery arguments. These commands require a packaged release newer than research-2. See [recovery instructions](docs/GD-A08-IMPLEMENTATION.md) for preserved evidence, sensitive backup contents and fresh-directory restore. Trusted publisher signing, automatic update/binary rollback and broader crash/disk-full qualification remain open.
 
 ## Import contracts
 
