@@ -71,3 +71,10 @@ rollback, dedicated workflows for API/kernel-only increments and broader validat
 hydraulic/contact/transient closures remain unfinished. Original backlog acceptance
 criteria are retained. The new recovery repair has separate source evidence in
 recovery-verification.json and must pass its own packaged release checks.
+
+## Published recovery and connected workflow continuation — 6 October 2026
+
+Research-3 at c4037d21ed3313ef21a335882a1330b24f00c41e passed 602 tests on both Windows and Ubuntu and in its release job. Actual installed-EXE backup, wrong-hash refusal, fresh restore, existing-destination preservation, signing-key preservation, restored API diagnostics, install and uninstall passed. Full downloaded public installer/ZIP bytes match the release hashes. See [published recovery evidence](evidence/published-recovery-verification.json).
+
+The subsequent offset benchmarking and evidence search integration is described in GD-A14-IMPLEMENTATION.md and GD-A18-IMPLEMENTATION.md. These are separate from research-3 binaries until a newer package is verified. ETP/WITSML streaming, automatic update/binary rollback, dedicated team/directional/geomechanics integration, wider model closures and external qualification remain unfinished.
+

@@ -72,3 +72,10 @@ preservation through re-export, archive/identity validation and packaged recover
 arguments. See evidence/recovery-verification.json and GD-A08-IMPLEMENTATION.md.
 Research-2 remains the verified earlier publication; these changes require their own
 CI and packaged-release acceptance before a newer binary is claimed.
+
+## Published recovery and connected workflow continuation — 6 October 2026
+
+Research-3 at c4037d21ed3313ef21a335882a1330b24f00c41e passed 602 tests on both Windows and Ubuntu and in its release job. Actual installed-EXE backup, wrong-hash refusal, fresh restore, existing-destination preservation, signing-key preservation, restored API diagnostics, install and uninstall passed. Full downloaded public installer/ZIP bytes match the release hashes. See [published recovery evidence](evidence/published-recovery-verification.json).
+
+The subsequent offset benchmarking and evidence search integration is described in GD-A14-IMPLEMENTATION.md and GD-A18-IMPLEMENTATION.md. These are separate from research-3 binaries until a newer package is verified. ETP/WITSML streaming, automatic update/binary rollback, dedicated team/directional/geomechanics integration, wider model closures and external qualification remain unfinished.
+

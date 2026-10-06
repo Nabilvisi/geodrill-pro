@@ -1,14 +1,14 @@
 {
   "version": "0.8.0",
-  "source_release": "dist/release-a37a6617c6c3443480881980f2aae84f",
+  "source_release": "dist/release-9f60053fa04d4ea1b2fab6af244633d2",
   "assets": [
-    {
-      "path": "assets/index-CG2D8Y8e.js",
-      "sha256": "e488e856987958f7d23356a74c50232b7f41b4c0bb00ae987d44731269733a93"
-    },
     {
       "path": "assets/index-DQfLpxdr.css",
       "sha256": "aef49db358eabb760ad692bb7f65f9e370c9fcf6ea66d380980caabfb4a0d87f"
+    },
+    {
+      "path": "assets/index-L8L7q0c6.js",
+      "sha256": "c11185f1eaf37f6eeac185749d99de4b0af6020b096ce664ce09cadeb9c01d96"
     }
   ]
 }

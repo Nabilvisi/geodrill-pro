@@ -229,3 +229,23 @@ def test_evidence_search_api_endpoint(tmp_path):
     assert "citations" in data
     assert "abstention" in data
 
+
+def test_unrelated_query_abstains_despite_changed_historical_geometry():
+    query=SearchQuery(query="unobtainium",project_id="p",user_id="viewer",user_role="viewer")
+    revisions=[{"id":str(i),"sha256":str(i)*64,"change_note":"Casing history","input":{"casings":[{"name":"Casing","bottom_md_m":depth,"inside_diameter_m":.2}]}} for i,depth in enumerate((100.,100.,200.))]
+    result=search_project_evidence(query,{'id':'p'},[],revisions,[],[],['p'])
+    assert result['abstention'] is True and result['citations']==[]
+    assert result['conflicting_versions']==[]
+    query=query.model_copy(update={'query':'Casing'})
+    result=search_project_evidence(query,{'id':'p'},[],revisions,[],[],['p'])
+    assert result['abstention'] is True and len(result['citations'])==3
+    assert len(result['conflicting_versions'][0]['revisions'])==3
+    assert result['conflicting_versions'][0]['revisions'][2]['shoe_md_m']==200.
+
+
+def test_search_query_is_bounded_at_http_entrypoint(tmp_path):
+    from fastapi.testclient import TestClient
+    from services.api.main import create_app
+    c=TestClient(create_app(tmp_path));c.get('/api/session');c.headers['X-Geodrill-Client']='workstation'
+    project=c.post('/api/projects',json={'name':'Bounded','well_name':'Bounded','datum':'RKB','bit_diameter_m':.2,'origin':'synthetic'}).json()
+    assert c.get('/api/projects/'+project['id']+'/evidence/search',params={'q':'a'*501}).status_code==422

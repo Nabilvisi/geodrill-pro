@@ -1,8 +1,11 @@
 # GD-A08 — local recovery and distribution
 
 Current source adds tools/backup_restore.py and desktop --backup/--restore commands.
-The research-2 binaries predate these commands. A newer packaged release must pass
-the actual installer recovery workflow before its commands are considered delivered.
+Research-3 contains these commands and passed actual installed-EXE backup/restore,
+wrong-hash refusal, fresh restore, existing-destination preservation, signer-key
+preservation and restored API smoke checks. Windows and Ubuntu each passed 602
+tests at c4037d21ed3313ef21a335882a1330b24f00c41e.
+See [published recovery evidence](evidence/published-recovery-verification.json).
 
 Stop the application before backup. A whole-workstation snapshot uses SQLite's backup
 API, including committed WAL records, and holds a database write lock while copying
@@ -27,9 +30,11 @@ Source commands, from the repository:
 Desktop builds containing this change support:
 
 ```powershell
-.\GeoDrillPro.exe --backup C:\GeoDrillBackups\workstation.zip
+$geodrillBackup = Start-Process -FilePath '.\GeoDrillPro.exe' -ArgumentList '--backup','C:\GeoDrillBackups\workstation.zip' -WindowStyle Hidden -Wait -PassThru
+if ($geodrillBackup.ExitCode -ne 0) { throw 'Backup refused; do not continue' }
 $geodrillReceipt = Get-Content -Raw C:\GeoDrillBackups\workstation.zip.receipt.json | ConvertFrom-Json
-.\GeoDrillPro.exe --restore C:\GeoDrillBackups\workstation.zip --destination C:\GeoDrillRestored\data --expected-sha256 $geodrillReceipt.sha256
+$geodrillRestore = Start-Process -FilePath '.\GeoDrillPro.exe' -ArgumentList '--restore','C:\GeoDrillBackups\workstation.zip','--destination','C:\GeoDrillRestored\data','--expected-sha256',$geodrillReceipt.sha256 -WindowStyle Hidden -Wait -PassThru
+if ($geodrillRestore.ExitCode -ne 0) { throw 'Restore refused; retain the original data directory' }
 ```
 
 Set GEODRILL_DATA_DIR to the restored directory before normal startup. Recovery commands

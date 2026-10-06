@@ -5,9 +5,9 @@ withdrawn. This code audit distinguishes connected workflows, API/kernel capabil
 missing software and external qualification. Numerical tests do not close the original
 backlog's integration or independent review criteria.
 
-PR 1 merge, hosted repair and unsigned research-2 publication are complete at their
+PR 1 merge, hosted repair and unsigned research-3 recovery publication are complete at their
 recorded revision. See [published evidence](evidence/published-research-verification.json).
-Subsequent recovery changes are distinct from those binaries in
+Current recovery changes and packaged acceptance are recorded in
 [the recovery implementation](GD-A08-IMPLEMENTATION.md).
 
 | Increment | Current code evidence | Remaining scope |
@@ -21,11 +21,11 @@ Subsequent recovery changes are distinct from those binaries in
 | GD-A11 | Laminar rheology, supplied geometry, restricted transients and no-slip cuttings mixture density | Transition/turbulence, eccentric/rotating and deviated-bed closures, critical carrying/bed height and original flow-loop/PWD/solids validation; mixture density is not a bed model |
 | GD-A12 | Reduced bending-gradient torque/drag extension, friction grid fit with supplied holdout points and vibration screening | Clearance-dependent contact/tortuosity, state/depth-specific identified calibration, variable-geometry transients and instrumented holdout qualification |
 | GD-A13 | Four casing-collapse regimes, burst/tension interactions and load-envelope API/benchmarks | Complete barrier/cement lifecycle and qualified manufacturer/inspection evidence; broad standards compliance is not established |
-| GD-A14 | Offset cohort/percentile kernel and tests | Connected import/API/UI, harmonized real DDR cohorts and independent acceptance |
+| GD-A14 | Preserved typed cohort import, geometry-bound API, dedicated UI, exclusion/provenance tables, empirical quantiles, fixed reports and restored-study reopening | Harmonized real DDR cohorts, independent adjudication and operator/forecast qualification |
 | GD-A15 | IADC parser and conditional inspected-bit progression through bit study inputs | Calibrated sensor/cohort programme and independent/censored holdout validation; no individual life/trip authority |
 | GD-A16 | Offline causal balance/event replay with disjoint supplied evaluation intervals | Authorized live adapter, adjudicated field corpus and blind performance qualification; no early-kick guarantee |
 | GD-A17 | Principal-stress/linear fluid-density/Mogi-Coulomb kernel and tests | Geometry-bound API/UI, actual property/core/LOT observations and independent review; no operational mud-window approval |
-| GD-A18 | Permission-scoped evidence search API with citations/abstention tests | Dedicated search UI, representative conflicting/unauthorized questions and operator acceptance |
+| GD-A18 | Dedicated project evidence UI, cited-record inspection, complete-calculation hashes, actual programme versions, historical casing disclosures and bounded/permission tests | Representative operator acceptance, broader evidence domains/full document retrieval and independent assessment |
 
 M01–M17 provide the audited offline workflows in [MODULES-1-17.md](MODULES-1-17.md)
 and the versioned model specifications. The proposal's zero-error, zero-latency,
@@ -39,7 +39,7 @@ objective achieved.
 Separate release and external gates:
 
 - Hosted repair and unsigned research publication: complete at the recorded revision.
-- Current recovery changes: regression and packaged checks must pass at their own revision.
+- Research-3 recovery: 602 tests on Windows/Ubuntu; installed backup/restore and complete public asset hashes verified. New connected workflows require their own final CI/live/package evidence.
 - Publisher signing: owner-supplied certificate, timestamp and trusted EXE/installer verification.
 - Engineering qualification: original observations, applicability/holdout comparisons and a real named reviewer assessment.
 - Security/compliance: actual scoped external assessment and certification evidence if claimed.
@@ -51,4 +51,3 @@ evidence.
 
 Equipment control remains false, equipment authority none, and automated drilling
 clearance false throughout implementation and review.
-

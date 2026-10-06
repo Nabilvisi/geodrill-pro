@@ -504,3 +504,15 @@ The code audit corrects absent ETP/WITSML streaming, automatic updater/binary ro
 incomplete API/kernel-to-UI integration and restricted hydraulic/contact closures.
 IMPROVEMENT-PLAN.md preserves these open requirements. Research-2 evidence remains
 tied to its original revision; this source requires separate CI/package verification.
+
+## Published recovery and connected workflow continuation — 6 October 2026
+
+Research-3 at c4037d21ed3313ef21a335882a1330b24f00c41e passed 602 tests on both Windows and Ubuntu and in its release job. Actual installed-EXE backup, wrong-hash refusal, fresh restore, existing-destination preservation, signing-key preservation, restored API diagnostics, install and uninstall passed. Full downloaded public installer/ZIP bytes match the release hashes. See [published recovery evidence](evidence/published-recovery-verification.json).
+
+The subsequent offset benchmarking and evidence search integration is described in GD-A14-IMPLEMENTATION.md and GD-A18-IMPLEMENTATION.md. These are separate from research-3 binaries until a newer package is verified. ETP/WITSML streaming, automatic update/binary rollback, dedicated team/directional/geomechanics integration, wider model closures and external qualification remain unfinished.
+
+
+## Connected offsets and evidence search — verified source continuation
+
+The complete local regression passed 615 tests (zero failures/errors/skips; one existing Starlette/httpx TestClient deprecation). The production frontend compiled successfully. The internal Bandit scope reported zero findings across 9,904 lines with six existing suppressed checks. Local browser checks reopened an offset study, rendered cohort quantiles, found original-file and complete-calculation citations, inspected the cited study and verified no-match abstention. See evidence/connected-increments-verification.json and the GD-A14/GD-A18 implementation guides. Final remote CI, hosted and packaged evidence are recorded separately after completion.
+

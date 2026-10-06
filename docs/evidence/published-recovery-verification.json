@@ -1,0 +1,74 @@
+{
+  "verified_at_utc": "2026-10-06 11:17:11 UTC",
+  "release_url": "https://github.com/Nabilvisi/geodrill-pro/releases/tag/research-3",
+  "source_commit": "c4037d21ed3313ef21a335882a1330b24f00c41e",
+  "ci_run": "https://github.com/Nabilvisi/geodrill-pro/actions/runs/37452301863",
+  "release_run": "https://github.com/Nabilvisi/geodrill-pro/actions/runs/37452409888",
+  "regression": {
+    "ubuntu": 602,
+    "windows": 602,
+    "release": 602,
+    "failures": 0,
+    "warning": "Existing Starlette/httpx TestClient deprecation"
+  },
+  "installer": {
+    "source_snapshot_sha256": "6b871df1d092cf05e88e2a707cb7b80964753aad96403166951243bcf9dece3e",
+    "restored_smoke_exit_code": 0,
+    "passed": true,
+    "clearance_generated": false,
+    "install_exit_code": 0,
+    "restored_signing_identity_preserved": true,
+    "existing_restore_destination_preserved": true,
+    "uninstall_exit_code": 0,
+    "packaged_restore_exit_code": 0,
+    "installed_executable_sha256": "b442f0dcc9b87c7bdc8c6dab85c1f7ad42412d612577135d9b3843f70a9de7b2",
+    "signing_mode": "unsigned",
+    "smoke_exit_code": 0,
+    "installer_sha256": "ebeaa0c1103016b33ee372c72212b81aa83f3fa8b189da139ce11618947adaac",
+    "persistent_evidence_preserved": true,
+    "backup_archive_sha256": "31afa2c9c1e7b535112074cfb7c38c52f67287718eaf934d6443ba9f385ecd61",
+    "wrong_hash_restore_rejected": true,
+    "extra_user_file_preserved": true,
+    "packaged_backup_exit_code": 0,
+    "equipment_control": false
+  },
+  "downloaded_assets": [
+    {
+      "name": "GeoDrillPro-Setup.exe",
+      "size_bytes": 111289328,
+      "sha256": "ebeaa0c1103016b33ee372c72212b81aa83f3fa8b189da139ce11618947adaac",
+      "full_download_matches": true
+    },
+    {
+      "name": "GeoDrillPro-Windows-x64.zip",
+      "size_bytes": 173273479,
+      "sha256": "68560b0ef2aebc00e40a8c4b422615f17bcf1a4568723e0eb2964a46c1d7f8b0",
+      "full_download_matches": true
+    },
+    {
+      "name": "release-manifest.json",
+      "size_bytes": 1281,
+      "sha256": "369d5d395e3f546374b8153a073fac6f42f987e846f66f22c4e318b3ff6766c6",
+      "full_download_matches": true
+    },
+    {
+      "name": "SHA256SUMS.txt",
+      "size_bytes": 273,
+      "sha256": "ce9e793e181a7265d966b13983308a9a63e67c9c48b24c88c0e9446585e78911",
+      "full_download_matches": true
+    }
+  ],
+  "source_snapshot": {
+    "file_count": 141,
+    "sha256": "6b871df1d092cf05e88e2a707cb7b80964753aad96403166951243bcf9dece3e",
+    "included_in_portable": true,
+    "source_has_uncommitted_changes": true,
+    "note": "Build regenerates Streamlit frontend metadata. Snapshot identifies packaged source bytes; it is not a clean-tree declaration."
+  },
+  "signing_mode": "unsigned",
+  "downloaded_installer_authenticode_status": "NotSigned",
+  "independent_engineering_qualification": "pending",
+  "external_security_review": "pending",
+  "equipment_control": false,
+  "clearance_generated": false
+}

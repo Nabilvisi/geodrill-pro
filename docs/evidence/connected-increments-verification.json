@@ -1,0 +1,71 @@
+{
+  "verified_at_utc": "2026-10-06 11:28:09 UTC",
+  "regression": {
+    "tests": 615,
+    "errors": 0,
+    "failures": 0,
+    "skipped": 0,
+    "seconds": 219.157,
+    "frontend": {
+      "version": "0.8.0",
+      "source_release": "dist/release-9f60053fa04d4ea1b2fab6af244633d2",
+      "assets": [
+        {
+          "path": "assets/index-DQfLpxdr.css",
+          "sha256": "aef49db358eabb760ad692bb7f65f9e370c9fcf6ea66d380980caabfb4a0d87f"
+        },
+        {
+          "path": "assets/index-L8L7q0c6.js",
+          "sha256": "c11185f1eaf37f6eeac185749d99de4b0af6020b096ce664ce09cadeb9c01d96"
+        }
+      ]
+    }
+  },
+  "bandit": {
+    "issues": 0,
+    "lines": 9904,
+    "suppressed": 6,
+    "scope": [
+      "services",
+      "packages",
+      "tools/backup_restore.py",
+      "tools/desktop_app.py"
+    ],
+    "independent_assessment": false
+  },
+  "local_browser_checks": {
+    "offset_saved_study_reopened": true,
+    "cohort_quantile_table_rendered": true,
+    "source_and_calculation_citations_rendered": true,
+    "cited_calculation_opened": true,
+    "no_match_abstained": true,
+    "examples": "synthetic"
+  },
+  "repairs": [
+    "Preserved offset-cohort input document and geometry-bound API/UI",
+    "Currency exclusion, unknown-evidence gate, explicit median and unrounded projection quantiles",
+    "Separate supplied rig-rate cost scenario and numerical input limits",
+    "Complete saved-calculation citation hashes",
+    "Actual programme version hash/state citations and scoped record inspection",
+    "All stored casing revisions disclosed for matching geometry queries",
+    "No-match and historical-variation abstention",
+    "Optional trajectory filter explicitly renders Any trajectory"
+  ],
+  "ci": "pending at publication",
+  "hosted_verification": "pending at publication",
+  "packaged_release": "Research-3 contains recovery repairs; connected-page package pending",
+  "remaining_software": [
+    "Read-only ETP/WITSML adapter",
+    "Automatic update/channel selection and binary rollback",
+    "Team/directional/geomechanics UI integration",
+    "Broader model closures and recovery fault injection",
+    "Full-document evidence retrieval and broader conflicts"
+  ],
+  "external_requirements": [
+    "Original harmonized DDR/field observations and independent holdout engineering qualification",
+    "Publisher certificate and actual trusted EXE/installer signatures",
+    "Scoped external security/compliance assessment"
+  ],
+  "equipment_control": false,
+  "clearance_generated": false
+}

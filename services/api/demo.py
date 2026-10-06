@@ -118,6 +118,24 @@ def research_template(model,revision,origin):
           "geometry_revision_id":revision["id"],"depth_datum":revision["input"]["datum"],
           "evidence_state":"synthetic" if origin=="synthetic" else "unknown",
           "source_note":"Generated software assumptions; no field qualification" if origin=="synthetic" else "Replace draft assumptions with traceable evidence"}
+    if model=="offset-benchmarking":
+        import hashlib,json
+        records=[]
+        if origin=="synthetic":
+            for i,hours in enumerate((40.,50.,60.),1):
+                record={"well_id":f"SYN-OFFSET-{i}","well_name":f"Synthetic offset {i}",
+                        "field_name":"Generated demonstration field","hole_diameter_m":.3,
+                        "bit_family":"Synthetic PDC","formation":"Synthetic sand","trajectory_type":"vertical",
+                        "spud_date":"2026-01-01","drilled_interval_m":1000.,"drilling_hours":hours,
+                        "npt_hours":10.,"total_cost":1e6+i*100000,"cost_currency":"USD",
+                        "is_adjudicated":True,"adjudication_note":"Synthetic classification fixture; no actual reviewer approval"}
+                record["evidence_source_hash"]=hashlib.sha256(json.dumps(record,sort_keys=True).encode()).hexdigest()
+                records.append(record)
+        return {**base,"planned_interval_m":min(td,1000.),"criteria":{"target_hole_diameter_m":.3,
+                "target_formation":"Synthetic sand" if origin=="synthetic" else "Replace with target formation",
+                "target_bit_family":None,"target_trajectory_type":None,"max_hole_diameter_diff_m":.0254,
+                "require_adjudicated_only":True},"offset_wells":records,
+                "planned_rig_rate_per_day":100000.,"cost_currency":"USD"}
     if model=="stability":
         return {**base,"md_m":min(td,1000.),"model":"isotropic_elastic_impermeable",
                 "stress_north_pa":22e6,"stress_east_pa":13e6,"stress_vertical_pa":25e6,

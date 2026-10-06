@@ -51,6 +51,7 @@ from packages.engineering.directional import (
 from packages.engineering.review_pack import build_programme_pack, export_pack_to_html, export_pack_to_csv
 from packages.engineering.usability import convert_unit, paginate_and_search_records, UNIT_PROFILES
 from packages.engineering.evidence_search import SearchQuery, search_project_evidence
+from packages.engineering.offset_benchmarking import OffsetBenchmarkingInput, calculate_offset_benchmarks
 from packages.engineering.ddr import create_daily_drilling_report, export_ddr_to_xml
 from packages.frontend import frontend_dist
 from . import demo, programmes
@@ -366,7 +367,7 @@ def create_app(data_dir: Path | None = None, mode: str | None = None):
                           survey_source_sha256=source["source_hash"],survey_parquet_sha256=source["parquet_sha256"])
             return store.calculation(project_id,"hydraulics",value.model_dump(),result)
 
-    research_models={"stability":StabilityInput,"transport":TransportInput,"surge-swab":SurgeInput,"torque-drag":TorqueDragInput,"buckling":BucklingInput,"dynamics":DynamicsInput,"bit-condition":BitInput,"wear-fatigue":WearInput,"anomaly":AnomalyInput,"gas-phase":GasInput,"supervision":SupervisionInput}
+    research_models={"stability":StabilityInput,"transport":TransportInput,"surge-swab":SurgeInput,"torque-drag":TorqueDragInput,"buckling":BucklingInput,"dynamics":DynamicsInput,"bit-condition":BitInput,"wear-fatigue":WearInput,"anomaly":AnomalyInput,"gas-phase":GasInput,"supervision":SupervisionInput,"offset-benchmarking":OffsetBenchmarkingInput}
 
     @app.get("/api/research/schemas")
     def research_schemas():
@@ -452,7 +453,7 @@ def create_app(data_dir: Path | None = None, mode: str | None = None):
         return explain_study(calcs[calc_id], project, ds, revs)
 
     @app.get("/api/projects/{project_id}/evidence/search")
-    def search_evidence(project_id: str, q: str = Query(..., min_length=1), request: Request = None):
+    def search_evidence(project_id: str, q: str = Query(..., min_length=1, max_length=500), request: Request = None):
         user = getattr(request.state, "user", None) if request and hasattr(request, "state") else None
         role = user.get("role", "viewer") if user else "viewer"
         user_id = user.get("id", "current_user") if user else "current_user"
@@ -461,10 +462,7 @@ def create_app(data_dir: Path | None = None, mode: str | None = None):
         ds = store.datasets(project_id)
         revs = store.revisions(project_id, "M1")
         calcs = store.calculations(project_id)
-        try:
-            progs = programmes.list_programmes(store, project_id)
-        except Exception:
-            progs = []
+        progs = [programmes.get_programme(store, p["id"]) for p in programmes.list_programmes(store, project_id)]
 
         query_input = SearchQuery(
             query=q,
@@ -483,6 +481,14 @@ def create_app(data_dir: Path | None = None, mode: str | None = None):
             programmes=progs,
             user_project_memberships=memberships,
         )
+
+    @app.get("/api/projects/{project_id}/programmes/{programme_id}")
+    def cited_programme(project_id: str, programme_id: str):
+        store.project(project_id)
+        value = programmes.get_programme(store, programme_id)
+        if value["project_id"] != project_id:
+            raise KeyError("Programme not found in this project")
+        return value
 
     @app.get("/api/projects/{project_id}/bundle/export")
     def project_bundle_export(project_id: str):
@@ -620,8 +626,8 @@ def create_app(data_dir: Path | None = None, mode: str | None = None):
 
     @app.post("/api/projects/{project_id}/research/{model}/imports",status_code=201)
     async def import_research_inputs(project_id: str,model: str,file: UploadFile = File(...)):
-        if model not in {"dynamics","bit-condition","wear-fatigue","anomaly","gas-phase","supervision"}:
-            raise ValueError("JSON research imports are available for Modules 12–17.")
+        if model not in {"dynamics","bit-condition","wear-fatigue","anomaly","gas-phase","supervision","offset-benchmarking"}:
+            raise ValueError("JSON research imports are available for Modules 12–17 and offset benchmarking.")
         raw=await file.read(MAX_FILE_BYTES+1);await file.close()
         if len(raw)>MAX_FILE_BYTES:raise HTTPException(413,"File exceeds the 2 MiB release limit.")
         filename=(file.filename or "untitled").replace("\\","/").split("/")[-1][:160]
@@ -680,6 +686,10 @@ def create_app(data_dir: Path | None = None, mode: str | None = None):
     @app.post("/api/projects/{project_id}/calculations/supervision")
     def calculate_supervision(project_id: str,value: SupervisionInput):
         return research_save(project_id,value,"supervision",supervision)
+
+    @app.post("/api/projects/{project_id}/calculations/offset-benchmarking")
+    def calculate_offsets(project_id: str, value: OffsetBenchmarkingInput):
+        return research_save(project_id, value, "offset-benchmarking", calculate_offset_benchmarks)
 
     def ingest_em_vendor(project_id, filename, raw):
         project=store.project(project_id)

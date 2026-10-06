@@ -48,7 +48,7 @@ def test_bad_imports_have_no_side_effect(workspace):
 def test_seeded_models_preserve_original_geometry_and_documents(seeded):
  p=next(p for p in seeded.call("GET","/api/projects") if p["name"].startswith("Cloud verification"))
  rows=seeded.call("GET","/api/projects/"+p["id"]+"/calculations")
- assert {x["model"] for x in rows}=={"dynamics","bit-condition","wear-fatigue","anomaly","gas-phase","supervision"}
+ assert {x["model"] for x in rows}=={"dynamics","bit-condition","wear-fatigue","anomaly","gas-phase","supervision","offset-benchmarking"}
  for x in rows:
   r=x["result"];assert r["geometry_revision_id"]==x["inputs_si"]["geometry_revision_id"]
   assert r["input_document_matches_current"] and r["equipment_authority"]=="none" and not r["approval_issued"]
@@ -59,7 +59,7 @@ def test_complete_fixed_report_download(seeded):
  filename="geodrill-report-"+created["id"]+".json"
  original=seeded.client.get(b+"/reports/"+created["id"]+"/download").content
  assert seeded.report_downloads[filename]==original
- assert len(v["snapshot"]["calculations"])==6
+ assert len(v["snapshot"]["calculations"])==7
  canonical=json.dumps(v["snapshot"],sort_keys=True,separators=(",",":"),allow_nan=False).encode()
  assert hashlib.sha256(canonical).hexdigest()==v["sha256"]==created["sha256"]
  seeded.call("POST",b+"/reports")

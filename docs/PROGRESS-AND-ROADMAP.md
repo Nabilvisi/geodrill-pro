@@ -23,8 +23,9 @@ Remaining implementation sequence:
    remains a separate unfinished feature.
 2. Build the isolated read-only ETP/WITSML adapter with original/receipt/source time,
    ordering, duplicates, reconnect, quarantine and declared supported-object fixtures.
-3. Connect API/kernel-only team, directional, offset, geomechanics and evidence
-   search capabilities into reviewable app workflows with operator acceptance.
+3. Offset benchmarking and evidence search now have connected UI/import/citation
+   workflows. Complete their final deployment/package verification and operator
+   acceptance. Team, directional and geomechanics integration remains unfinished.
 4. Expand hydraulics/contact/transient closures only with declared applicability,
    measured prerequisites and independent reference/holdout comparisons. Restricted
    mixture-density and bending-gradient implementations do not close these items.
@@ -38,4 +39,3 @@ their acceptance criteria. Full completion is not declared.
 All released engineering capabilities remain research/advisory. Equipment control
 is false, automated drilling clearance is false, and no error-free or field
 performance guarantee is made.
-
