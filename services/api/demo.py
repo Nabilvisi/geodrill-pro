@@ -136,6 +136,25 @@ def research_template(model,revision,origin):
                 "target_bit_family":None,"target_trajectory_type":None,"max_hole_diameter_diff_m":.0254,
                 "require_adjudicated_only":True},"offset_wells":records,
                 "planned_rig_rate_per_day":100000.,"cost_currency":"USD"}
+    if model=="geomechanics":
+        import hashlib,json,math
+        z=revision["result"]["samples"][-1]["tvd_m"]
+        core={"specimen_id":"SYN-CORE","confining_pressure_pa":20e6,"peak_axial_stress_pa":85e6,
+              "pore_pressure_pa":10e6,"cohesion_pa":12e6,"friction_angle_deg":30.,
+              "unconfined_compressive_strength_pa":24e6*math.sqrt(3),"tensile_strength_pa":4e6,
+              "youngs_modulus_pa":25e9,"poissons_ratio":.22,"biot_coefficient":.85,
+              "test_standard":"Generated analytical fixture","certificate_id":"SYN-NO-ACTUAL-CERTIFICATE"}
+        core["source_sha256"]=hashlib.sha256(json.dumps(core,sort_keys=True).encode()).hexdigest()
+        calibration={"method":"XLOT","measured_shmin_gradient_sg":1.65,"test_depth_tvd_m":max(z,.001),
+                     "closure_pressure_gauge_pa":1.65*1000*9.80665*max(z,.001),"pressure_reference":"at_test_depth",
+                     "calibration_quality":"verified_closure","evidence_note":"Generated closure-state fixture; no actual reviewer or field test"}
+        calibration["source_sha256"]=hashlib.sha256(json.dumps(calibration,sort_keys=True).encode()).hexdigest()
+        return {**base,"md_m":td,"azimuth_shmax_deg":0.,"stress_north_reference":revision["result"].get("north_reference","true"),"overburden_gradient_sg":2.3,"pore_pressure_sg":1.1,
+                "tectonic_strain_x":0.,"tectonic_strain_y":min(.01,.0003*max(z,0)/1000),
+                "core_test":core if origin=="synthetic" else None,"stress_calibration":calibration if origin=="synthetic" else None,
+                "surface_temperature_c":15.,"geothermal_gradient_c_per_100m":3.,"base_mud_density_sg":1.5,
+                "mud_compressibility_per_pa":4e-10,"mud_thermal_expansion_per_c":6e-4,
+                "shear_failure_model":"mogi_coulomb","minimum_tested_pressure_sg":.8,"maximum_tested_pressure_sg":3.5}
     if model=="stability":
         return {**base,"md_m":min(td,1000.),"model":"isotropic_elastic_impermeable",
                 "stress_north_pa":22e6,"stress_east_pa":13e6,"stress_vertical_pa":25e6,

@@ -26,8 +26,9 @@ Remaining implementation sequence:
    ordering, duplicates, reconnect, quarantine and declared supported-object fixtures.
 3. Offset benchmarking and evidence search now have connected UI/import/citation
    workflows with deployment/package verification complete in research-4. Complete
-   representative operator acceptance. Team, directional and geomechanics integration
-   remains unfinished.
+   representative operator acceptance. Formation geomechanics now has a repaired
+   survey-bound workflow; actual-fluid/coupled solver scope remains unfinished,
+   together with dedicated team and directional integration.
 4. Expand hydraulics/contact/transient closures only with declared applicability,
    measured prerequisites and independent reference/holdout comparisons. Restricted
    mixture-density and bending-gradient implementations do not close these items.

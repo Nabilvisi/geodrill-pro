@@ -26,7 +26,7 @@ Recovery changes and packaged acceptance are recorded in
 | GD-A14 | Preserved typed cohort import, geometry-bound API, dedicated UI, exclusion/provenance tables, empirical quantiles, fixed reports and restored-study reopening | Harmonized real DDR cohorts, independent adjudication and operator/forecast qualification |
 | GD-A15 | IADC parser and conditional inspected-bit progression through bit study inputs | Calibrated sensor/cohort programme and independent/censored holdout validation; no individual life/trip authority |
 | GD-A16 | Offline causal balance/event replay with disjoint supplied evaluation intervals | Authorized live adapter, adjudicated field corpus and blind performance qualification; no early-kick guarantee |
-| GD-A17 | Principal-stress/linear fluid-density/Mogi-Coulomb kernel and tests | Geometry-bound API/UI, actual property/core/LOT observations and independent review; no operational mud-window approval |
+| GD-A17 | Survey-bound typed input/import/API/UI, actual wall-eigenvalue MC/Mogi envelopes, numerical elastic intervals and integrated linear hydrostatic density; [scope](GD-A17-IMPLEMENTATION.md) | Actual characterized-fluid adapter, coupled thermal/poroelastic or multiphase solver experiments, original core/LOT/PVT observations and independent review; no operational mud-window approval |
 | GD-A18 | Dedicated project evidence UI, cited-record inspection, complete-calculation hashes, actual programme versions, historical casing disclosures and bounded/permission tests | Representative operator acceptance, broader evidence domains/full document retrieval and independent assessment |
 
 M01–M17 provide the audited offline workflows in [MODULES-1-17.md](MODULES-1-17.md)

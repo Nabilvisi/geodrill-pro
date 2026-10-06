@@ -52,6 +52,7 @@ from packages.engineering.review_pack import build_programme_pack, export_pack_t
 from packages.engineering.usability import convert_unit, paginate_and_search_records, UNIT_PROFILES
 from packages.engineering.evidence_search import SearchQuery, search_project_evidence
 from packages.engineering.offset_benchmarking import OffsetBenchmarkingInput, calculate_offset_benchmarks
+from packages.engineering.geomechanics import GeomechanicsInput, calculate_geomechanics
 from packages.engineering.ddr import create_daily_drilling_report, export_ddr_to_xml
 from packages.frontend import frontend_dist
 from . import demo, programmes
@@ -367,7 +368,7 @@ def create_app(data_dir: Path | None = None, mode: str | None = None):
                           survey_source_sha256=source["source_hash"],survey_parquet_sha256=source["parquet_sha256"])
             return store.calculation(project_id,"hydraulics",value.model_dump(),result)
 
-    research_models={"stability":StabilityInput,"transport":TransportInput,"surge-swab":SurgeInput,"torque-drag":TorqueDragInput,"buckling":BucklingInput,"dynamics":DynamicsInput,"bit-condition":BitInput,"wear-fatigue":WearInput,"anomaly":AnomalyInput,"gas-phase":GasInput,"supervision":SupervisionInput,"offset-benchmarking":OffsetBenchmarkingInput}
+    research_models={"stability":StabilityInput,"transport":TransportInput,"surge-swab":SurgeInput,"torque-drag":TorqueDragInput,"buckling":BucklingInput,"dynamics":DynamicsInput,"bit-condition":BitInput,"wear-fatigue":WearInput,"anomaly":AnomalyInput,"gas-phase":GasInput,"supervision":SupervisionInput,"offset-benchmarking":OffsetBenchmarkingInput,"geomechanics":GeomechanicsInput}
 
     @app.get("/api/research/schemas")
     def research_schemas():
@@ -580,6 +581,8 @@ def create_app(data_dir: Path | None = None, mode: str | None = None):
         revision=checked_geometry(project_id,value.geometry_revision_id)
         if value.depth_datum!=project["datum"]:
             raise ValueError("Research depth datum must match the project.")
+        if hasattr(value,"stress_north_reference") and value.stress_north_reference!=project["north_reference"]:
+            raise ValueError("Stress azimuth reference must match the project's accepted survey north reference.")
         if value.evidence_state=="synthetic" and project["origin"]!="synthetic":
             raise ValueError("Synthetic research evidence is restricted to synthetic projects.")
         geometry=GeometryInput.model_validate(revision["input"])
@@ -626,8 +629,8 @@ def create_app(data_dir: Path | None = None, mode: str | None = None):
 
     @app.post("/api/projects/{project_id}/research/{model}/imports",status_code=201)
     async def import_research_inputs(project_id: str,model: str,file: UploadFile = File(...)):
-        if model not in {"dynamics","bit-condition","wear-fatigue","anomaly","gas-phase","supervision","offset-benchmarking"}:
-            raise ValueError("JSON research imports are available for Modules 12–17 and offset benchmarking.")
+        if model not in {"dynamics","bit-condition","wear-fatigue","anomaly","gas-phase","supervision","offset-benchmarking","geomechanics"}:
+            raise ValueError("JSON research imports are available for Modules 12–17, offset benchmarking and geomechanics.")
         raw=await file.read(MAX_FILE_BYTES+1);await file.close()
         if len(raw)>MAX_FILE_BYTES:raise HTTPException(413,"File exceeds the 2 MiB release limit.")
         filename=(file.filename or "untitled").replace("\\","/").split("/")[-1][:160]
@@ -646,6 +649,10 @@ def create_app(data_dir: Path | None = None, mode: str | None = None):
     @app.post("/api/projects/{project_id}/calculations/stability")
     def calculate_stability(project_id: str,value: StabilityInput):
         return research_save(project_id,value,"stability",stability)
+
+    @app.post("/api/projects/{project_id}/calculations/geomechanics")
+    def geomechanics_study(project_id: str,value: GeomechanicsInput):
+        return research_save(project_id,value,"geomechanics",calculate_geomechanics)
 
     @app.post("/api/projects/{project_id}/calculations/transport")
     def calculate_transport(project_id: str,value: TransportInput):

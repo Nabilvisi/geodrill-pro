@@ -5,10 +5,11 @@ import type {Revision} from './GeometryWorkspace';
 type Value=string|number|boolean|null|Value[]|{[key:string]:Value};
 type Document=Record<string,Value>;
 type Schema={$ref?:string;type?:string;title?:string;description?:string;enum?:string[];anyOf?:Schema[];properties?:Record<string,Schema>;items?:Schema;required?:string[];$defs?:Record<string,Schema>;minimum?:number;maximum?:number;minLength?:number;maxLength?:number};
-type Model='stability'|'transport'|'surge-swab'|'torque-drag'|'buckling'|'dynamics'|'bit-condition'|'wear-fatigue'|'anomaly'|'gas-phase'|'supervision'|'offset-benchmarking';
+type Model='stability'|'transport'|'surge-swab'|'torque-drag'|'buckling'|'dynamics'|'bit-condition'|'wear-fatigue'|'anomaly'|'gas-phase'|'supervision'|'offset-benchmarking'|'geomechanics';
 type Study={id:string;model:string;inputs_si:Document;result:Document;created_at:string};
 type Props={model:Model;project:{id:string;origin:string;datum:string};online:boolean;onError:(s:string)=>void;onNotice:(s:string)=>void};
 const descriptions:Record<Model,[string,string]>={
+  geomechanics:['GD-A17 · Formation geomechanics','Bind isotropic elastic rock and closure-pressure assumptions to the accepted survey orientation. Compare Mohr–Coulomb or Mogi–Coulomb margins, hydrostatic fluid-density scenarios and numerical pressure intervals. Supplied certificate states and hashes do not establish independent verification or an approved mud window.'],
   'offset-benchmarking':['GD-A14 · Offset cohort benchmarks','Select historical records by formation, hole size, bit family, trajectory and currency. Review exclusions and supplied adjudication notes before comparing empirical duration and cost quantiles. These descriptive scenarios do not establish forecast probabilities or a budget commitment.'],
   dynamics:['M12 · BHA dynamics & measurements','Simulate three coupled coordinates of a straight uniform cantilever segment. Review supplied acceleration samples separately; bandwidth eligibility does not establish modal observability or a virtual downhole diagnosis.'],
   'bit-condition':['M13 · Inspected bit runs','Preserve inspections, run exposure and measured or proxy energy. Compare censored runs within one family and formation using evidence available at the declared cutoff. Cohort survival and conditional costs do not predict an individual bit life or authorize a trip.'],
@@ -24,6 +25,12 @@ const descriptions:Record<Model,[string,string]>={
 };
 const labels:Record<string,string>={cutoff_at:'Analysis cutoff (ISO time with zone)',closed_end_von_mises_pa:'Closed-end von Mises stress (MPa)',miner_damage:'Miner fatigue index',horizon_failure_fraction:'Conditional horizon failure fraction',boundary:'End boundary model',pipe_configuration:'Pipe and contact configuration',force_basis:'Axial force basis',wall_loads:'Supplied wall-force and absolute-pressure knots',compression_allowance_n:'Local compression uncertainty (kN)',modulus_relative_delta:'Modulus relative uncertainty',clearance_relative_delta:'Clearance relative uncertainty',transfer_model:'Load-transfer assessment',transfer_tolerance_n:'Load-transfer refinement tolerance (kN)',source_note:'Evidence and applicability',md_m:'Measured depth (m)',evidence_state:'Input evidence state',model:'Rock model',thermal_scope:'Thermal model',external_bounds_state:'External pressure-bound evidence',pressure_basis_note:'Stress and pressure reference / boundary evidence',hydraulics_calculation_id:'Saved hydraulic source',displacement:'Pipe displacement / fill model',operation:'String operation',motion:'Pipe-motion history',string_sections:'String sections',generation_stop_s:'Generation stops at (s)',shape:'Particle shape',cells:'Initial grid cells',convergence_tolerance_pa:'Pressure refinement tolerance (MPa)',step_m:'Initial integration step (m)'};
 function presentation(key:string):[string,number]{
+  if(key==='mud_compressibility_per_pa')return ['Mud compressibility (1/Pa)',1];
+  if(key==='mud_thermal_expansion_per_c')return ['Mud thermal expansion (1/°C)',1];
+  if(key==='youngs_modulus_pa')return ['Young modulus (GPa)',1e9];
+  if(key.endsWith('_sg'))return [human(key.slice(0,-3))+' (SG, water = 1000 kg/m³)',1];
+  if(key.endsWith('_c'))return [human(key.slice(0,-2))+' (°C)',1];
+  if(key==='geothermal_gradient_c_per_100m')return ['Geothermal gradient (°C/100 m)',1];
   if(key==='wear_coefficient_m2_n')return ['Wear coefficient (m²/N)',1];
   if(key==='contact_work_n_m')return ['Integrated normal-force × sliding exposure (N·m)',1];
   if(key==='proportional_per_pa')return ['Proportional gain (1/Pa)',1];
@@ -42,8 +49,8 @@ const sensorUnit=(s:Value)=>s==='m_s2'?'m/s²':s==='rad_s2'?'rad/s²':String(s);
 const human=(s:string)=>s.replaceAll('_',' ').replace(/^./,c=>c.toUpperCase());
 const fmt=(v:Value|undefined,d=3)=>typeof v==='number'?(v!==0&&Math.abs(v)<1e-5?v.toExponential(3):v.toLocaleString('en-US',{maximumFractionDigits:d})):v==null?'Not supplied':String(v);
 function resolve(schema:Schema,root:Schema):Schema{
-  if(schema.$ref)return root.$defs?.[schema.$ref.split('/').at(-1)!]??schema;
-  if(schema.anyOf)return schema.anyOf.find(s=>s.type!=='null')??schema;
+  if(schema.$ref){const target=root.$defs?.[schema.$ref.split('/').at(-1)!];return target?resolve(target,root):schema;}
+  if(schema.anyOf){const target=schema.anyOf.find(s=>s.type!=='null');return target?resolve(target,root):schema;}
   return schema;
 }
 function empty(schema:Schema,root:Schema):Value{
@@ -58,7 +65,7 @@ function Field({name,schema,root,value,onChange,required=false}:{name:string;sch
   const s=resolve(schema,root);const [label,factor]=presentation(name);const optional=schema.anyOf?.some(x=>x.type==='null')??false;
   if(s.type==='object'){
     const obj=(value??{}) as Document;
-    return <fieldset className="research-group"><legend>{label}</legend><div className="lab-fields">{Object.entries(s.properties??{}).map(([k,sub])=><Field key={k} name={k} schema={sub} root={root} value={obj[k]??null} required={s.required?.includes(k)} onChange={v=>onChange({...obj,[k]:v})}/>)}</div></fieldset>;
+    return <fieldset className="research-group"><legend>{label}</legend>{optional&&<label className="field-label research-checkbox"><span>Include {label.toLowerCase()}</span><input type="checkbox" checked={value!==null} onChange={e=>onChange(e.target.checked?empty(s,root):null)}/></label>}{optional&&value===null?<p>Not supplied. The saved assessment retains this missing evidence.</p>:<div className="lab-fields">{Object.entries(s.properties??{}).map(([k,sub])=><Field key={k} name={k} schema={sub} root={root} value={obj[k]??null} required={s.required?.includes(k)} onChange={v=>onChange({...obj,[k]:v})}/>)}</div>}</fieldset>;
   }
   if(s.type==='array'){
     const rows=(value??[]) as Value[];const item=s.items??{};
@@ -81,7 +88,7 @@ function Plot({rows,xKey,series,factor=1,xLabel,yLabel,step=false,breakKey,range
   return <div className="research-plot"><svg viewBox="0 0 820 325" role="img" aria-label={yLabel+' versus '+xLabel}>{[0,1,2,3,4].map(i=>{const y=loY+(hiY-loY)*i/4;return <g key={i}><line x1="65" x2="765" y1={py(y)} y2={py(y)} stroke="#e2e8f0"/><text x="57" y={py(y)+4} textAnchor="end" fontSize="11" fill="#64748b">{y.toPrecision(3)}</text></g>;})}<line x1="65" x2="765" y1="275" y2="275" stroke="#94a3b8"/>{series.flatMap(s=>{const paths:string[][]=[];let path:string[]=[];let previous:Document|undefined;for(const row of finite){if(breakKey&&row[breakKey]==="unknown_balance"){if(path.length)paths.push(path);path=[];previous=undefined;}if(typeof row[s.key]!=='number'){if(path.length)paths.push(path);path=[];previous=undefined;continue;}if(step&&previous)path.push(px(Number(row[xKey]))+','+py(Number(previous[s.key])/factor));path.push(px(Number(row[xKey]))+','+py(Number(row[s.key])/factor));previous=row;}if(path.length)paths.push(path);return paths.map((points,i)=><polyline key={s.key+i} fill="none" stroke={s.color} strokeWidth="2" points={points.join(' ')}/>);})}<text x="65" y="295" fontSize="11">{loX.toFixed(1)}</text><text x="765" y="295" textAnchor="end" fontSize="11">{hiX.toFixed(1)}</text><text x="410" y="315" textAnchor="middle" fontSize="12">{xLabel}</text><text x="65" y="20" fontSize="12">{yLabel}</text></svg><div className="research-legend">{series.map(s=><span key={s.key}><i style={{background:s.color}}/>{s.label}</span>)}</div></div>;
 }
 const palette=['#0f766e','#d97706','#6366f1','#be185d'];
-const historyPlots:Record<Model,[string[],number,string][]>={stability:[],buckling:[],'torque-drag':[],'offset-benchmarking':[],
+const historyPlots:Record<Model,[string[],number,string][]>={stability:[],buckling:[],'torque-drag':[],'offset-benchmarking':[],geomechanics:[],
   transport:[[['generated_m3','returned_m3','inventory_m3'],1,'Solids volume (m³)']],
   'surge-swab':[[['bottom_perturbation_pa'],1e6,'Bottom-cell pressure change (MPa)']],
   dynamics:[[['axial_displacement_m','lateral_displacement_m'],1,'Simulated displacement (m)'],[['torsional_angle_rad'],1,'Simulated torsional angle (rad)'],[['energy_j','energy_balance_residual_j'],1,'Simulated energy and balance residual (J)']],
@@ -117,6 +124,7 @@ function OffsetQuantiles({projections}:{projections:Document}){
 function Result({model,result}:{model:Model;result:Document}){
   const profile=(result.profile??[]) as Document[],history=(result.history??[]) as Document[];
   const summaries:Record<Model,string[]>={
+    geomechanics:['md_m','tvd_m','inclination_deg','azimuth_deg','minimum_shear_margin_pa','minimum_tensile_margin_pa','failure_screen_exceeded'],
     'offset-benchmarking':['total_offset_wells_supplied','eligible_cohort_count'],
     dynamics:['maximum_energy_balance_residual_j','contact_active_samples'],
     'bit-condition':['cohort_size','confirmed_failures'],
@@ -126,6 +134,7 @@ function Result({model,result}:{model:Model;result:Document}){
     supervision:['final_pressure_pa','tracking_rms_pa','maximum_overshoot_pa','refinement_change_pa','pressure_envelope_exceeded','accepted_simulation_requests','rejected_simulation_requests','equipment_control','network_adapter_available'],buckling:['sinusoidal_threshold_n','helical_threshold_n','maximum_compression_n','minimum_conservative_margin_n','radial_clearance_m','characteristic_wavelength_m'],stability:['thermal_stress_estimate_pa','failure_screen_exceeded','angular_resolution_deg'],transport:['settling_velocity_m_s','particle_reynolds','generated_m3','returned_m3','inventory_m3','peak_volume_fraction','balance_residual_m3'],'surge-swab':['maximum_mass_balance_residual_kg','maximum_reynolds','maximum_pipe_displacement_m','numerical_tolerance_met','time_step_s'], 'torque-drag':['hookload_n','surface_torque_nm','minimum_tension_n','surface_tension_margin_n','surface_torque_margin_nm','hookload_residual_n','torque_residual_nm']};
   const metrics=summaries[model].filter(k=>k in result);
   const y:Record<Model,[string[],number,string]>={
+    geomechanics:[['hoop_effective_pa','axial_effective_pa','minimum_principal_pa'],1e6,'Effective wall stress (MPa)'],
     'offset-benchmarking':[[],1,'Empirical cohort'],
     dynamics:[[],1,'Simulated response'],
     'bit-condition':[['survival','approximate_lower','approximate_upper'],1,'Descriptive cohort survival fraction'],
@@ -139,7 +148,7 @@ function Result({model,result}:{model:Model;result:Document}){
     {(result.reasons as string[]|undefined)?.length?<div className="research-alert" role="status"><strong>Assessment conditions</strong><ul>{(result.reasons as string[]).map((reason,i)=><li key={i}>{reason}</li>)}</ul></div>:null}
     <div className="research-metrics">{metrics.map(k=>{const [label,factor]=presentation(k);return <div className="panel" key={k}><span>{label}</span><strong>{typeof result[k]==='number'?fmt(Number(result[k])/factor,6):fmt(result[k])}</strong></div>;})}</div>
     {model==='buckling'&&result.mode_counts&&<section className="panel"><div className="panel-heading"><div><h2>Local buckling indicators</h2><p>Selected-formulation susceptibility by retained profile point; these counts do not measure buckled length.</p></div></div><div className="research-metrics research-mode-counts">{Object.entries(result.mode_counts as Document).map(([key,value])=><div key={key}><span>{human(key)}</span><strong>{fmt(value,0)}</strong></div>)}</div></section>}
-    {profile.length>0&&<section className="panel"><div className="panel-heading"><div><h2>{model==='stability'?'Wall stress around the borehole':model==='bit-condition'?'Censored cohort history':'Depth profile'}</h2><p>{profile.length} retained points · original inputs and complete results preserved in reports</p></div></div><Plot rows={model==='bit-condition'?[{drilling_hours:0,survival:1,approximate_lower:null,approximate_upper:null},...profile]:profile} step={model==='bit-condition'} range={model==='bit-condition'||model==='gas-phase'?[0,1]:undefined} xKey={model==='stability'?'angle_deg':model==='bit-condition'?'drilling_hours':'md_m'} xLabel={model==='stability'?'Circumferential angle (°)':model==='bit-condition'?'Drilling exposure (hours)':'Measured depth (m)'} series={series} factor={factor} yLabel={yLabel}/>
+    {profile.length>0&&<section className="panel"><div className="panel-heading"><div><h2>{(model==='stability'||model==='geomechanics')?'Wall stress around the borehole':model==='bit-condition'?'Censored cohort history':'Depth profile'}</h2><p>{profile.length} retained points · original inputs and complete results preserved in reports</p></div></div><Plot rows={model==='bit-condition'?[{drilling_hours:0,survival:1,approximate_lower:null,approximate_upper:null},...profile]:profile} step={model==='bit-condition'} range={model==='bit-condition'||model==='gas-phase'?[0,1]:undefined} xKey={(model==='stability'||model==='geomechanics')?'angle_deg':model==='bit-condition'?'drilling_hours':'md_m'} xLabel={(model==='stability'||model==='geomechanics')?'Circumferential angle (°)':model==='bit-condition'?'Drilling exposure (hours)':'Measured depth (m)'} series={series} factor={factor} yLabel={yLabel}/>
       {model==='surge-swab'&&<Plot rows={profile} xKey="md_m" xLabel="Measured depth (m)" series={[{key:'minimum_perturbation_pa',label:'Minimum change',color:palette[0]},{key:'maximum_perturbation_pa',label:'Maximum change',color:palette[1]}]} factor={1e6} yLabel="Pressure perturbation (MPa)"/>}
       {model==='transport'&&<Plot rows={profile} xKey="md_m" xLabel="Measured depth (m)" series={[{key:'final_volume_fraction',label:'Retained solids fraction',color:palette[2]}]} yLabel="Final cuttings volume fraction"/>}
       {model==='torque-drag'&&<Plot rows={profile} xKey="md_m" xLabel="Measured depth (m)" series={[{key:'torque_nm',label:'Torque',color:palette[1]}]} factor={1000} yLabel="Torque (kN·m)"/>}
@@ -152,6 +161,7 @@ function Result({model,result}:{model:Model;result:Document}){
     {model==='wear-fatigue'&&<><EvidenceObject title="Separate fatigue exposure" value={result.fatigue}/><EvidenceObject title="Restricted residual-wall strength scenario" value={result.residual_strength}/></>}
     {model==='anomaly'&&<><EvidenceTable title="Causal balance-anomaly candidates" rows={(result.candidate_events??[]) as Document[]} columns={['onset_s','alarm_s','end_s','sign']}/><EvidenceObject title="Supplied event replay evaluation" value={result.event_evaluation}/></>}
     {model==='gas-phase'&&<EvidenceObject title="Characterized binary equilibrium" value={result.equilibrium}/>}
+    {model==='geomechanics'&&<><EvidenceObject title="Supplied in-situ stress scenario" value={result.in_situ_stresses}/><EvidenceObject title="Hydrostatic fluid-density scenario" value={result.fluid_thermodynamics}/><EvidenceTable title="Numerical elastic pressure intervals" rows={(result.elastic_pressure_intervals??[]) as Document[]} columns={['lower_gauge_pa','upper_gauge_pa','lower_equivalent_sg','upper_equivalent_sg','lower_at_test_boundary','upper_at_test_boundary']}/><EvidenceObject title="Angular and pressure-seed refinement" value={result.numerical_refinement}/><EvidenceObject title="Supplied core and closure provenance" value={result.supplied_evidence}/></>}
     {model==='supervision'&&<><EvidenceTable title="Simulation request audit · first 80 records" rows={(result.request_audit??[]) as Document[]} columns={['request_id','at_s','accepted_in_simulation','reasons','equipment_command_issued']}/><EvidenceObject title="Supplied request examples" value={result.request_example_audit}/></>}
     {model==='buckling'&&result.load_transfer&&<section className="panel research-transfer"><div className="panel-heading"><h2>Conditional load transfer</h2></div><p>{human(String((result.load_transfer as Document).status))} · Prescribed interval bottom force; this does not set a surface or bit WOB limit.</p>{['upper_effective_tension_n','unbuckled_upper_effective_tension_n','upper_tension_change_n','final_refinement_change_n'].filter(k=>k in (result.load_transfer as Document)).map(k=><p key={k}>{presentation(k)[0]}: {fmt(Number((result.load_transfer as Document)[k])/1000,6)}</p>)}<Plot rows={((result.load_transfer as Document).profile??[]) as Document[]} xKey="md_m" xLabel="Measured depth (m)" series={[{key:'effective_tension_n',label:'Conditional effective tension',color:palette[0]}]} factor={1000} yLabel="Axial tension (kN)"/></section>}
     <section className="panel"><details><summary>Numerical checks, source references & applicability</summary><pre className="research-json">{JSON.stringify(preview(Object.fromEntries(Object.entries(result).filter(([k])=>!['profile','history'].includes(k)).map(([k,v])=>[k,k==='load_transfer'?Object.fromEntries(Object.entries(v as Document).filter(([sub])=>sub!=='profile')):v]))),null,2)}</pre></details></section>
@@ -162,7 +172,7 @@ export function ResearchStudy({model,project,online,onError,onNotice}:Props){
   const base='/projects/'+project.id;
   const [revisions,setRevisions]=useState<Revision[]>([]),[schemas,setSchemas]=useState<Record<Model,Schema>|null>(null),[form,setForm]=useState<Document|null>(null),[history,setHistory]=useState<Study[]>([]),[hydraulics,setHydraulics]=useState<Study[]>([]),[result,setResult]=useState<Study|null>(null),[busy,setBusy]=useState(false),[dirty,setDirty]=useState(false);
   const inputFile=useRef<HTMLInputElement>(null);const resultView=useRef<HTMLDivElement>(null);const generation=useRef(0);
-  const importsAvailable=['dynamics','bit-condition','wear-fatigue','anomaly','gas-phase','supervision','offset-benchmarking'].includes(model);
+  const importsAvailable=['dynamics','bit-condition','wear-fatigue','anomaly','gas-phase','supervision','offset-benchmarking','geomechanics'].includes(model);
   const hydraulicLinked=model==='transport'||model==='surge-swab';
   const linked=hydraulicLinked||model==='buckling';
   const linkKey=hydraulicLinked?'hydraulics_calculation_id':'torque_drag_calculation_id';

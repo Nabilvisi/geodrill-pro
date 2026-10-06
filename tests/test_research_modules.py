@@ -180,7 +180,7 @@ def test_drag_contract_invalid(patch):
 def test_research_api_persistence_source_binding_report_and_restart(api_setup):
     c,p,base,d,store,root=api_setup
     rev=c.post(base+"/geometry",json={"geometry":d,"change_note":"Research fixture","base_revision_id":None}).json()
-    schemas=c.get("/api/research/schemas").json();assert set(schemas)=={"stability","transport","surge-swab","torque-drag","buckling","dynamics","bit-condition","wear-fatigue","anomaly","gas-phase","supervision","offset-benchmarking"}
+    schemas=c.get("/api/research/schemas").json();assert set(schemas)=={"stability","transport","surge-swab","torque-drag","buckling","dynamics","bit-condition","wear-fatigue","anomaly","gas-phase","supervision","offset-benchmarking","geomechanics"}
     source=c.post(base+"/research/source-hydraulics/"+rev["id"]);assert source.status_code==201,source.text
     source=source.json();records=[]
     for model in ["stability","transport","surge-swab","torque-drag","buckling"]:

@@ -33,7 +33,7 @@ class Workspace:
         ds=self.call("POST",b+"/imports",data={"kind":"survey"},files={"file":("synthetic-vertical.csv",b"md[m],inclination[deg],azimuth[deg]\n0,0,0\n500,0,0\n1000,0,0\n","text/csv")})
         g={"survey_dataset_id":ds["id"],"datum":p["datum"],"coordinate_reference":"Synthetic local frame","wellhead_north_m":0.,"wellhead_east_m":0.,"wellhead_elevation_m":0.,"survey_quality_note":"Generated vertical stations","tool_to_bit_offset_m":0.,"formations":[],"hole_sections":[{"name":"Synthetic hole","top_md_m":0.,"bottom_md_m":1000.,"diameter_m":.3,"source":"Generated hole assumption"}],"casings":[{"name":"Synthetic planned casing","top_md_m":0.,"bottom_md_m":1000.,"outside_diameter_m":.244,"inside_diameter_m":.216,"minimum_wall_m":.014,"wall_loss_allowance_m":0.,"state":"planned","grade":"Synthetic nominal material","source":"Generated geometry","yield_strength_pa":690e6,"body_rating_source":"Generated property, no material certificate"}]}
         rev=self.call("POST",b+"/geometry",json={"geometry":g,"base_revision_id":None,"change_note":"Generated cloud demonstration geometry"})
-        for model in ["dynamics","bit-condition","wear-fatigue","anomaly","gas-phase","supervision","offset-benchmarking"]:
+        for model in ["dynamics","bit-condition","wear-fatigue","anomaly","gas-phase","supervision","offset-benchmarking","geomechanics"]:
             value=self.call("GET",b+"/research/"+model+"/template/"+rev["id"])
             value["study_name"]="Synthetic cloud "+model+" study"
             imported=self.call("POST",b+"/research/"+model+"/imports",files={"file":(model+"-synthetic.json",json.dumps(value).encode(),"application/json")})
