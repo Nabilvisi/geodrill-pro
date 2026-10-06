@@ -17,7 +17,7 @@ from packages.domain.calculation import (
     compute_inputs_hash,
 )
 from packages.engineering.models import Survey, SurveyRequest
-from packages.engineering.physics import minimum_curvature
+from packages.engineering.physics import minimum_curvature, MODEL_VERSION
 from packages.engineering.directional import (
     convert_geodetic_to_projected,
     convert_projected_to_geodetic,
@@ -93,11 +93,11 @@ class DirectionalService:
         envelope = CalculationEnvelope(
             calculation_id=str(uuid4()),
             model="directional.minimum_curvature",
-            model_version="0.9.0",
+            model_version=MODEL_VERSION,
             model_class=ModelClass.DETERMINISTIC_VERIFIED,
             qualification=QualificationLevel.PUBLISHED_BENCHMARK,
             status=CalculationStatus.CALCULATED,
-            inputs_hash=compute_inputs_hash(inputs_summary),
+            inputs_hash=compute_inputs_hash({"stations": inputs_summary, "wellbore_id": wellbore_id, "survey_revision_id": survey_revision_id, "trajectory_type": trajectory_type}),
             survey_revision_id=survey_revision_id,
             geometry_revision_id=traj.id,
             result={
@@ -129,16 +129,16 @@ class DirectionalService:
         envelope = CalculationEnvelope(
             calculation_id=str(uuid4()),
             model="directional.uncertainty_iscwsa",
-            model_version="0.9.0",
+            model_version=raw_result.get("tool_revision", "undeclared"),
             model_class=ModelClass.DETERMINISTIC_VERIFIED,
-            qualification=QualificationLevel.PUBLISHED_BENCHMARK,
+            qualification=QualificationLevel.INTERNAL_VERIFICATION,
             status=status,
             inputs_hash=compute_inputs_hash(payload),
             geometry_revision_id=geometry_revision_id,
             survey_revision_id=survey_revision_id,
-            result=raw_result if not is_withheld else {},
+            result=raw_result,
             assumptions=[
-                "ISCWSA MWD error model formulation",
+                "Declared survey error model; pinned diagnostic verification is not field qualification",
                 f"Tool model: {raw_result.get('tool_model')}",
             ],
             warnings=[f"WITHHELD: {reason}"] if is_withheld else [],
@@ -160,9 +160,9 @@ class DirectionalService:
         envelope = CalculationEnvelope(
             calculation_id=str(uuid4()),
             model="anticollision.closest_approach",
-            model_version="0.9.0",
+            model_version="GD-A10-proximity-1",
             model_class=ModelClass.DETERMINISTIC_VERIFIED,
-            qualification=QualificationLevel.PUBLISHED_BENCHMARK,
+            qualification=QualificationLevel.INTERNAL_VERIFICATION,
             status=CalculationStatus.CALCULATED,
             inputs_hash=compute_inputs_hash(payload),
             geometry_revision_id=ref_geometry_revision_id,

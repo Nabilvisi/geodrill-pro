@@ -22,6 +22,26 @@ from packages.engineering.models import SurveyRequest
 
 class EngineeringCaseService:
     @staticmethod
+    def run_saved_research_case(run_case, project_id, payload, model, kernel) -> CalculationEnvelope:
+        """Wrap the preserved revision-bound calculation and immutable evidence record."""
+        record = run_case(project_id, payload, model, kernel)
+        result = record["result"]
+        withheld = result.get("status") in {"withheld", "invalid", "nonconverged"}
+        return CalculationEnvelope(
+            calculation_id=record["id"], model=model,
+            model_version=result.get("model_version", "undeclared"),
+            model_class=ModelClass.DETERMINISTIC_RESEARCH,
+            qualification=QualificationLevel.INTERNAL_VERIFICATION,
+            status=CalculationStatus.WITHHELD if withheld else CalculationStatus.CALCULATED,
+            inputs_hash=compute_inputs_hash(record["inputs_si"]),
+            geometry_revision_id=payload.geometry_revision_id,
+            result=result, warnings=result.get("reasons", []),
+            limitations=result.get("limitations", []),
+            evidence_ids=[result[k] for k in ("geometry_sha256", "survey_source_sha256", "input_document_sha256") if result.get(k)],
+            created_at=record["created_at"],
+        )
+
+    @staticmethod
     def run_pressure_balance_case(
         payload: PressureInput,
         geometry_revision_id: str | None = None,
@@ -31,9 +51,9 @@ class EngineeringCaseService:
         return CalculationEnvelope(
             calculation_id=str(uuid4()),
             model="hydraulics.pressure_balance",
-            model_version="0.9.0",
+            model_version=raw_result["version"],
             model_class=ModelClass.DETERMINISTIC_VERIFIED,
-            qualification=QualificationLevel.PUBLISHED_BENCHMARK,
+            qualification=QualificationLevel.INTERNAL_VERIFICATION,
             status=CalculationStatus.CALCULATED,
             inputs_hash=compute_inputs_hash(payload.model_dump()),
             geometry_revision_id=geometry_revision_id,
@@ -54,9 +74,9 @@ class EngineeringCaseService:
         return CalculationEnvelope(
             calculation_id=str(uuid4()),
             model="performance.mse",
-            model_version="0.9.0",
+            model_version=raw_result["version"],
             model_class=ModelClass.DETERMINISTIC_VERIFIED,
-            qualification=QualificationLevel.PUBLISHED_BENCHMARK,
+            qualification=QualificationLevel.INTERNAL_VERIFICATION,
             status=status,
             inputs_hash=compute_inputs_hash(payload.model_dump()),
             bha_revision_id=bha_revision_id,
@@ -75,14 +95,9 @@ class EngineeringCaseService:
     ) -> CalculationEnvelope:
         """Run full geometry-linked steady laminar hydraulics calculation."""
         project = store.project(project_id)
-        with store.connect() as db:
-            row = db.execute(
-                "SELECT * FROM engineering_revisions WHERE project_id=? AND id=?",
-                (project_id, value.geometry_revision_id),
-            ).fetchone()
-        if not row:
-            raise KeyError("Geometry revision not found")
-        revision = dict(row)
+        revision = store.revision(project_id, value.geometry_revision_id)
+        if revision["module"] != "M1" or value.depth_datum != project["datum"]:
+            raise ValueError("Hydraulics requires a geometry revision with the project datum.")
         geometry = GeometryInput.model_validate(revision["input"])
         source = store.dataset(project_id, geometry.survey_dataset_id)
         path = SurveyPath(SurveyRequest(stations=[{k: r[k] for k in ("md_m", "inclination_rad", "azimuth_rad")} for r in source["rows"]]))
@@ -106,9 +121,13 @@ class EngineeringCaseService:
     def run_torque_drag_case(
         payload: TorqueDragInput,
         geometry_revision_id: str | None = None,
+        geometry: GeometryInput | None = None,
+        path: SurveyPath | None = None,
     ) -> CalculationEnvelope:
         """Run torque & drag analysis wrapped in calculation envelope."""
-        result = torque_drag(payload)
+        if geometry is None or path is None:
+            raise ValueError("Torque/drag requires immutable project geometry and accepted survey context.")
+        result = torque_drag(payload, geometry, path)
         return CalculationEnvelope(
             calculation_id=str(uuid4()),
             model="torque_drag.soft_string",
@@ -132,7 +151,7 @@ class EngineeringCaseService:
     ) -> CalculationEnvelope:
         """Run geomechanics and wellbore stability calculations."""
         result = calculate_geomechanics(payload)
-        is_withheld = result.get("withheld", False)
+        is_withheld = result.get("status") == "withheld"
         status = CalculationStatus.WITHHELD if is_withheld else CalculationStatus.CALCULATED
         return CalculationEnvelope(
             calculation_id=str(uuid4()),

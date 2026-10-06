@@ -16,14 +16,27 @@ from .storage import Store, now
 WRITE_ROLES = frozenset({"engineer", "admin"})
 SAFE_METHODS = frozenset({"GET", "HEAD", "OPTIONS"})
 
-_PROJECT_PATH = re.compile(r"^/api/projects/([^/]+)(?:/(.*))?$")
+_PROJECT_PATH = re.compile(r"^/api/(?:v1/)?projects/([^/]+)(?:/(.*))?$")
 # Routes whose own handlers enforce finer-grained roles (programme workflow, membership).
 _SELF_AUTHORISED = re.compile(r"^/api/(team/|projects/[^/]+/(programmes|members)(/|$))")
 
 
-def project_id_from_path(path: str) -> str | None:
+def project_id_from_path(path: str, store: Store | None = None) -> str | None:
     match = _PROJECT_PATH.match(path)
-    return match.group(1) if match else None
+    if match:
+        return match.group(1)
+    match = re.match(r"^/api/v1/(wells|wellbores)/([^/]+)(?:/|$)", path)
+    if match and store is not None:
+        kind, entity_id = match.groups()
+        with store.connect() as db:
+            if kind == "wells":
+                row = db.execute("SELECT project_id FROM wells WHERE id=?", (entity_id,)).fetchone()
+            else:
+                row = db.execute("SELECT w.project_id FROM wellbores b JOIN wells w ON w.id=b.well_id WHERE b.id=?", (entity_id,)).fetchone()
+        if not row:
+            raise KeyError("Project not found")
+        return row[0]
+    return None
 
 
 def role_denial(method: str, path: str, user: dict) -> str | None:

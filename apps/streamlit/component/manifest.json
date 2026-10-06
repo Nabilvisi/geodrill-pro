@@ -1,14 +1,15 @@
 {
-  "version": "0.8.0",
-  "source_release": "dist/release-728517b7a00e433b980f462ba2adf5d7",
+  "version": "0.9.0-alpha.1",
+  "frontend_source_sha256": "7015f7c3053c141fc69e28464426006bcf448d21b307d4fbdefb620cf0d9c8bc",
+  "source_release": "dist/release-5bc07397c70d4bbcba3f5f9f74b94177",
   "assets": [
     {
-      "path": "assets/index-CVotoqRw.js",
-      "sha256": "f9a7c9495634ac6993b6ef7128c836ae7f127fdde804df5a21fe895ea2ba3001"
+      "path": "assets/index-D1k-d0nj.css",
+      "sha256": "65494c6cfa0faa55f303f8044b56e90e5bf19f261870ae995c2651dc143eb158"
     },
     {
-      "path": "assets/index-DQfLpxdr.css",
-      "sha256": "aef49db358eabb760ad692bb7f65f9e370c9fcf6ea66d380980caabfb4a0d87f"
+      "path": "assets/index-D6XwBnm_.js",
+      "sha256": "1e574a11c7081ece54522136f8ba0fa543717b0cb22b676df91ee79204cd90b2"
     }
   ]
 }

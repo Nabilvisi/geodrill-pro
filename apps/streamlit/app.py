@@ -7,8 +7,11 @@ import streamlit as st
 import streamlit.components.v1 as components
 from apps.streamlit.cloud import Workspace
 from apps.streamlit.distribution import published_assets, local_asset, RELEASES_PAGE
+from packages.version import APP_VERSION
+from packages.frontend import verify_streamlit_component
 
 st.set_page_config(page_title="GeoDrill Pro",page_icon="🛢️",layout="wide",initial_sidebar_state="collapsed")
+verify_streamlit_component(ROOT)
 st.markdown(
     """
     <style>
@@ -34,7 +37,7 @@ st.markdown(
     unsafe_allow_html=True
 )
 st.title("GeoDrill Pro")
-st.caption("Version 0.9.0-workstation · Integrated Drilling Engineering Workstation")
+st.caption(f"Version {APP_VERSION} · Drilling Engineering Workstation Preview")
 st.info("This cloud workspace belongs to this browser session. Download fixed reports to retain evidence. Use the local workstation for persistent project storage. Examples are synthetic; equipment control is unavailable.")
 with st.expander("Desktop application · Offline research workstation"):
     st.markdown(

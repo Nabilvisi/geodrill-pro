@@ -17,23 +17,17 @@ router = APIRouter(prefix="/api/v1", tags=["Directional & Anti-Collision"])
 
 class TrajectoryCalcRequest(BaseModel):
     wellbore_id: str
-    stations: list[dict[str, Any]]
+    stations: list[SurveyStation] = Field(min_length=2, max_length=10000)
     survey_revision_id: str | None = None
     trajectory_type: TrajectoryType = TrajectoryType.PLANNED
 
 
 @router.post("/wellbores/{wellbore_id}/directional/calculate")
 def calculate_trajectory(wellbore_id: str, body: TrajectoryCalcRequest):
+    if body.wellbore_id != wellbore_id:
+        raise HTTPException(status_code=422, detail="Path and body wellbore IDs must match.")
     try:
-        stations = [
-            SurveyStation(
-                md_m=float(s["md_m"]),
-                inc_rad=float(s.get("inc_rad", 0.0)),
-                azi_rad=float(s.get("azi_rad", 0.0)),
-                tool_code=str(s.get("tool_code", "MWD")),
-            )
-            for s in body.stations
-        ]
+        stations = body.stations
         traj, envelope = DirectionalService.calculate_minimum_curvature_trajectory(
             stations=stations,
             wellbore_id=wellbore_id,
@@ -68,6 +62,8 @@ def calculate_anticollision(wellbore_id: str, payload: dict[str, Any]):
 
 @router.post("/geodesy/convert")
 def convert_coordinates(payload: dict[str, Any]):
+    if not payload.get("crs_code") or not payload.get("datum"):
+        raise HTTPException(status_code=422, detail="Explicit CRS and datum are required.")
     try:
         if "latitude_deg" in payload and "longitude_deg" in payload:
             return convert_geodetic_to_projected(

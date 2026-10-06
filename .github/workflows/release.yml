@@ -3,6 +3,7 @@ name: Release
 on:
   push:
     tags: ['v*.*.*']
+    branches: ['v09-verified-release']
   workflow_dispatch:
     inputs:
       unsigned_research:
@@ -45,7 +46,7 @@ jobs:
         env:
           GEODRILL_SIGN_PFX_BASE64: ${{ secrets.CODESIGN_PFX_BASE64 }}
           GEODRILL_SIGN_PASSWORD: ${{ secrets.CODESIGN_PASSWORD }}
-          UNSIGNED_RESEARCH: ${{ github.event_name == 'workflow_dispatch' && inputs.unsigned_research }}
+          UNSIGNED_RESEARCH: ${{ (github.event_name == 'workflow_dispatch' && inputs.unsigned_research) || github.ref == 'refs/heads/v09-verified-release' }}
         run: |
           if ($env:UNSIGNED_RESEARCH -eq 'true') {
             python tools/build_exe.py --unsigned
@@ -75,7 +76,7 @@ jobs:
           & "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" tools/installer/setup.iss
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
       - name: Sign installer for publisher releases
-        if: ${{ !(github.event_name == 'workflow_dispatch' && inputs.unsigned_research) }}
+        if: ${{ !((github.event_name == 'workflow_dispatch' && inputs.unsigned_research) || github.ref == 'refs/heads/v09-verified-release') }}
         shell: pwsh
         env:
           GEODRILL_SIGN_PFX_BASE64: ${{ secrets.CODESIGN_PFX_BASE64 }}
@@ -92,7 +93,7 @@ jobs:
       - name: Verify artifacts and generate manifest/checksums
         shell: pwsh
         env:
-          UNSIGNED_RESEARCH: ${{ github.event_name == 'workflow_dispatch' && inputs.unsigned_research }}
+          UNSIGNED_RESEARCH: ${{ (github.event_name == 'workflow_dispatch' && inputs.unsigned_research) || github.ref == 'refs/heads/v09-verified-release' }}
         run: |
           if ($env:UNSIGNED_RESEARCH -eq 'true') {
             python tools/verify_windows_release.py --unsigned
@@ -115,9 +116,9 @@ jobs:
       - name: Publish verified artifacts
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ github.event_name == 'workflow_dispatch' && format('research-{0}', github.run_number) || github.ref_name }}
-          name: ${{ github.event_name == 'workflow_dispatch' && format('Unsigned research build {0}', github.run_number) || github.ref_name }}
-          prerelease: ${{ github.event_name == 'workflow_dispatch' && inputs.unsigned_research }}
+          tag_name: ${{ (github.event_name == 'workflow_dispatch' || github.ref == 'refs/heads/v09-verified-release') && format('research-{0}', github.run_number) || github.ref_name }}
+          name: ${{ (github.event_name == 'workflow_dispatch' || github.ref == 'refs/heads/v09-verified-release') && format('Unsigned research build {0}', github.run_number) || github.ref_name }}
+          prerelease: ${{ (github.event_name == 'workflow_dispatch' && inputs.unsigned_research) || github.ref == 'refs/heads/v09-verified-release' }}
           files: |
             dist/GeoDrillPro-Setup.exe
             dist/GeoDrillPro-Windows-x64.zip

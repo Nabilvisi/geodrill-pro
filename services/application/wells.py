@@ -50,6 +50,11 @@ class WellService:
     ) -> dict[str, Any]:
         self.store.project(project_id)
         well_id = str(uuid4())
+        if field_id is not None:
+            with self.store.connect() as db:
+                row = db.execute("SELECT 1 FROM fields WHERE id=? AND project_id=?", (field_id, project_id)).fetchone()
+            if not row:
+                raise ValueError("Field must belong to this project.")
         loc = surface_location or SurfaceLocation()
         well = Well(
             id=well_id,
@@ -92,6 +97,8 @@ class WellService:
         planned_td_m: float = 0.0,
     ) -> dict[str, Any]:
         well = self.get_well(well_id)
+        if sidetrack_parent_id is not None and self.get_wellbore(sidetrack_parent_id)["well_id"] != well_id:
+            raise ValueError("Sidetrack parent must belong to this well.")
         wellbore_id = str(uuid4())
         wellbore = Wellbore(
             id=wellbore_id,

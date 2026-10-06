@@ -1,0 +1,178 @@
+{
+  "version": "0.9.0-alpha.1",
+  "baseline_commit": "3268a82d36699c00fbd126fb4d8d791f8d6dd7f5",
+  "baseline_tests": {
+    "passed": 668,
+    "failed": 0,
+    "elapsed_seconds": 231.04,
+    "junit": "build/v09-audit-baseline.xml"
+  },
+  "regression_tests": {
+    "passed": 683,
+    "failed": 0,
+    "skipped": 0,
+    "elapsed_seconds": 266.2,
+    "junit": "build/v09-release-regression.xml",
+    "warning": "Starlette TestClient httpx deprecation"
+  },
+  "frontend_build": {
+    "typecheck": "passed",
+    "vite": "passed",
+    "release": "dist/release-5bc07397c70d4bbcba3f5f9f74b94177"
+  },
+  "streamlit_component": {
+    "version": "0.9.0-alpha.1",
+    "frontend_source_sha256": "7015f7c3053c141fc69e28464426006bcf448d21b307d4fbdefb620cf0d9c8bc",
+    "source_release": "dist/release-5bc07397c70d4bbcba3f5f9f74b94177",
+    "assets": [
+      {
+        "path": "assets/index-D1k-d0nj.css",
+        "sha256": "65494c6cfa0faa55f303f8044b56e90e5bf19f261870ae995c2651dc143eb158"
+      },
+      {
+        "path": "assets/index-D6XwBnm_.js",
+        "sha256": "1e574a11c7081ece54522136f8ba0fa543717b0cb22b676df91ee79204cd90b2"
+      }
+    ]
+  },
+  "local_browser": {
+    "url": "http://127.0.0.1:8765",
+    "data_directory": "build/v09-browser-data",
+    "survey_sha256": "4cadd3a791d62a3901e51472913094a212b22dde18c273a588321434998c5dcb",
+    "selected_md_m": 900,
+    "north_m": 34.187,
+    "east_m": 23.938,
+    "tvd_m": 897.082,
+    "geometry_id_prefix": "2ae6efa1",
+    "geometry_sha256_prefix": "646d3118bf919bd5",
+    "missing_geomagnetic_metadata": "withheld, observed in UI",
+    "report_download": {
+      "path": "C:\\Users\\HP\\Downloads\\geodrill-report-0498c979-6faf-47ce-a55c-260802d48d03.json",
+      "size_bytes": 140917,
+      "download_sha256": "c52a83928b94cede505a58bfeed5ed1dda6f19e783c7aeb07d5a7e95a46e8350",
+      "snapshot_sha256": "18954082b6a1ea8fda35dfe2abd86d58a4ecd1d9865b71890a777aba6b71150c",
+      "canonical_integrity_verified": true,
+      "application_version": "0.9.0-alpha.1"
+    }
+  },
+  "github": {
+    "status": "PR ready; explicit approval required for main/publication",
+    "pull_request": "https://github.com/Nabilvisi/geodrill-pro/pull/2",
+    "verified_source_commit": "f8b1372de7cd2c64efb9c33c970a8d00f024d8f6",
+    "ci_run": "https://github.com/Nabilvisi/geodrill-pro/actions/runs/37508291450",
+    "windows": {
+      "passed": 683,
+      "failed": 0,
+      "elapsed_seconds": 87.6,
+      "job_id": 112422473384
+    },
+    "linux": {
+      "passed": 683,
+      "failed": 0,
+      "elapsed_seconds": 61.12,
+      "job_id": 112422473044
+    },
+    "previous_windows_failure": "Asset bytes changed by automatic checkout CRLF conversion; .gitattributes now preserves compiled component bytes",
+    "main_commit": "3268a82d36699c00fbd126fb4d8d791f8d6dd7f5",
+    "main_update_approval": "auto_review rejected default-branch mutation; no bypass attempted"
+  },
+  "hosted_streamlit": {
+    "url": "https://geodrill-pro.streamlit.app/",
+    "status": "still using previous main/component; refreshed source published on PR branch, deployment pending explicit main merge approval"
+  },
+  "windows": {
+    "status": "local unsigned preview rebuilt and verified; public release pending approval",
+    "signing_mode": "unsigned",
+    "packaged_workflow": {
+      "health": {
+        "status": "ok",
+        "version": "0.9.0-alpha.1",
+        "mode": "local-research",
+        "equipment_control": false,
+        "instance_id": "d2b65dba662650cd",
+        "pid": 24252
+      },
+      "frontend_asset_hashes_verified": true,
+      "import_dataset_id": "697bc308-0622-4ae8-bdd6-14b5aa9944af",
+      "report_snapshot_sha256": "0a405e2c7a475eb2c142b54dd1f06d2cc0af47ae7e650693ad3dc7ce297a4b35",
+      "original_download_sha256": "b92225c552071d72c8a283d92aa0fdccd0b437b7dbbea58841509c9c577a743d",
+      "source_import_and_fixed_report_passed": true
+    },
+    "manifest": {
+      "version": "0.9.0-alpha.1",
+      "created_at_utc": "2026-10-06T18:07:00.927427+00:00",
+      "source_commit": "f8b1372de7cd2c64efb9c33c970a8d00f024d8f6",
+      "source_has_uncommitted_changes": true,
+      "source_snapshot_sha256": "1e0a3a74bf5b2662bed6b578e156f118237dff6f6bb8a27578329a3954832eb7",
+      "source_snapshot_file_count": 210,
+      "source_snapshot_scope": "Git-listed application, package, service, tool, test, workflow and original-source files; root build/dependency files. Generated verification reports excluded.",
+      "signing_mode": "unsigned",
+      "trusted_signature_verification": {
+        "GeoDrillPro.exe": false,
+        "GeoDrillPro-Setup.exe": false
+      },
+      "independent_engineering_qualification": "pending",
+      "external_security_audit": "pending",
+      "equipment_control": false,
+      "clearance_generated": false,
+      "assets": [
+        {
+          "name": "GeoDrillPro-Setup.exe",
+          "size_bytes": 121796497,
+          "sha256": "896abe99a0618626931762dd2263ee16355431be7e3540124c36935c0839ac40"
+        },
+        {
+          "name": "GeoDrillPro-Windows-x64.zip",
+          "size_bytes": 184326288,
+          "sha256": "51a5522f49a15d3c933be91c70886fc30f591d780aa392a7252410bfc834899e"
+        }
+      ],
+      "executable_sha256": "79f9c60936721fe4aba0cbe9f2b646d96c02f2c0f2d8e9d2ed8a8e0139e5dc8a"
+    },
+    "installer": {
+      "packaged_restore_exit_code": 0,
+      "install_exit_code": 0,
+      "restored_smoke_exit_code": 0,
+      "signing_mode": "unsigned",
+      "existing_restore_destination_preserved": true,
+      "smoke_exit_code": 0,
+      "installer_sha256": "896abe99a0618626931762dd2263ee16355431be7e3540124c36935c0839ac40",
+      "extra_user_file_preserved": true,
+      "persistent_evidence_preserved": true,
+      "equipment_control": false,
+      "packaged_backup_exit_code": 0,
+      "installed_executable_sha256": "79f9c60936721fe4aba0cbe9f2b646d96c02f2c0f2d8e9d2ed8a8e0139e5dc8a",
+      "restored_signing_identity_preserved": true,
+      "uninstall_exit_code": 0,
+      "wrong_hash_restore_rejected": true,
+      "passed": true,
+      "source_snapshot_sha256": "1e0a3a74bf5b2662bed6b578e156f118237dff6f6bb8a27578329a3954832eb7",
+      "clearance_generated": false,
+      "backup_archive_sha256": "4e82867001b5d13f52e8cf66098e64cf5cef19acd4094206a14da429dc13828b"
+    },
+    "browser_checks": {
+      "hierarchy_crud": "field/well/wellbore/target created and visibly listed in isolated packaged data",
+      "new_survey_staleness": "saved geometry remains historical; current survey displacement displayed; observed UI warning",
+      "mobile_viewport": {
+        "width": 390,
+        "height": 844,
+        "document_width": 375,
+        "page_selector": "opened 3D well engineering",
+        "override_reset": true
+      }
+    }
+  },
+  "equipment_control": false,
+  "equipment_authority": "none",
+  "independent_engineering_qualification": "pending",
+  "external_security_audit": "pending",
+  "updated_at_utc": "2026-10-06T18:09:11.049104+00:00",
+  "additional_regression": {
+    "passed": 32,
+    "failed": 0,
+    "elapsed_seconds": 64.76,
+    "junit": "build/v09-attributes-regression.xml",
+    "scope": "v0.9 verification and Streamlit cloud after byte-preserving repository attributes"
+  },
+  "publication_next_step": "Approve merge of PR #2 into main; verify rendered Streamlit, then trigger v09-verified-release unsigned prerelease and verify its downloads. Signed version-tag policy remains unchanged."
+}

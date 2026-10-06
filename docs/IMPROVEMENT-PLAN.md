@@ -1,5 +1,7 @@
 # Current delivery and remaining scope — 6 October 2026
 
+7 October v0.9 update: [the architecture acceptance matrix](V09-ARCHITECTURE-AUDIT.md) supersedes blanket v0.9 completion claims. Current source version is **0.9.0-alpha.1**; current local/hosted/package results are in [verification evidence](evidence/v09-verification.json). This historical GD-A matrix remains applicable to its model-specific limitations. The read-only ETP/WITSML lab foundation now has fixture coverage, but authorized provider/field interoperability remains unverified. The new directional page is source-backed; full integrated wellbore anti-collision and the specified Three.js scene remain open.
+
 Blanket declarations that GD-A01–A18 and all commercial gates were complete are
 withdrawn. This code audit distinguishes connected workflows, API/kernel capabilities,
 missing software and external qualification. Numerical tests do not close the original

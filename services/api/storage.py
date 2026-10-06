@@ -15,6 +15,7 @@ from cryptography.exceptions import InvalidSignature
 import duckdb
 import polars as pl
 from .migrations import migrate
+from packages.version import APP_VERSION
 
 # Acting user for audit entries written during the current request (set by team-mode middleware).
 current_actor: ContextVar[str] = ContextVar("current_actor", default="local-workstation-user")
@@ -234,7 +235,7 @@ class Store:
         report_id = str(uuid4())
         with self.connect() as db:
             calculations = [json.loads(r[0]) for r in db.execute("SELECT payload FROM calculations WHERE project_id=? ORDER BY created_at", (project_id,))]
-            payload = {"id": report_id, "schema_version": "1.1", "application_version": "0.8.0", "created_at": now(),
+            payload = {"id": report_id, "schema_version": "1.1", "application_version": APP_VERSION, "created_at": now(),
                        "intended_use": "Engineering research and historical review; not field-qualified or an operational clearance.",
                        "project": project, "datasets": datasets, "events": self.events(project_id), "calculations": self.calculations(project_id), "engineering_revisions": self.revisions(project_id),
                        "audit_head": history["head"], "audit_entries": [e for e in history["entries"] if e["project_id"] == project_id],

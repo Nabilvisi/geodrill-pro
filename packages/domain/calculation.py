@@ -5,6 +5,7 @@ from pydantic import BaseModel, ConfigDict, Field
 from datetime import datetime, timezone
 import hashlib
 import json
+from packages.version import APP_VERSION
 
 
 class CalculationStatus(str, Enum):
@@ -71,7 +72,7 @@ class CalculationEnvelope(BaseModel):
     evidence_ids: list[str] = Field(default_factory=list, description="Referenced evidence or source hashes")
 
     created_at: str = Field(default_factory=utc_now_iso, description="ISO-8601 UTC timestamp")
-    software_revision: str = Field(default="0.9.0", description="GeoDrill Pro software version")
+    software_revision: str = Field(default=APP_VERSION, description="GeoDrill Pro software version")
 
     def mark_stale(self, reason: str) -> "CalculationEnvelope":
         """Return a copy marked as stale due to upstream dependency invalidation."""

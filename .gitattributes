@@ -1,0 +1,2 @@
+# Preserve built component bytes on every platform for SHA-256 verification.
+apps/streamlit/component/** -text
