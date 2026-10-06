@@ -5,10 +5,12 @@ withdrawn. This code audit distinguishes connected workflows, API/kernel capabil
 missing software and external qualification. Numerical tests do not close the original
 backlog's integration or independent review criteria.
 
-PR 1 merge, hosted repair and unsigned research-4 publication are complete at their
-recorded revisions. Research-4 includes connected offset benchmarking and evidence search;
-615 tests passed locally, on both CI platforms and in the Windows release job. See
-[current publication evidence](evidence/connected-increments-verification.json).
+PR 1 merge, hosted repair and unsigned research-5 publication are complete at their
+recorded revisions. Research-5 includes the repaired formation-geomechanics workflow,
+following connected offset benchmarking and evidence search in research-4.
+635 tests passed locally, on both CI platforms and in the Windows release job. The
+actual downloaded portable executable passed the new preserved-study workflow. See
+[current publication evidence](evidence/geomechanics-verification.json).
 Recovery changes and packaged acceptance are recorded in
 [the recovery implementation](GD-A08-IMPLEMENTATION.md).
 

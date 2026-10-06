@@ -1,6 +1,6 @@
 # GeoDrill Pro Engineering Workstation
 
-Published [research-4](https://github.com/Nabilvisi/geodrill-pro/releases/tag/research-4) verification: **615 tests passed locally, on Windows and Linux CI, and in the Windows release job**. Offset benchmarking and project evidence search are connected and verified on the hosted app. Actual installed-EXE backup/restore and installer install/execute/uninstall passed; all four complete public downloads matched their hashes. [Connected release evidence](docs/evidence/connected-increments-verification.json) identifies exact source, hosted assets and downloaded package hashes. Remaining software and qualification gaps are tracked in [the delivery matrix](docs/IMPROVEMENT-PLAN.md).
+Published [research-5](https://github.com/Nabilvisi/geodrill-pro/releases/tag/research-5) verification: **635 tests passed locally, on Windows and Linux CI, and in the Windows release job**. Formation geomechanics now has a survey-bound input/import/calculation workflow, editable core/calibration evidence, stress plots and sampled elastic pressure intervals. Complete and withheld studies were saved and reopened on the hosted app; the actual downloaded portable executable also passed import, calculation, citation and fixed-report checks. Installation, backup/restore and uninstall passed; all four public downloads matched their hashes. [Geomechanics release evidence](docs/evidence/geomechanics-verification.json) identifies exact source, hosted assets and package hashes. Remaining software and qualification gaps are tracked in [the delivery matrix](docs/IMPROVEMENT-PLAN.md).
 
 
 **Version 0.8.0 — Engineering research workstation (GD-A01–A18).** The audited engineering workstation links source data → studies → scenario comparisons → programme governance → verified export and recovery.
@@ -8,13 +8,13 @@ Published [research-4](https://github.com/Nabilvisi/geodrill-pro/releases/tag/re
 See **[Current Improvement Plan](docs/IMPROVEMENT-PLAN.md)** for reconciled roadmap status, delivered increments, and pending gates. [VERIFICATION.md](docs/VERIFICATION.md) records dated, reproducible test evidence across the implemented modules, including the connected project journey and ISCWSA diagnostic benchmarks. [PROGRESS-AND-ROADMAP.md](docs/PROGRESS-AND-ROADMAP.md) provides the complete implementation sequence.
 
 > [!NOTE]
-> See docs/evidence/connected-increments-verification.json for current regression, hosted and artifact evidence; repair-verification.json records earlier repairs. The 6 October claim that all commercial gates were closed has been withdrawn. Unsigned Windows research packaging, trusted publisher signing, public deployment, independent petroleum engineering qualification and external security review are tracked separately. Release evidence binds each verified surface to its actual revision or asset hash. Equipment control and autonomous rig actuation remain strictly excluded (`equipment_control: false`).
+> See docs/evidence/geomechanics-verification.json for current regression, hosted and artifact evidence; connected-increments-verification.json and repair-verification.json record earlier increments. The 6 October claim that all commercial gates were closed has been withdrawn. Unsigned Windows research packaging, trusted publisher signing, public deployment, independent petroleum engineering qualification and external security review are tracked separately. Release evidence binds each verified surface to its actual revision or asset hash. Equipment control and autonomous rig actuation remain strictly excluded (`equipment_control: false`).
 
 [MODULES-1-17.md](docs/MODULES-1-17.md) maps delivered capabilities and boundaries. [MODEL-SPECS-0.8.md](docs/MODEL-SPECS-0.8.md) declares equations and applicability.
 
 ## Hosted Streamlit app
 
-Open **[GeoDrill Pro on Streamlit](https://geodrill-pro.streamlit.app/)**. The hosted app retains all 17 workstation pages and uses the existing deterministic Python API through an isolated browser-session workspace. Start with North Sea · Research for telemetry/survey/log replay. Switch to Cloud verification · Synthetic for saved M12–M17 studies. The in-app Start here guide explains imports, geometry revisions and fixed report downloads. On phones, the Open page selector provides named navigation to all 26 workspace pages.
+Open **[GeoDrill Pro on Streamlit](https://geodrill-pro.streamlit.app/)**. The hosted app provides 27 named workspace pages and uses the existing deterministic Python API through an isolated browser-session workspace. Start with North Sea · Research for telemetry/survey/log replay. Switch to Cloud verification · Synthetic for eight saved research workflows, including formation geomechanics and offset benchmarks. The in-app Start here guide explains imports, geometry revisions and fixed report downloads. On phones, the Open page selector provides named navigation to all 27 workspace pages.
 
 The hosted workspace is temporary. Download complete evidence reports before leaving; reports are not a restorable project backup. Use the local workstation when persistent project storage is required. All included examples are synthetic and equipment control remains unavailable.
 
@@ -33,6 +33,10 @@ The installed environment and built assets are already in this project directory
 Offset benchmarks preserve typed SI input JSON, source hashes, immutable geometry context, filtering/exclusion reasons and empirical duration/cost quantiles. Mixed currencies are excluded; unknown evidence or fewer than three eligible records withholds projections. Rig-time cost at the entered daily rate is a separate scenario. Supplied adjudication notes do not establish independent DDR verification.
 
 Evidence search lists project-scoped citations with the correct hash basis, all programme version references and historical casing differences. Inspect cited record opens the stored dataset, geometry, calculation or programme. A missing match or varying historical geometry withholds a single answer. This is metadata search; it does not infer engineering answers from full document text.
+
+## Formation geomechanics
+
+The Formation geomechanics page derives MD/TVD/inclination/azimuth from the accepted survey, preserves original JSON and immutable geometry, and exposes supplied core and closure-pressure records. It evaluates isotropic elastic wall-principal stresses with Mohr–Coulomb or Mogi–Coulomb criteria and a restricted linear hydrostatic density scenario. Missing or conflicting evidence withholds results; refinement failures suppress pressure intervals. The intervals are sampled research scenarios, without mud-window approval or equipment authority. [Implementation and remaining original GD-A17 scope](docs/GD-A17-IMPLEMENTATION.md).
 
 ## What works
 

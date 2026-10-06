@@ -88,3 +88,18 @@ Research-4 at e03d35c510d369759961c374def0928147442364 is published. All 615 tes
 Actual installed-EXE backup/restore, wrong-hash rejection, existing-destination preservation, signer preservation, restored diagnostics, install and uninstall passed again. All four full public downloads match their hashes, and the portable EXE and canonical source-snapshot digest match the manifest. The installer is unsigned (NotSigned); independent engineering qualification and external security assessment remain pending. See [current evidence](evidence/connected-increments-verification.json), [release](https://github.com/Nabilvisi/geodrill-pro/releases/tag/research-4), [offset implementation](GD-A14-IMPLEMENTATION.md) and [evidence search implementation](GD-A18-IMPLEMENTATION.md).
 
 This closes this increment's source, hosted and package checks. Read-only ETP/WITSML streaming, automatic update/binary rollback, dedicated team/directional/geomechanics integration, broader qualified model closures and representative operator acceptance remain open in [the delivery matrix](IMPROVEMENT-PLAN.md).
+
+
+
+## 6 October 2026 — published geomechanics increment (research-5)
+
+Source 77e3e91885b9994f6ed0eedee85bb7567e6738f6 repairs the survey-bound MC/Mogi geomechanics model and connects original-input preservation, editable core/closure records, saved studies, citations and fixed reports. Local regression, Windows/Ubuntu CI 37461989646 and release workflow 37462177431 each passed 635 tests. The live app rendered 27 workspace pages and eight seeded research workflows; complete and missing-core withheld cases were saved and reopened, and the complete citation inspected.
+
+All four complete research-5 downloads matched their published SHA-256 hashes. ZIP CRC, bundled executable and source-snapshot digest were verified. The actual downloaded portable executable passed HTTP import, original-hash/geometry binding, complete and withheld calculations, saved-record citation and fixed-report checks against an isolated data directory. Installer install/execute/backup/restore/uninstall acceptance passed, including wrong-hash and existing-destination refusal and user evidence preservation. Signing remains explicitly unsigned.
+
+Current release: https://github.com/Nabilvisi/geodrill-pro/releases/tag/research-5
+Live app: https://geodrill-pro.streamlit.app/
+Evidence: docs/evidence/geomechanics-verification.json
+Scope: docs/GD-A17-IMPLEMENTATION.md
+
+Actual characterized-fluid and coupled thermal/poroelastic or multiphase experiments, read-only ETP/WITSML, updater/rollback, dedicated team/directional UI and broader original model acceptance remain open. Publisher signing requires the owner's certificate; original engineering observations and independent engineering/security assessments remain external prerequisites. Equipment control and drilling clearance remain unavailable. Earlier release entries retain their dated historical scope.

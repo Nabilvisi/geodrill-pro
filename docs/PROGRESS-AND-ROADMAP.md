@@ -4,10 +4,10 @@ Updated 6 October 2026. This file supersedes the former 485/537-test progress
 snapshots and blanket "advancement complete" declaration. Historical command
 records remain in [VERIFICATION.md](VERIFICATION.md).
 
-PR 1 is merged. The hosted app and unsigned research-4 Windows packages
-are published and verified at source e03d35c510d369759961c374def0928147442364,
-with 615 passing tests locally, on Windows/Ubuntu CI and in the Windows release job. See
-[current publication evidence](evidence/connected-increments-verification.json) and
+PR 1 is merged. The hosted app and unsigned research-5 Windows packages
+are published and verified at source 77e3e91885b9994f6ed0eedee85bb7567e6738f6,
+with 635 passing tests locally, on Windows/Ubuntu CI and in the Windows release job. See
+[current publication evidence](evidence/geomechanics-verification.json) and
 [repair status](REPAIR-STATUS.md).
 
 The completion audit found additional software gaps. Read
@@ -15,7 +15,7 @@ The completion audit found additional software gaps. Read
 remaining acceptance criteria. Current recovery work adds whole-workstation
 snapshot/restore, atomic failed migrations, preserved project-study reopening and
 archive/identity validation. Research-4 also includes connected offset benchmarking
-and evidence search. Historical release evidence remains separately recorded.
+and evidence search; research-5 adds connected survey-bound formation geomechanics. Historical release evidence remains separately recorded.
 
 Remaining implementation sequence:
 
