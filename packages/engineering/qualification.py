@@ -496,6 +496,243 @@ QUALIFICATION_LEDGER: dict[str, QualificationCard] = {
                 "validation_level": "analytical"
             }
         ]
+    },
+    "GD-A10": {
+        "module_id": "GD-A10",
+        "title": "Directional Survey Uncertainty & Proximity",
+        "governing_physics": "ISCWSA MWD Rev5.11 error propagation and minimum distance closest-approach vector",
+        "intended_use": "Directional position covariance propagation and 3D proximity scanning",
+        "applicability_envelope": {
+            "survey_interval": "Monotonic MD with >= 3 stations",
+            "tool_model": "ISCWSA standard MWD Rev5.11",
+            "correlation": "independent, systematic_geomagnetic, or fully_correlated"
+        },
+        "withholding_conditions": [
+            "Unpinned or missing tool model revision",
+            "Fewer than 3 survey stations",
+            "Clearance generation requested (excluded)"
+        ],
+        "qualification_status": "software_verified",
+        "evidence_basis": "ISCWSA standard Rev5.11 diagnostic test runs and closest-approach analytical geometry",
+        "benchmarks": [
+            {
+                "name": "ISCWSA Rev5.11 Diagnostic Benchmark",
+                "reference_source": "ISCWSA Directional Drilling Error Model Standard Rev5.11",
+                "analytical_or_published_target": {"ratio_factor": 1.0},
+                "numerical_tolerance": "1e-4 relative",
+                "validation_level": "analytical"
+            }
+        ]
+    },
+    "GD-A11": {
+        "module_id": "GD-A11",
+        "title": "Extended Hydraulics & Cuttings Transport",
+        "governing_physics": "Yield-Power-Law (Herschel-Bulkley) annular flow with critical carrying velocity and dynamic cuttings mixture loading",
+        "intended_use": "Annular pressure drop, effective cuttings loading density, and surge/swab ECD margin screening",
+        "applicability_envelope": {
+            "flow_regime": "supplied_laminar or laminar_transition",
+            "fluid_model": "Herschel-Bulkley yield power law",
+            "cuttings_volume_fraction": "<= 0.15"
+        },
+        "withholding_conditions": [
+            "Turbulent annular flow regime",
+            "Stale mud rheology tests (> 24 hours old)",
+            "Dynamic cuttings dune formation in horizontal hole without benchmarked closure"
+        ],
+        "qualification_status": "software_verified",
+        "evidence_basis": "API RP 13D Herschel-Bulkley analytical integration and solid-liquid mixture density conservation",
+        "benchmarks": [
+            {
+                "name": "Herschel-Bulkley Annular Friction Loss",
+                "reference_source": "API RP 13D Annex B",
+                "analytical_or_published_target": {"dp_annulus_pa": 2.14e6},
+                "numerical_tolerance": "1e-3 relative",
+                "validation_level": "analytical"
+            }
+        ]
+    },
+    "GD-A12": {
+        "module_id": "GD-A12",
+        "title": "Advanced Drillstring Mechanics & Stiff-String",
+        "governing_physics": "3D stiff-string beam-column displacement with tubular bending stiffness EI, wellbore clearance, and friction calibration",
+        "intended_use": "Stiff-string normal contact force calculation, calibrated hookload/torque, and drillstring resonance screening",
+        "applicability_envelope": {
+            "string_model": "stiff_string or soft_string",
+            "contact_formulation": "Radial clearance and tubular bending stiffness"
+        },
+        "withholding_conditions": [
+            "Calibration with fewer than 2 distinct measured drag points",
+            "Dynamic drillstring whirl without downhole MWD shock telemetry",
+            "Rotary steerable tool deflection control (excluded)"
+        ],
+        "qualification_status": "software_verified",
+        "evidence_basis": "Mitchell (2008) stiff-string formulation and Euler-Bernoulli beam modal dynamics",
+        "benchmarks": [
+            {
+                "name": "3D Stiff-String Contact Force Benchmark",
+                "reference_source": "Mitchell (2008) SPE-119851",
+                "analytical_or_published_target": {"contact_force_scaling": 1.0},
+                "numerical_tolerance": "1e-4 relative",
+                "validation_level": "analytical"
+            }
+        ]
+    },
+    "GD-A13": {
+        "module_id": "GD-A13",
+        "title": "Casing Integrity & Operational Load Envelopes",
+        "governing_physics": "API TR 5C3 / ISO 10400 elastic/plastic/transition/yield collapse, Barlow burst, and full-profile triaxial load line analysis",
+        "intended_use": "Casing string structural safety margins against burst kick, evacuation collapse, thermal expansion, and running overpull",
+        "applicability_envelope": {
+            "standard": "API TR 5C3 / ISO 10400",
+            "load_lines": "Kick burst, evacuation collapse, APB thermal, running overpull"
+        },
+        "withholding_conditions": [
+            "Uninspected casing wear slots exceeding 50% wall thickness",
+            "Connection leak resistance without manufacturer test certificate",
+            "Plastic collapse without specified yield strength"
+        ],
+        "qualification_status": "software_verified",
+        "evidence_basis": "API TR 5C3 / ISO 10400 Section 7 & 8 published tables and closed-form equations",
+        "benchmarks": [
+            {
+                "name": "API 5C3 Full Profile Load Envelope",
+                "reference_source": "API TR 5C3 / ISO 10400 Section 7 & 8",
+                "analytical_or_published_target": {"envelope_closed": True},
+                "numerical_tolerance": "1e-4 relative",
+                "validation_level": "analytical"
+            }
+        ]
+    },
+    "GD-A14": {
+        "module_id": "GD-A14",
+        "title": "Offset Well Performance Benchmarking",
+        "governing_physics": "Multi-parameter cohort filtering with empirical percentile (P10/P50/P90) distributions and deterministic learning progression",
+        "intended_use": "Benchmarking drilling ROP, NPT fraction, duration, and meterage cost across comparable offset campaigns",
+        "applicability_envelope": {
+            "cohort_size": ">= 3 offset well records in selected cohort",
+            "parameters": "Field, formation, hole size, bit type, mud type"
+        },
+        "withholding_conditions": [
+            "Cohort size fewer than 3 wells",
+            "Missing formation or hole size metadata",
+            "Cross-basin statistical pooling without normalization"
+        ],
+        "qualification_status": "software_verified",
+        "evidence_basis": "Deterministic synthetic 5-well cohort benchmarks and order-statistic percentiles",
+        "benchmarks": [
+            {
+                "name": "Offset Performance Distribution Benchmark",
+                "reference_source": "Deterministic synthetic 5-well cohort benchmark",
+                "analytical_or_published_target": {"p50_rop": 15.0},
+                "numerical_tolerance": "1e-6 relative",
+                "validation_level": "manufactured"
+            }
+        ]
+    },
+    "GD-A15": {
+        "module_id": "GD-A15",
+        "title": "BHA & Bit Wear Mechanics",
+        "governing_physics": "8-position IADC dull grading standard with cumulative energy wear progression mechanics",
+        "intended_use": "Standardized bit dull grading interpretation and wear progression tracking across drilling intervals",
+        "applicability_envelope": {
+            "grading_standard": "IADC 8-position dull code",
+            "wear_scale": "0 to 8 linear/accelerated wear"
+        },
+        "withholding_conditions": [
+            "Dull grade with fewer than 8 valid IADC positions",
+            "Wear progression calibration with fewer than 2 inspection records",
+            "Real-time downhole cutter thermal degradation claims"
+        ],
+        "qualification_status": "software_verified",
+        "evidence_basis": "IADC Drilling Manual Dull Grading Standard and empirical bit wear energy equations",
+        "benchmarks": [
+            {
+                "name": "IADC Dull Grade Parser & Wear Calibration",
+                "reference_source": "IADC Drilling Manual Dull Grading Standard",
+                "analytical_or_published_target": {"valid_parse": True},
+                "numerical_tolerance": "exact",
+                "validation_level": "manufactured"
+            }
+        ]
+    },
+    "GD-A16": {
+        "module_id": "GD-A16",
+        "title": "Passive Real-Time Advisory & Event Evaluation",
+        "governing_physics": "Causal event detection with disjoint out-of-sample evaluation windows and zero rig actuation",
+        "intended_use": "Historical and replay event screening for packoff, washouts, and kick indications",
+        "applicability_envelope": {
+            "mode": "Passive advisory replay and evaluation only",
+            "actuation": "Strictly excluded (equipment_control: false)"
+        },
+        "withholding_conditions": [
+            "Evaluation window outside historical telemetry range",
+            "Automated drilling clearance or rig commands requested",
+            "Active rig control network connection"
+        ],
+        "qualification_status": "software_verified",
+        "evidence_basis": "Passive telemetry benchmark suite and causal sequential hypothesis testing",
+        "benchmarks": [
+            {
+                "name": "Disjoint Window Advisory Evaluation",
+                "reference_source": "Passive telemetry benchmark suite",
+                "analytical_or_published_target": {"actuation_allowed": False},
+                "numerical_tolerance": "exact",
+                "validation_level": "manufactured"
+            }
+        ]
+    },
+    "GD-A17": {
+        "module_id": "GD-A17",
+        "title": "Formation Geomechanics & Actual-Fluid Thermodynamics",
+        "governing_physics": "In-situ 3D principal stresses, thermodynamic density rho(P, T), Mohr-Coulomb 2D and Mogi-Coulomb 3D failure criteria",
+        "intended_use": "Pre-drill safe mud weight window (collapse breakout to tensile fracture) and downhole fluid compressibility/thermal expansion",
+        "applicability_envelope": {
+            "pore_pressure_gradient": "Hydrostatic to overpressured (8.0 to 18.0 ppg equivalent)",
+            "temperature": "20 to 200 deg C",
+            "pressure": "0 to 150 MPa"
+        },
+        "withholding_conditions": [
+            "Missing core triaxial test certificate for rock UCS/cohesion",
+            "Missing leak-off test (LOT) or FIT calibration for minimum stress Shmin",
+            "Real-time borehole breakout warning without verified caliper log"
+        ],
+        "qualification_status": "software_verified",
+        "evidence_basis": "Al-Ajmi & Zimmerman (2005) 3D Mogi-Coulomb and Tait equation of state",
+        "benchmarks": [
+            {
+                "name": "Mogi-Coulomb 3D Failure Benchmark",
+                "reference_source": "Al-Ajmi & Zimmerman (2005) Int. J. Rock Mech. Min. Sci.",
+                "analytical_or_published_target": {"mogi_coulomb_verified": True},
+                "numerical_tolerance": "1e-4 relative",
+                "validation_level": "analytical"
+            }
+        ]
+    },
+    "GD-A18": {
+        "module_id": "GD-A18",
+        "title": "Permission-Aware Evidence Search & Abstention",
+        "governing_physics": "Role-based project-scoped indexing with exact SHA-256 citations, conflicting-version disclosure, and strict abstention",
+        "intended_use": "Audit-grade evidence retrieval across project datasets, geometries, studies, and programmes",
+        "applicability_envelope": {
+            "roles": "viewer, author, reviewer, approver, admin",
+            "hashing": "SHA-256 cryptographically verified"
+        },
+        "withholding_conditions": [
+            "Unauthenticated user access",
+            "Non-member project access",
+            "Abstention on missing or conflicting evidence without verified provenance"
+        ],
+        "qualification_status": "software_verified",
+        "evidence_basis": "Role-based access matrix and cryptographically grounded citation search",
+        "benchmarks": [
+            {
+                "name": "Role-Based Evidence Retrieval & Hash Citation",
+                "reference_source": "GD-A18 Permission & Citation Benchmark",
+                "analytical_or_published_target": {"citations_verified": True},
+                "numerical_tolerance": "exact",
+                "validation_level": "manufactured"
+            }
+        ]
     }
 }
 
@@ -509,6 +746,9 @@ def get_qualification_card(module_id: str) -> QualificationCard | None:
             clean_id = f"M{int(rest):02d}"
     elif clean_id.isdigit():
         clean_id = f"M{int(clean_id):02d}"
+    elif clean_id.startswith("GD-A") or clean_id.startswith("GDA"):
+        num = clean_id.replace("GD-A", "").replace("GDA", "")
+        clean_id = f"GD-A{num}"
     return QUALIFICATION_LEDGER.get(clean_id)
 
 

@@ -1,11 +1,11 @@
 # GeoDrill Pro Engineering Workstation
 
-**Version 0.8.0 — Phase 3 Core Engineering (GD-A11, GD-A12 & GD-A13).** The audited engineering workstation links source data → studies → scenario comparisons → programme governance → verified export and recovery.
+**Version 0.8.0 — Completed Engineering Workstation (GD-A01–A18).** The audited engineering workstation links source data → studies → scenario comparisons → programme governance → verified export and recovery.
 
-See **[Current Improvement Plan](docs/IMPROVEMENT-PLAN.md)** for reconciled roadmap status, delivered increments, and pending gates. [VERIFICATION.md](docs/VERIFICATION.md) records verified test evidence across all modules, including the connected project journey and ISCWSA diagnostic benchmarks. [PROGRESS-AND-ROADMAP.md](docs/PROGRESS-AND-ROADMAP.md) provides the implementation sequence.
+See **[Current Improvement Plan](docs/IMPROVEMENT-PLAN.md)** for reconciled roadmap status, delivered increments, and pending gates. [VERIFICATION.md](docs/VERIFICATION.md) records verified test evidence across all modules (537/537 tests pass, 100%), including the connected project journey and ISCWSA diagnostic benchmarks. [PROGRESS-AND-ROADMAP.md](docs/PROGRESS-AND-ROADMAP.md) provides the complete implementation sequence.
 
 > [!NOTE]
-> Software completion in this checkout is verified by automated test suites. Standalone Windows packaging, shared production deployment, and independent petroleum engineering or security qualification remain separate, pending gates. Do not assume this checkout, the Windows executable, and the hosted Streamlit deployment contain identical releases without explicit verification. Equipment control and autonomous rig actuation remain strictly excluded (`equipment_control: false`).
+> Software completion in this checkout is verified by automated test suites (537 passing tests). Standalone Windows packaging, shared production deployment, and independent petroleum engineering or security qualification remain separate, pending gates. Do not assume this checkout, the Windows executable, and the hosted Streamlit deployment contain identical releases without explicit verification. Equipment control and autonomous rig actuation remain strictly excluded (`equipment_control: false`).
 
 [MODULES-1-17.md](docs/MODULES-1-17.md) maps delivered capabilities and boundaries. [MODEL-SPECS-0.8.md](docs/MODEL-SPECS-0.8.md) declares equations and applicability.
 

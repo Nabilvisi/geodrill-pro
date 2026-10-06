@@ -311,17 +311,17 @@ def test_cuttings_transport_and_surge_margins():
     r = hydraulics(HydraulicsInput.model_validate(v), geometry(), path(inclination=math.pi/4))
     
     assert r["status"] == "scenario_only"
-    assert "Annular velocity is below critical carrying velocity in at least one segment." in r["reasons"]
+    assert "Cuttings loading applied as no-slip mixture density only; critical carrying velocity and bed height are withheld (no benchmarked closure)." in r["reasons"]
     
     # check rho_eff logic
     # clean mud rho is 1000, cuttings is 2600. effective rho = 1000 + 0.05 * 1600 = 1080
     assert r["nominal"]["mass_in_kg_s"] == pytest.approx(1080.0 * 0.0001)
     
-    # Check segment metrics
+    # Check segment metrics: critical carrying velocity and bed height are withheld
     s = r["nominal"]["segments"][0]
-    assert s["critical_carrying_velocity_m_s"] > 0.5
-    assert s["dynamic_bed_height_m"] > 0
-    assert s["effective_cuttings_loading"] > 0.05
+    assert s["critical_carrying_velocity_m_s"] is None
+    assert s["dynamic_bed_height_m"] is None
+    assert s["effective_cuttings_loading"] == 0.05
     
     # Check ECD with surge/swab
     assert r["profile"][-1]["equivalent_density_including_surge_kg_m3"] > r["profile"][-1]["equivalent_density_including_backpressure_kg_m3"]

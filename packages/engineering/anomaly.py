@@ -34,11 +34,17 @@ class AnomalyInput(StudyInput):
     samples: list[BalanceSample] = Field(min_length=3,max_length=5000)
     adjudicated_events: list[AdjudicatedEvent] = Field(default_factory=list,max_length=100)
     adjudication_note: str | None = Field(default=None,min_length=3,max_length=500)
+    evaluation_window_start_s: float | None = Field(default=None,ge=0,le=1e7)
+    evaluation_window_end_s: float | None = Field(default=None,ge=0,le=1e7)
     @model_validator(mode="after")
     def timing(self):
         if any(b.time_s<=a.time_s for a,b in zip(self.samples,self.samples[1:])):raise ValueError("Balance replay times must strictly increase.")
         if self.adjudicated_events and not self.adjudication_note:raise ValueError("Labelled events need independent adjudication provenance.")
         if any(e.onset_s<self.samples[0].time_s or e.end_s>self.samples[-1].time_s for e in self.adjudicated_events):raise ValueError("Event labels must lie within the preserved replay.")
+        if (self.evaluation_window_start_s is None) != (self.evaluation_window_end_s is None):
+            raise ValueError("Both evaluation_window_start_s and evaluation_window_end_s must be provided together.")
+        if self.evaluation_window_start_s is not None and self.evaluation_window_end_s <= self.evaluation_window_start_s:
+            raise ValueError("evaluation_window_end_s must exceed evaluation_window_start_s.")
         return self
 
 def anomaly(v,geometry,path):
@@ -72,6 +78,37 @@ def anomaly(v,geometry,path):
             i,e=min(candidates,key=lambda ie:ie[1]["alarm_s"]);used.add(i)
             matches.append({"label":label.name,"candidate_alarm_s":e["alarm_s"],"detection_delay_s":e["alarm_s"]-label.onset_s,"lead_vs_baseline_s":None if label.baseline_alarm_s is None else label.baseline_alarm_s-e["alarm_s"]})
         else:misses.append(label.name)
-    out.update(history=rows,candidate_events=events,valid_monitoring_duration_s=valid_duration,unknown_intervals=sum(r["quality_status"]=="unknown_balance" for r in rows),event_evaluation={"status":"supplied_replay_only" if v.adjudicated_events else "unlabelled","matched":matches,"missed_labels":misses,"event_sensitivity":len(matches)/len(v.adjudicated_events) if v.adjudicated_events else None,"unmatched_candidate_events":len(events)-len(used) if v.adjudicated_events else None,"false_candidates_per_monitoring_hour":(len(events)-len(used))/(valid_duration/3600) if v.adjudicated_events and valid_duration else None},probabilities_calibrated=False,actuation_available=False)
+    disjoint_info = None
+    if v.evaluation_window_start_s is not None and v.evaluation_window_end_s is not None:
+        eval_events = [e for e in v.adjudicated_events if v.evaluation_window_start_s <= e.onset_s <= v.evaluation_window_end_s]
+        eval_alarms = [e for e in events if v.evaluation_window_start_s <= e["alarm_s"] <= v.evaluation_window_end_s]
+        eval_matches = [m for m in matches if any(e.name == m["label"] for e in eval_events)]
+        disjoint_info = {
+            "window_start_s": v.evaluation_window_start_s,
+            "window_end_s": v.evaluation_window_end_s,
+            "evaluation_events_count": len(eval_events),
+            "candidate_alarms_in_window": len(eval_alarms),
+            "disjoint_matches": len(eval_matches),
+            "disjoint_sensitivity": len(eval_matches) / len(eval_events) if eval_events else None,
+        }
+
+    out.update(
+        history=rows,
+        candidate_events=events,
+        valid_monitoring_duration_s=valid_duration,
+        unknown_intervals=sum(r["quality_status"]=="unknown_balance" for r in rows),
+        event_evaluation={
+            "status":"supplied_replay_only" if v.adjudicated_events else "unlabelled",
+            "matched":matches,
+            "missed_labels":misses,
+            "event_sensitivity":len(matches)/len(v.adjudicated_events) if v.adjudicated_events else None,
+            "unmatched_candidate_events":len(events)-len(used) if v.adjudicated_events else None,
+            "false_candidates_per_monitoring_hour":(len(events)-len(used))/(valid_duration/3600) if v.adjudicated_events and valid_duration else None,
+            "disjoint_evaluation":disjoint_info,
+        },
+        probabilities_calibrated=False,
+        actuation_available=False,
+        equipment_control=False,
+    )
     if any(r["quality_status"]=="unknown_balance" for r in rows):out["reasons"].append("Gaps or suspect/missing/negative observations interrupt alarm persistence; no interpolation used.")
     return out

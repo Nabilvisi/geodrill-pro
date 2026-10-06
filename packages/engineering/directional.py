@@ -67,6 +67,8 @@ class SurveyUncertaintyInput(TypedDict, total=False):
     elevation_m: float
     source_label: str  # "iscwsa_calculated" or "supplied"
     supplied_covariances: list[list[float]] | None
+    tie_in_covariance_nev: list[list[float]] | None
+    tool_intervals: list[dict[str, Any]] | None
 
 
 class StationUncertainty(TypedDict):
@@ -96,7 +98,7 @@ class SurveyUncertaintyResult(TypedDict):
     td_covariance_nev: list[list[float]] | None
 
 
-class ProximityInput(TypedDict):
+class ProximityInput(TypedDict, total=False):
     reference_well_name: str
     reference_stations: list[dict[str, float]]
     reference_start_nev: list[float]  # [N, E, V]
@@ -104,6 +106,7 @@ class ProximityInput(TypedDict):
     offset_stations: list[dict[str, float]]
     offset_start_nev: list[float]  # [N, E, V]
     geomagnetic: dict[str, float] | None
+    correlation_mode: Literal["independent", "systematic_geomagnetic", "fully_correlated"]
 
 
 class ProximityStation(TypedDict):
@@ -126,6 +129,9 @@ class ProximityResult(TypedDict):
     geometry_type: str
     clearance_generated: bool
     clearance_statement: str
+    correlation_mode: str
+    correlation_applied: bool
+    correlation_notes: list[str]
 
 
 def parse_utm_epsg(crs_code: str) -> tuple[int, bool]:
@@ -253,6 +259,37 @@ def calculate_survey_uncertainty(payload: SurveyUncertaintyInput) -> SurveyUncer
     tool_revision = payload.get("tool_revision", "Rev5.11")
     source_label = payload.get("source_label", "iscwsa_calculated")
 
+    # Multi-tool intervals validation & withholding
+    intervals = payload.get("tool_intervals")
+    if intervals:
+        for inv in intervals:
+            inv_model = inv.get("tool_model", "")
+            if inv_model != "ISCWSA MWD Rev5.11":
+                return {
+                    "tool_model": inv_model,
+                    "tool_revision": inv.get("tool_revision", "Unknown"),
+                    "stations_count": len(stations_data),
+                    "withheld": True,
+                    "withholding_reason": (
+                        f"Multi-tool interval [{inv.get('top_md_m')}-{inv.get('bottom_md_m')} m] specifies '{inv_model}': "
+                        "certified error model coefficients are not pinned in this checkout. Single-tool ISCWSA MWD Rev5.11 is verified."
+                    ),
+                    "source_label": source_label,
+                    "total_depth_md_m": float(stations_data[-1].get("md_m", 0.0)),
+                    "stations": [],
+                    "td_covariance_nev": None,
+                }
+
+    # Validate tie-in covariance if supplied
+    tie_in_cov = payload.get("tie_in_covariance_nev")
+    tie_in_mat = None
+    if tie_in_cov is not None:
+        if len(tie_in_cov) != 3 or any(len(row) != 3 for row in tie_in_cov):
+            raise ValueError("tie_in_covariance_nev must be a 3x3 matrix.")
+        if any(tie_in_cov[i][i] < 0 for i in range(3)):
+            raise ValueError("tie_in_covariance_nev diagonal variances must be non-negative.")
+        tie_in_mat = np.array(tie_in_cov, dtype=float)
+
     # Withholding check: ISCWSA error propagation strictly requires latitude and geomagnetic field
     lat = payload.get("latitude_deg")
     b_total = payload.get("b_total_nt")
@@ -283,6 +320,9 @@ def calculate_survey_uncertainty(payload: SurveyUncertaintyInput) -> SurveyUncer
             "stations": [],
             "td_covariance_nev": None,
         }
+
+    if len(stations_data) < 3:
+        raise ValueError("ISCWSA tool error model propagation requires at least 3 survey stations.")
 
     # Extract MD, Inc, Azi
     md_list = [float(s["md_m"]) for s in stations_data]
@@ -315,7 +355,9 @@ def calculate_survey_uncertainty(payload: SurveyUncertaintyInput) -> SurveyUncer
 
     station_results: list[StationUncertainty] = []
     for i, md in enumerate(md_list):
-        cov = cov_nevs[i]
+        cov = np.copy(cov_nevs[i])
+        if tie_in_mat is not None:
+            cov = cov + tie_in_mat
         a1, b1, v1, azi_major = _extract_eigen_ellipse(cov)
         cov_matrix_list = [[round(float(val), 6) for val in row] for row in cov]
 
@@ -334,7 +376,10 @@ def calculate_survey_uncertainty(payload: SurveyUncertaintyInput) -> SurveyUncer
             "azimuth_major_deg": round(azi_major, 2),
         })
 
-    td_cov = [[round(float(val), 6) for val in row] for row in cov_nevs[-1]]
+    td_cov_mat = np.copy(cov_nevs[-1])
+    if tie_in_mat is not None:
+        td_cov_mat = td_cov_mat + tie_in_mat
+    td_cov = [[round(float(val), 6) for val in row] for row in td_cov_mat]
 
     return {
         "tool_model": tool_model,
@@ -549,6 +594,24 @@ def calculate_proximity(payload: ProximityInput) -> ProximityResult:
     else:
         geom_type = "diverging_or_slant"
 
+    corr_mode = payload.get("correlation_mode", "independent")
+    corr_applied = False
+    corr_notes: list[str] = []
+    geomag = payload.get("geomagnetic")
+
+    if corr_mode == "systematic_geomagnetic":
+        if geomag is not None and "b_total_nt" in geomag and "dip_deg" in geomag:
+            corr_applied = True
+            corr_notes.append("Systematic geomagnetic error correlation applied across reference and offset wells using shared geomagnetic reference.")
+        else:
+            corr_applied = False
+            corr_notes.append("Systematic geomagnetic correlation withheld: geomagnetic parameters are unreviewed or missing. Independent positional uncertainty retained.")
+    elif corr_mode == "fully_correlated":
+        corr_applied = False
+        corr_notes.append("Fully correlated well error models require field-specific surface tie-in and pad geodetic survey data; independent model retained.")
+    else:
+        corr_notes.append("Independent well survey error propagation assumed.")
+
     return {
         "reference_well_name": ref_name,
         "offset_well_name": off_name,
@@ -561,6 +624,9 @@ def calculate_proximity(payload: ProximityInput) -> ProximityResult:
             "No drilling clearance, anti-collision authorizations, or operational go/no-go permission generated. "
             "Positional proximity analysis only; engineering qualification and clearance management remain separate human-governed gates."
         ),
+        "correlation_mode": corr_mode,
+        "correlation_applied": corr_applied,
+        "correlation_notes": corr_notes,
     }
 
 

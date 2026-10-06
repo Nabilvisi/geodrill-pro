@@ -296,10 +296,11 @@ def pressure_case(value,segments,path,rho,q,k,backpressure):
         area=math.pi*(b*b-a*a);pipe_area=math.pi*(s["string_id_m"]/2)**2
         av=q/area;pv=q/pipe_area;dh=2*(b-a)
         
-        inc_rad = math.acos(max(-1., min(1., (path.at(s["bottom_md_m"])["tvd_m"] - path.at(s["top_md_m"])["tvd_m"]) / max(1e-5, s["length_m"]))))
-        v_crit = max(0.5, 1.5 * math.sin(inc_rad))
-        bed_height_m = max(0.0, (v_crit - av) * dh * 0.5) if av < v_crit else 0.0
-        effective_loading = value.cuttings_volume_fraction * (1.0 + (bed_height_m / dh if dh > 0 else 0.0))
+        # Critical carrying velocity / bed height: no independently benchmarked closure is pinned
+        # in this checkout, so these outputs are withheld (None) rather than estimated.
+        v_crit = None
+        bed_height_m = None
+        effective_loading = value.cuttings_volume_fraction
         
         def screen(velocity,diameter,scale):
             if velocity==0:return 0.
@@ -426,8 +427,8 @@ def hydraulics(value: HydraulicsInput,geometry: GeometryInput,path: Path):
     if withheld:assessment_reasons.append("At least one requested sensitivity corner is outside model applicability.")
     if minimum_lower["margin_pa"]<0:assessment_reasons.append("At least one tested profile is below a supplied pore-pressure upper allowance.")
     if minimum_upper["margin_pa"]<0:assessment_reasons.append("At least one tested profile is above a supplied fracture-pressure lower allowance.")
-    if nominal and any(s["annular_velocity_m_s"] < s["critical_carrying_velocity_m_s"] for s in nominal["segments"]):
-        assessment_reasons.append("Annular velocity is below critical carrying velocity in at least one segment.")
+    if value.cuttings_volume_fraction > 0:
+        assessment_reasons.append("Cuttings loading applied as no-slip mixture density only; critical carrying velocity and bed height are withheld (no benchmarked closure).")
     summaries=[{k:v for k,v in c.items() if k not in ("at","segments","critical_md_m")} for c in cases]
     # Callables never enter a saved JSON record.
     nominal.pop("at")

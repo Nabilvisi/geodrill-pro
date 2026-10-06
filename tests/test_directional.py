@@ -164,3 +164,126 @@ def test_proximity_geometry_endpoint():
     })
     assert abs(res["min_c2c_distance_m"] - 15.0) < 0.05
     assert res["clearance_generated"] is False
+
+
+def test_survey_uncertainty_tie_in_covariance():
+    stations = [
+        {"md_m": 0.0, "inclination_deg": 0.0, "azimuth_deg": 0.0},
+        {"md_m": 500.0, "inclination_deg": 5.0, "azimuth_deg": 10.0},
+        {"md_m": 1000.0, "inclination_deg": 10.0, "azimuth_deg": 20.0},
+    ]
+    # Base calculation without tie-in covariance
+    base_res = calculate_survey_uncertainty({
+        "stations": stations,
+        "tool_model": "ISCWSA MWD Rev5.11",
+        "latitude_deg": 60.0,
+        "b_total_nt": 50000.0,
+        "dip_deg": 70.0,
+    })
+    assert base_res["withheld"] is False
+    base_td_cov = base_res["td_covariance_nev"]
+
+    # Calculation with initial tie-in covariance (e.g. 4.0 m2 North variance, 9.0 m2 East variance)
+    tie_in = [
+        [4.0, 0.0, 0.0],
+        [0.0, 9.0, 0.0],
+        [0.0, 0.0, 1.0],
+    ]
+    tie_res = calculate_survey_uncertainty({
+        "stations": stations,
+        "tool_model": "ISCWSA MWD Rev5.11",
+        "latitude_deg": 60.0,
+        "b_total_nt": 50000.0,
+        "dip_deg": 70.0,
+        "tie_in_covariance_nev": tie_in,
+    })
+    assert tie_res["withheld"] is False
+    tie_td_cov = tie_res["td_covariance_nev"]
+
+    # Verify tie-in covariance is strictly additive to the propagated covariance
+    assert abs(tie_td_cov[0][0] - (base_td_cov[0][0] + 4.0)) < 1e-4
+    assert abs(tie_td_cov[1][1] - (base_td_cov[1][1] + 9.0)) < 1e-4
+    assert abs(tie_td_cov[2][2] - (base_td_cov[2][2] + 1.0)) < 1e-4
+
+    # Validation: invalid matrix dimension raises ValueError
+    with pytest.raises(ValueError, match="3x3 matrix"):
+        calculate_survey_uncertainty({
+            "stations": stations,
+            "tool_model": "ISCWSA MWD Rev5.11",
+            "latitude_deg": 60.0,
+            "b_total_nt": 50000.0,
+            "dip_deg": 70.0,
+            "tie_in_covariance_nev": [[1.0, 0.0], [0.0, 1.0]],
+        })
+
+
+def test_survey_uncertainty_tool_intervals_withholding():
+    stations = [
+        {"md_m": 0.0, "inclination_deg": 0.0, "azimuth_deg": 0.0},
+        {"md_m": 1000.0, "inclination_deg": 10.0, "azimuth_deg": 45.0},
+    ]
+    # Tool intervals specifying an unpinned tool model
+    res = calculate_survey_uncertainty({
+        "stations": stations,
+        "tool_model": "ISCWSA MWD Rev5.11",
+        "latitude_deg": 60.0,
+        "b_total_nt": 50000.0,
+        "dip_deg": 70.0,
+        "tool_intervals": [
+            {"top_md_m": 0.0, "bottom_md_m": 500.0, "tool_model": "Surface Gyro G1", "tool_revision": "v1.0"},
+            {"top_md_m": 500.0, "bottom_md_m": 1000.0, "tool_model": "ISCWSA MWD Rev5.11", "tool_revision": "Rev5.11"},
+        ],
+    })
+    assert res["withheld"] is True
+    assert "Multi-tool interval" in res["withholding_reason"]
+    assert "Surface Gyro G1" in res["withholding_reason"]
+
+
+def test_proximity_correlation_mode():
+    manifest = load_diagnostic_manifest()
+    case = manifest["cases"]["proximity_crossing"]
+
+    # 1. Independent correlation mode (default)
+    res_ind = calculate_proximity({
+        "reference_well_name": case["reference_well"]["name"],
+        "reference_stations": case["reference_well"]["stations"],
+        "reference_start_nev": case["reference_well"]["start_nev"],
+        "offset_well_name": case["offset_well"]["name"],
+        "offset_stations": case["offset_well"]["stations"],
+        "offset_start_nev": case["offset_well"]["start_nev"],
+        "correlation_mode": "independent",
+    })
+    assert res_ind["correlation_mode"] == "independent"
+    assert res_ind["correlation_applied"] is False
+    assert "Independent well survey" in res_ind["correlation_notes"][0]
+
+    # 2. Systematic geomagnetic without geomagnetic parameters -> withheld
+    res_sys_withheld = calculate_proximity({
+        "reference_well_name": case["reference_well"]["name"],
+        "reference_stations": case["reference_well"]["stations"],
+        "reference_start_nev": case["reference_well"]["start_nev"],
+        "offset_well_name": case["offset_well"]["name"],
+        "offset_stations": case["offset_well"]["stations"],
+        "offset_start_nev": case["offset_well"]["start_nev"],
+        "correlation_mode": "systematic_geomagnetic",
+        "geomagnetic": None,
+    })
+    assert res_sys_withheld["correlation_mode"] == "systematic_geomagnetic"
+    assert res_sys_withheld["correlation_applied"] is False
+    assert "withheld" in res_sys_withheld["correlation_notes"][0]
+
+    # 3. Systematic geomagnetic with valid parameters -> applied
+    res_sys_applied = calculate_proximity({
+        "reference_well_name": case["reference_well"]["name"],
+        "reference_stations": case["reference_well"]["stations"],
+        "reference_start_nev": case["reference_well"]["start_nev"],
+        "offset_well_name": case["offset_well"]["name"],
+        "offset_stations": case["offset_well"]["stations"],
+        "offset_start_nev": case["offset_well"]["start_nev"],
+        "correlation_mode": "systematic_geomagnetic",
+        "geomagnetic": {"b_total_nt": 50000.0, "dip_deg": 70.0, "declination_deg": -2.5},
+    })
+    assert res_sys_applied["correlation_mode"] == "systematic_geomagnetic"
+    assert res_sys_applied["correlation_applied"] is True
+    assert "applied" in res_sys_applied["correlation_notes"][0]
+

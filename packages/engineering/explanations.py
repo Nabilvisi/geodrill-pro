@@ -146,6 +146,20 @@ def explain_study(
     elif model == "torque-drag":
         drag_model = inputs.get("model", "soft_string").replace("_", "-")
         assumptions.append(f"{drag_model.title()} formulation with friction factors")
+        if inputs.get("calibration_points"):
+            assumptions.append("Calibrated friction factor applied against measured drag data with holdout validation")
+    elif model in ("directional", "survey-uncertainty"):
+        assumptions.append("ISCWSA Rev5.11 standard directional survey tool error propagation")
+        corr = inputs.get("correlation_mode", "independent")
+        assumptions.append(f"Inter-well survey correlation mode: {corr}")
+        assumptions.append("3D closest approach proximity scanning; automated drilling clearance excluded")
+    elif model in ("geomechanics", "wellbore-stability"):
+        assumptions.append("In-situ 3D principal stresses and thermodynamic mud density rho(P, T)")
+        assumptions.append("Mohr-Coulomb and 3D Mogi-Coulomb shear breakout criteria with tensile fracture boundary")
+    elif model in ("offset-benchmarking", "offset-wells"):
+        assumptions.append("Offset well performance cohort filtering with P10/P50/P90 ROP and NPT distributions")
+    elif model in ("bit-condition", "bit-wear"):
+        assumptions.append("8-position IADC dull grading wear mechanics with calibrated dull progression curves")
     elif model == "clustering" or model == "shaly_sand":
         assumptions.append("Petrophysical evaluation assumes calibrated wireline/LWD log responses aligned to project depth datum.")
     else:

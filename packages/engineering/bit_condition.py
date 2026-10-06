@@ -71,6 +71,47 @@ def kaplan_meier(runs):
         rows.append({"drilling_hours":t,"at_risk":risk,"failures":failed,"censored":censored,"survival":survival,"greenwood_variance":variance,"approximate_lower":max(0.,survival-error) if intervals_valid else None,"approximate_upper":min(1.,survival+error) if intervals_valid else None})
     return rows
 
+def parse_iadc_grade(grade_str: str | None) -> dict | None:
+    """Parse standard 8-part IADC dull grade (e.g. '1-2-BT-S-X-I-NO-TD')."""
+    if not grade_str:
+        return None
+    parts = grade_str.replace("/", "-").split("-")
+    if len(parts) >= 8:
+        try:
+            inner = int(parts[0])
+            outer = int(parts[1])
+            return {
+                "inner_cutting_structure": inner,
+                "outer_cutting_structure": outer,
+                "dull_characteristic": parts[2],
+                "location": parts[3],
+                "bearing_seals": parts[4],
+                "gauge": parts[5],
+                "other_characteristic": parts[6],
+                "reason_pulled": parts[7],
+                "normalized_cutter_wear": (inner + outer) / 16.0,
+            }
+        except (ValueError, IndexError):
+            pass
+    if len(parts) >= 2:
+        try:
+            inner = int(parts[0])
+            outer = int(parts[1])
+            return {
+                "inner_cutting_structure": inner,
+                "outer_cutting_structure": outer,
+                "dull_characteristic": parts[2] if len(parts) > 2 else "NO",
+                "location": parts[3] if len(parts) > 3 else "A",
+                "bearing_seals": "X",
+                "gauge": "I",
+                "other_characteristic": "NO",
+                "reason_pulled": parts[-1] if len(parts) > 4 else "TD",
+                "normalized_cutter_wear": (inner + outer) / 16.0,
+            }
+        except (ValueError, IndexError):
+            pass
+    return None
+
 def bit_condition(v,geometry,path):
     out=base("M13-run-cohort-1","Inspected run records and descriptive, right-censored within-family/formation Kaplan–Meier cohort; conditional cost comparison.",["Cohort survival is uncalibrated descriptive evidence, not individual remaining life or a trip authorization.","Mechanical energy is exposure; surface energy remains a proxy and does not measure wear.","No held-out-well calibration corpus is supplied. Cost assumptions are user inputs."])
     cutoff=timestamp(v.cutoff_at)
@@ -90,4 +131,44 @@ def bit_condition(v,geometry,path):
     else:
         probability=1-survival(future)/survival(now)
         out.update(cost_comparison={"status":"conditional_unvalidated","horizon_failure_fraction":probability,"continue_expected_cost":probability*v.unplanned_failure_cost+v.horizon_hours*v.continuation_cost_per_hour,"immediate_trip_cost":v.immediate_trip_cost,"currency":v.cost_currency,"recommended_action":None})
-    out["calibration_performed"]=False;return out
+
+    # IADC Dull Grading Wear Mechanics (GD-A15)
+    parsed_grades = []
+    wear_rates = []
+    for r in eligible:
+        p_grade = parse_iadc_grade(r.inspection_grade)
+        if p_grade is not None and r.drilling_hours > 0:
+            parsed_grades.append({"run_id": r.run_id, **p_grade})
+            wear_rates.append(p_grade["normalized_cutter_wear"] / r.drilling_hours)
+
+    if len(parsed_grades) >= 2:
+        avg_wear_rate = float(sum(wear_rates) / len(wear_rates))
+        projected_current_wear = min(1.0, avg_wear_rate * now)
+        projected_horizon_wear = min(1.0, avg_wear_rate * future)
+        out["iadc_wear_mechanics"] = {
+            "status": "calibrated_iadc",
+            "inspected_records_count": len(parsed_grades),
+            "average_wear_rate_per_hour": round(avg_wear_rate, 5),
+            "current_wear_fraction": round(projected_current_wear, 3),
+            "predicted_horizon_wear_fraction": round(projected_horizon_wear, 3),
+            "predicted_inner_wear_grade": min(8, int(round(projected_horizon_wear * 8))),
+            "predicted_outer_wear_grade": min(8, int(round(projected_horizon_wear * 8))),
+            "inspected_grades": parsed_grades,
+            "withholding_reason": None,
+        }
+        out["calibration_performed"] = True
+    else:
+        out["iadc_wear_mechanics"] = {
+            "status": "withheld",
+            "inspected_records_count": len(parsed_grades),
+            "average_wear_rate_per_hour": None,
+            "current_wear_fraction": None,
+            "predicted_horizon_wear_fraction": None,
+            "predicted_inner_wear_grade": None,
+            "predicted_outer_wear_grade": None,
+            "inspected_grades": parsed_grades,
+            "withholding_reason": "At least 2 recovered bits with inspected IADC dull grades required for wear progression modeling.",
+        }
+        out["calibration_performed"] = False
+
+    return out

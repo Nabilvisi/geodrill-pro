@@ -6,7 +6,7 @@ import secrets
 import threading
 from pathlib import Path
 from typing import Literal
-from fastapi import Body, FastAPI, File, Form, HTTPException, Request, Response, UploadFile
+from fastapi import Body, FastAPI, File, Form, HTTPException, Query, Request, Response, UploadFile
 from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from starlette.concurrency import run_in_threadpool
@@ -50,6 +50,7 @@ from packages.engineering.directional import (
 )
 from packages.engineering.review_pack import build_programme_pack, export_pack_to_html, export_pack_to_csv
 from packages.engineering.usability import convert_unit, paginate_and_search_records, UNIT_PROFILES
+from packages.engineering.evidence_search import SearchQuery, search_project_evidence
 from packages.engineering.ddr import create_daily_drilling_report, export_ddr_to_xml
 from packages.frontend import frontend_dist
 from . import demo, programmes
@@ -449,6 +450,39 @@ def create_app(data_dir: Path | None = None, mode: str | None = None):
         ds = store.datasets(project_id)
         revs = store.revisions(project_id, "M1")
         return explain_study(calcs[calc_id], project, ds, revs)
+
+    @app.get("/api/projects/{project_id}/evidence/search")
+    def search_evidence(project_id: str, q: str = Query(..., min_length=1), request: Request = None):
+        user = getattr(request.state, "user", None) if request and hasattr(request, "state") else None
+        role = user.get("role", "viewer") if user else "viewer"
+        user_id = user.get("id", "current_user") if user else "current_user"
+
+        project = store.project(project_id)
+        ds = store.datasets(project_id)
+        revs = store.revisions(project_id, "M1")
+        calcs = store.calculations(project_id)
+        try:
+            progs = programmes.list_programmes(store, project_id)
+        except Exception:
+            progs = []
+
+        query_input = SearchQuery(
+            query=q,
+            project_id=project_id,
+            user_id=user_id,
+            user_role=role if role in ("viewer", "author", "reviewer", "approver", "admin", "unauthenticated") else "viewer",
+        )
+        memberships = [p["id"] for p in visible_projects(store, user)] if user else [project_id]
+
+        return search_project_evidence(
+            query_input=query_input,
+            project=project,
+            datasets=ds,
+            geometry_revisions=revs,
+            calculations=calcs,
+            programmes=progs,
+            user_project_memberships=memberships,
+        )
 
     @app.get("/api/projects/{project_id}/bundle/export")
     def project_bundle_export(project_id: str):

@@ -55,6 +55,9 @@ class CasingEnvelopesInput(StudyInput):
     drilling_mud_density_kg_m3: float = Field(default=1200.0, ge=800.0, le=3000.0)
     external_fluid_density_kg_m3: float = Field(default=1050.0, ge=800.0, le=3000.0)
     overpull_force_n: float = Field(default=222400.0, ge=0.0, le=1e8)
+    kick_margin_pa: float = Field(default=0.0, ge=0.0, le=1e8)
+    running_friction_factor: float = Field(default=0.0, ge=0.0, le=1.0)
+    assessment_date: str | None = Field(default=None, min_length=10, max_length=40)
     temperature_change_surface_c: float = Field(default=30.0, ge=-50.0, le=300.0)
     temperature_change_shoe_c: float = Field(default=60.0, ge=-50.0, le=300.0)
     thermal_apb_rate_pa_c: float = Field(default=700000.0, ge=0.0, le=5e6)
@@ -174,7 +177,7 @@ def api_burst_rating(od_m: float, wall_m: float, yield_strength_pa: float,
 
     # Lamé thick-wall elastic yield at inner surface under zero axial stress
     ro, ri = od_m / 2.0, id_m / 2.0
-    lame_yield = yield_strength_pa * (ro**2 - ri**2) / (math.sqrt(3.0) * (ro**2) + (ri**2))
+    lame_yield = yield_strength_pa * (ro**2 - ri**2) / math.sqrt(3.0 * ro**4 + ri**4)
 
     return {
         "burst_barlow_api_pa": barlow_api,
@@ -218,6 +221,21 @@ def casing_envelopes(data: CasingEnvelopesInput, geometry: GeometryInput, path: 
         if ev.pressure_test_passed is False:
             reasons.append("Casing pressure test recorded a failure or unsealed leak-off.")
             integrity_status = "withheld"
+        if data.assessment_date is None:
+            warnings.append("No assessment date supplied; inspection expiry was not evaluated.")
+        else:
+            from datetime import datetime
+            try:
+                exp = datetime.fromisoformat(ev.inspection_expiry.replace("Z", "+00:00"))
+                at = datetime.fromisoformat(data.assessment_date.replace("Z", "+00:00"))
+                if exp.tzinfo is None or at.tzinfo is None:
+                    exp, at = exp.replace(tzinfo=None), at.replace(tzinfo=None)
+                if exp < at:
+                    reasons.append(f"Inspection evidence expired on {ev.inspection_expiry} before assessment date {data.assessment_date}.")
+                    integrity_status = "withheld"
+            except ValueError:
+                reasons.append("Inspection expiry or assessment date is not an ISO-8601 date.")
+                integrity_status = "withheld"
         if ev.masp_pa is not None and ev.pressure_test_pressure_pa is not None:
             if ev.pressure_test_pressure_pa < ev.masp_pa:
                 warnings.append(f"Recorded test pressure ({ev.pressure_test_pressure_pa/1e6:.1f} MPa) is less than MASP ({ev.masp_pa/1e6:.1f} MPa).")
@@ -240,7 +258,7 @@ def casing_envelopes(data: CasingEnvelopesInput, geometry: GeometryInput, path: 
 
     shoe_tvd = path.at(bottom_md)["tvd_m"]
     shoe_pore_pa = data.drilling_mud_density_kg_m3 * G * shoe_tvd
-    kick_influx_margin_pa = 5.0e6  # 5 MPa kick influx pressure margin at shoe
+    kick_influx_margin_pa = data.kick_margin_pa  # declared input; no hidden default
 
     evac_tvd_limit = data.evacuation_depth_tvd_m if data.evacuation_depth_tvd_m is not None else shoe_tvd
 
@@ -358,7 +376,7 @@ def casing_envelopes(data: CasingEnvelopesInput, geometry: GeometryInput, path: 
         })
 
         # --- 4. Running / Overpull Axial Scenario ---
-        f_drag = 0.25 * f_axial_hanging * math.sin(inc)
+        f_drag = data.running_friction_factor * f_axial_hanging * math.sin(inc)
         f_total_axial = f_axial_hanging + f_drag + data.overpull_force_n
         rated_axial = min(body_tension, conn_tension)
         axial_util = (f_total_axial * data.axial_factor) / rated_axial if rated_axial > 0 else 0.0
@@ -405,16 +423,25 @@ def casing_envelopes(data: CasingEnvelopesInput, geometry: GeometryInput, path: 
         })
 
     triaxial_vme_envelope: list[dict[str, float]] = []
-    # Ellipse of yield in (P_diff, Axial Force) space
-    for angle_deg in range(0, 360, 15):
-        rad = math.radians(angle_deg)
-        # Parameterized yield curve point
-        f_axial_point = body_tension * math.cos(rad)
-        p_diff_point = (burst_ratings["burst_barlow_api_pa"] if math.sin(rad) >= 0 else -uniaxial_collapse["collapse_pressure_pa"]) * abs(math.sin(rad))
+    # Exact Lamé inner-surface von Mises yield boundary (uniform temperature, no bending):
+    # burst branch p_i=p, p_o=0  -> sr=-p, st=p*k1 ; collapse branch p_i=0, p_o=p -> sr=0, st=-p*k2
+    ri_e, ro_e = id_m / 2.0, od / 2.0
+    k1 = (ro_e**2 + ri_e**2) / (ro_e**2 - ri_e**2)
+    k2 = 2.0 * ro_e**2 / (ro_e**2 - ri_e**2)
+    def _yield_p(sr_c, st_c, sz):
+        # VME^2 = 0.5[(sr-st)^2+(st-sz)^2+(sz-sr)^2] = yp^2 with sr=sr_c*p, st=st_c*p
+        a = 0.5 * ((sr_c - st_c)**2 + st_c**2 + sr_c**2)
+        b = -(st_c + sr_c) * sz
+        c = sz**2 - yp**2
+        disc = b * b - 4 * a * c
+        return None if disc < 0 else (-b + math.sqrt(disc)) / (2 * a)
+    for ratio in [-0.95, -0.75, -0.5, -0.25, 0.0, 0.25, 0.5, 0.75, 0.95]:
+        sz = ratio * yp
+        pb = _yield_p(-1.0, k1, sz)
+        pc = _yield_p(0.0, -k2, sz)
         triaxial_vme_envelope.append({
-            "angle_deg": float(angle_deg),
-            "axial_force_n": f_axial_point,
-            "differential_pressure_pa": p_diff_point
+            "axial_stress_pa": sz, "axial_force_n": sz * area,
+            "internal_yield_pressure_pa": pb, "external_yield_pressure_pa": pc,
         })
 
     return {

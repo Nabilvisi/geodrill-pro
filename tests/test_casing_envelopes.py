@@ -405,3 +405,25 @@ def test_api_casing_envelopes_endpoint_and_explanation(casing_api_setup):
     assert comp["model"] == "casing-envelopes"
     assert comp["compatibility_status"] == "compatible"
     assert "drilling_mud_density_kg_m3" in comp["differing_inputs"]
+
+
+def test_expired_inspection_withholds_and_vme_boundary_matches_lame():
+    g_input = GeometryInput.model_validate(make_geom())
+    p = Path(make_survey([(0.0, 0.0, 0.0), (2500.0, 0.0, 0.0)]))
+    ev = CasingIntegrityEvidence(
+        casing_name="Production Casing", mill_certificate_id="MC-1",
+        inspection_date="2020-01-01", inspection_expiry="2022-01-01",
+        inspected_minimum_wall_m=0.0118, inspected_yield_strength_pa=560e6,
+        pressure_test_passed=True)
+    payload = CasingEnvelopesInput(study_name="Expired evidence", geometry_revision_id="r",
+                                   depth_datum="RKB", casing_name="Production Casing",
+                                   integrity_evidence=ev, assessment_date="2026-10-06",
+                                   source_note="Expiry check")
+    r = casing_envelopes(payload, g_input, p)
+    assert r["status"] == "withheld"
+    assert any("expired" in x for x in r["integrity_verification"]["reasons"])
+    # At zero axial stress the exact VME boundary must equal the closed-form Lamé burst.
+    zero = next(x for x in r["envelope_curves"]["triaxial_vme_boundary"] if x["axial_stress_pa"] == 0.0)
+    assert zero["internal_yield_pressure_pa"] == pytest.approx(r["api_ratings"]["burst_lame_pa"], rel=1e-9)
+    # No hidden margins: defaults contribute zero kick margin and zero running drag.
+    assert all(row["running_drag_n"] == 0.0 for row in r["load_profiles"]["running_overpull"])

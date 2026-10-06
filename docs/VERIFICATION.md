@@ -1,8 +1,15 @@
-# Verification record — 5 October 2026 / version 0.8.0
+# Verification record — 6 October 2026 / version 0.8.0
 
-**Current checkout increment:** [Phase 3 Core Engineering: GD-A11, GD-A12, GD-A13](IMPROVEMENT-PLAN.md), verified locally on 5 October 2026. Historical public-release observations below do not establish public/Windows equivalence for this increment.
+**Current checkout increment:** [Completed Engineering Workstation: GD-A01–A18](IMPROVEMENT-PLAN.md), verified locally on 6 October 2026. Historical public-release observations below do not establish public/Windows equivalence for this increment.
 
-## Phase 3 Core Engineering Verification (GD-A11, GD-A12, GD-A13) — 2026-10-05
+## Phase 3 & 4 Core Engineering & Evidence Verification (GD-A10–GD-A18) — 2026-10-06
+
+- **GD-A10 Directional Survey Uncertainty Extensions & Proximity**:
+  - Additive $3 \times 3$ tie-in position covariance matrix `tie_in_covariance_nev` propagated from surface datum.
+  - Multi-tool intervals with explicit withholding when unpinned or unknown tool models are assigned.
+  - Inter-well correlation modes (`independent`, `systematic_geomagnetic`, `fully_correlated`) in 3D closest approach scanning.
+  - Strict exclusion of automated clearance generation (`clearance_generated: false`).
+  - Verification: `tests/test_directional.py` (12 tests pass).
 
 - **GD-A11 Extended Hydraulics & Cuttings Transport**:
   - Non-Newtonian Herschel-Bulkley annular flow with laminar/laminar-transition bounds verified.
@@ -11,8 +18,9 @@
   - Verification: `tests/test_hydraulics.py` (53 tests pass).
 
 - **GD-A12 Advanced Drillstring Mechanics & Shock/Vibration**:
-  - 3D stiff-string torque & drag with tubular bending stiffness (EI), radial clearance from hole sections, and survey tortuosity.
+  - 3D stiff-string torque & drag with tubular bending stiffness ($EI$), radial clearance from hole sections, and survey tortuosity.
   - Bending normal contact force midpoint equilibrium solver verified.
+  - Calibrated friction factor grid search with holdout validation and RMSE/MAE evaluation (`calibrated_validated` vs `calibrated_unvalidated`).
   - Fundamental drillstring vibration screening: torsional stick-slip propensity and axial bit-bounce resonance frequencies.
   - Soft-string (GD-M10) and buckling (GD-M11) baselines preserved without silent substitution.
   - Verification: `tests/test_stiff_string.py` and `tests/test_dynamics.py` pass.
@@ -23,10 +31,42 @@
   - Biaxial axial stress reduction on collapse rating ($S_a / Y_p = 0.5 \to$ factor 0.651384) verified to 1e-5 relative tolerance.
   - Operational load-line profiles across full well depth: burst kick, evacuation collapse, thermal expansion (APB), and running overpull.
   - Casing integrity evidence binding: mill test certificates, pressure test records, and inspected wall thickness with explicit qualification withholding.
-  - Lineage, scenario comparison, and study explanations verified via HTTP API.
-  - Verification: `tests/test_casing_envelopes.py` (8 tests pass).
+  - Verification: `tests/test_casing_envelopes.py` (9 tests pass) and `tests/test_casing_published.py` (6 tests pass).
 
-- **Full Regression Suite**: **506 passed in 165.69s (100% pass rate)**.
+- **GD-A14 Offset Well Performance Benchmarking**:
+  - Multi-parameter cohort filtering (field, formation, hole size, bit type, mud type).
+  - Empirical percentile (P10, P50, P90) distributions for ROP, NPT %, duration per 1000m, and cost per meter.
+  - Strict withholding when cohort size < 3 offset wells.
+  - Verification: `tests/test_offset_benchmarking.py` (2 tests pass).
+
+- **GD-A15 BHA & Bit Wear Mechanics**:
+  - Full 8-position IADC dull grading standard parser (inner, outer, dull char, location, bearings, gauge, other char, reason pulled).
+  - Wear rate progression mechanics with calibration against inspected bit records.
+  - Strict withholding when < 2 inspection records are provided.
+  - Verification: `tests/test_bit_condition_iadc.py` (4 tests pass).
+
+- **GD-A16 Passive Real-Time Advisory & Event Evaluation**:
+  - Causal sequential event screening for packoff, washouts, and kick indications.
+  - Disjoint out-of-sample evaluation windows (`evaluation_window_start_s`, `evaluation_window_end_s`).
+  - Strict exclusion of equipment actuation (`equipment_control: false`, `actuation_available: false`).
+  - Verification: `tests/test_anomaly_disjoint.py` (2 tests pass).
+
+- **GD-A17 Formation Geomechanics & Actual-Fluid Thermodynamics**:
+  - In-situ 3D principal stresses ($S_v, S_h, S_H$) and pore pressure gradients.
+  - Thermodynamic fluid density $\rho(P, T) = \rho_0 [1 + c_p \Delta P - \alpha_T \Delta T]$ accounting for downhole compressibility and thermal expansion.
+  - 2D Mohr-Coulomb and 3D Mogi-Coulomb shear breakout criteria and tensile breakdown limit.
+  - Safe mud weight operating window $[MW_{\text{collapse}}, MW_{\text{frac}}]$.
+  - Strict withholding when core triaxial test certificates or leak-off test (LOT) records are missing.
+  - Verification: `tests/test_geomechanics.py` (4 tests pass).
+
+- **GD-A18 Permission-Aware Evidence Search & Abstention**:
+  - Role-based project-scoped indexing across datasets, geometries, studies, and programmes.
+  - Exact citations with entity ID, domain, title, and SHA-256 cryptographic hashes.
+  - Conflicting-version detection and disclosure across historical geometry revisions.
+  - Strict abstention when evidence is insufficient, contradictory, or unauthorized.
+  - Verification: `tests/test_evidence_search.py` (6 tests pass).
+
+- **Full Regression Suite**: **537 passed in 197.59s (100% pass rate)**.
 
 
 ## Streamlit cloud release verification — 2026-10-05
