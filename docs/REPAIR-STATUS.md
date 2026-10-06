@@ -1,14 +1,18 @@
 # GeoDrill repair status — 6 October 2026
 
-The approved repair PR is merged. The public Streamlit app and the final unsigned
-Windows research prerelease are deployed and verified.
+The approved repair PR is merged. The latest verified publication is unsigned
+research-5 at source 77e3e91885b9994f6ed0eedee85bb7567e6738f6, with 635 passing
+tests and actual downloaded-package workflow verification. Current evidence is
+[geomechanics-verification.json](evidence/geomechanics-verification.json).
+The following repair milestone records the earlier research-2 release; later dated
+increments appear below.
 
 - Live app: https://geodrill-pro.streamlit.app/
-- Final prerelease: https://github.com/Nabilvisi/geodrill-pro/releases/tag/research-2
-- Final code: b213c1f861ea508590886751ea9febcee2c27656
+- Earlier repair prerelease: https://github.com/Nabilvisi/geodrill-pro/releases/tag/research-2
+- Earlier repair code: b213c1f861ea508590886751ea9febcee2c27656
 - Windows/Linux CI: https://github.com/Nabilvisi/geodrill-pro/actions/runs/37444825114
 - Release workflow: https://github.com/Nabilvisi/geodrill-pro/actions/runs/37444938024
-- Current publication evidence: docs/evidence/published-research-verification.json
+- Earlier repair evidence: docs/evidence/published-research-verification.json
 
 Implemented and verified:
 

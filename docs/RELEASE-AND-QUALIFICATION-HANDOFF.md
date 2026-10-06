@@ -1,5 +1,12 @@
 # Release and independent-review handoff
 
+Current publication is [research-5](https://github.com/Nabilvisi/geodrill-pro/releases/tag/research-5),
+including the repaired survey-bound formation-geomechanics workflow.
+[Current evidence](evidence/geomechanics-verification.json) records 635 passing tests,
+hosted verification, complete public download hashes and actual portable/installer
+acceptance. The research-2 repair history below retains its earlier scope; the latest
+research-5 handoff appears at the end. Signing and independent qualification remain pending.
+
 The tested repair is [pull request 1](https://github.com/Nabilvisi/geodrill-pro/pull/1).
 The user approved merge, deployment and unsigned research publication on 6 October 2026.
 PR 1 is merged at 509be9b9a96fda0604be2ce1eda205e9ea691280. A follow-up native
