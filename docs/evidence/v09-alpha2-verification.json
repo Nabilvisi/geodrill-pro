@@ -1,0 +1,109 @@
+{
+  "version": "0.9.0-alpha.2",
+  "status": "verified candidate; publication pending",
+  "date": "2026-10-07",
+  "application_commit": "012df77a4c9ed52013266871262a10db600bf122",
+  "application_tree": "0c181a20d577fb952782000c8286a7cab4b7a2f1",
+  "pull_request": "https://github.com/Nabilvisi/geodrill-pro/pull/4",
+  "local_tests": {
+    "passed": 697,
+    "failed": 0,
+    "skipped": 0,
+    "seconds": 290.78,
+    "warnings": 1
+  },
+  "source_ci": {
+    "run": "https://github.com/Nabilvisi/geodrill-pro/actions/runs/37573854694",
+    "application_commit": "012df77a4c9ed52013266871262a10db600bf122",
+    "linux": {
+      "passed": 697,
+      "seconds": 50.68,
+      "conclusion": "success"
+    },
+    "windows": {
+      "passed": 697,
+      "seconds": 96.92,
+      "conclusion": "success"
+    }
+  },
+  "packaged_workflow": {
+    "passed": true,
+    "version": "0.9.0-alpha.2",
+    "owned_role_revisions": true,
+    "scoped_geometry": true,
+    "uncertainty_withheld": true,
+    "offset_staleness": true,
+    "canonical_report": true,
+    "frontend_assets": {
+      "/assets/index-PgqFzM0o.js": "be904f227e1fb65527ef730b9d7713acc83a2d6b93b197db93923002477bfe30",
+      "/assets/index-D1k-d0nj.css": "65494c6cfa0faa55f303f8044b56e90e5bf19f261870ae995c2651dc143eb158"
+    },
+    "equipment_control": false,
+    "clearance_generated": false,
+    "owned_workstation_backup_restore": true,
+    "restored_heads_history_reports_audit": true
+  },
+  "installer_recovery": {
+    "packaged_restore_exit_code": 0,
+    "equipment_control": false,
+    "wrong_hash_restore_rejected": true,
+    "signing_mode": "unsigned",
+    "uninstall_exit_code": 0,
+    "installer_sha256": "c3d1f716c4647344601c86b0146485d831c37fdedd8ad5e6b7e58bb57bc4a6b6",
+    "source_snapshot_sha256": "3ccdd8017747538175b91efa885661e52a12699cf790c7b58d076f1b4d6daecd",
+    "persistent_evidence_preserved": true,
+    "restored_signing_identity_preserved": true,
+    "install_exit_code": 0,
+    "smoke_exit_code": 0,
+    "passed": true,
+    "restored_smoke_exit_code": 0,
+    "clearance_generated": false,
+    "extra_user_file_preserved": true,
+    "packaged_backup_exit_code": 0,
+    "installed_executable_sha256": "5ce82eac6aee1fdc934e26580c64ca0a12076fb6b434b239ad422a18e7db8de4",
+    "existing_restore_destination_preserved": true
+  },
+  "windows_candidate": {
+    "version": "0.9.0-alpha.2",
+    "source_snapshot_sha256": "3ccdd8017747538175b91efa885661e52a12699cf790c7b58d076f1b4d6daecd",
+    "source_snapshot_file_count": 218,
+    "signing_mode": "unsigned",
+    "trusted_signature_verification": {
+      "GeoDrillPro.exe": false,
+      "GeoDrillPro-Setup.exe": false
+    },
+    "assets": [
+      {
+        "name": "GeoDrillPro-Setup.exe",
+        "size_bytes": 121824012,
+        "sha256": "c3d1f716c4647344601c86b0146485d831c37fdedd8ad5e6b7e58bb57bc4a6b6"
+      },
+      {
+        "name": "GeoDrillPro-Windows-x64.zip",
+        "size_bytes": 184361946,
+        "sha256": "97ff9b1984df9b25a0ab9e8f942676f6f0d9c38635e11b24317c25d633ab59ab"
+      }
+    ],
+    "executable_sha256": "5ce82eac6aee1fdc934e26580c64ca0a12076fb6b434b239ad422a18e7db8de4"
+  },
+  "manual_browser": {
+    "source": "Owned planned/actual edit, comparison, MD, geometry, scoped study, offset/source staleness, history, reload and original fixed report passed.",
+    "streamlit_local": "Rendered alpha.2, hierarchy, explicit adoption, trajectory, withheld uncertainty and report preparation passed.",
+    "original_csv_chooser": "Blocked by existing Chrome extension file URL permission; original CSV bytes covered by API tests.",
+    "streamlit_native_download": "Interrupted browser control; native download not claimed. Original bytes verified in transport test.",
+    "packaged": "Rendered selected owned bore, saved withholding and stale offset passed."
+  },
+  "published_baseline": {
+    "version": "0.9.0-alpha.1",
+    "release": "research-6",
+    "hosted": "https://geodrill-pro.streamlit.app/",
+    "new_candidate_deployed": false
+  },
+  "qualification": {
+    "independent_engineering": "pending",
+    "external_security": "pending",
+    "equipment_control": false,
+    "equipment_authority": "none",
+    "clearance_generated": false
+  }
+}
