@@ -131,6 +131,24 @@ WELLS_V6 = '''
     CREATE INDEX IF NOT EXISTS idx_targets_wellbore ON targets(wellbore_id);
 '''
 
+WELLBORE_REVISIONS_V7 = '''
+    CREATE TABLE wellbore_revisions(
+        id TEXT PRIMARY KEY,
+        project_id TEXT NOT NULL REFERENCES projects(id),
+        wellbore_id TEXT NOT NULL REFERENCES wellbores(id),
+        kind TEXT NOT NULL CHECK(kind IN ('survey','trajectory','uncertainty','proximity')),
+        trajectory_type TEXT NOT NULL CHECK(trajectory_type IN ('planned','actual','scenario')),
+        revision_no INTEGER NOT NULL CHECK(revision_no>0),
+        base_revision_id TEXT REFERENCES wellbore_revisions(id),
+        payload TEXT NOT NULL,
+        sha256 TEXT NOT NULL,
+        created_at TEXT NOT NULL,
+        UNIQUE(wellbore_id,kind,trajectory_type,revision_no));
+    CREATE INDEX wr_project ON wellbore_revisions(project_id);
+    CREATE TRIGGER wr_no_update BEFORE UPDATE ON wellbore_revisions BEGIN SELECT RAISE(ABORT,'Wellbore revisions are immutable'); END;
+    CREATE TRIGGER wr_no_delete BEFORE DELETE ON wellbore_revisions BEGIN SELECT RAISE(ABORT,'Wellbore revisions are immutable'); END;
+'''
+
 # (version, SQL script). Versions must be strictly increasing.
 MIGRATIONS: list[tuple[int, str]] = [
     (2, BASELINE_V2),
@@ -138,6 +156,7 @@ MIGRATIONS: list[tuple[int, str]] = [
     (4, MEMBERS_V4),
     (5, WORKFLOW_V5),
     (6, WELLS_V6),
+    (7, WELLBORE_REVISIONS_V7),
 ]
 
 

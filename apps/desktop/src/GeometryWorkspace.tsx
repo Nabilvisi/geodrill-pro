@@ -1,6 +1,7 @@
 import {useEffect,useState} from 'react';
 import {api} from './api';
 import {Plus,Save,Trash2,RotateCcw} from 'lucide-react';
+import type {WellboreContext} from './WellboreWorkspace';
 
 type Top={name:string;top_tvd_m:number;uncertainty_m:number;category:string;source:string;interpretation:string};
 type Hole={name:string;top_md_m:number;bottom_md_m:number;diameter_m:number;source:string};
@@ -8,10 +9,10 @@ type Casing={name:string;top_md_m:number;bottom_md_m:number;outside_diameter_m:n
 type Geometry={survey_dataset_id:string;datum:string;coordinate_reference:string;wellhead_north_m:number;wellhead_east_m:number;wellhead_elevation_m:number;survey_quality_note:string;tool_to_bit_offset_m:number;formations:Top[];hole_sections:Hole[];casings:Casing[]};
 type Point={md_m:number;north_m:number;east_m:number;tvd_m:number;elevation_m:number};
 type Cross={name:string;category:string;top_tvd_m:number;uncertainty_m:number;top_crossings:Point[];coincident_intervals:{top_md_m:number;bottom_md_m:number}[];shallow_band_crossings:Point[];deep_band_crossings:Point[]};
-export type Revision={id:string;sha256:string;created_at:string;input:Geometry;change_note:string;result:{samples:Point[];formation_intersections:Cross[];warnings:string[];assumptions:string[];cost:{status:string;value:number|null;currency:string|null;scope:string};total_depth_md_m:number}};
+export type Revision={id:string;sha256:string;created_at:string;wellbore_id?:string;trajectory_type?:string;survey_revision_id?:string;revision_no?:number;input:Geometry;change_note:string;result:{samples:Point[];formation_intersections:Cross[];warnings:string[];assumptions:string[];cost:{status:string;value:number|null;currency:string|null;scope:string};total_depth_md_m:number}};
 type Dataset={id:string;kind:string;filename:string;rows?:Record<string,number|string|null>[]};
 type Project={id:string;datum:string;north_reference:string;origin:string;formations?:{name:string;top_tvd_m:number;uncertainty_m:number}[]};
-type Props={project:Project;datasets:Dataset[];online:boolean;onError:(s:string)=>void;onNotice:(s:string)=>void;mode:'geometry'|'casing';onGeometryPage:()=>void};
+type Props={project:Project;datasets:Dataset[];online:boolean;onError:(s:string)=>void;onNotice:(s:string)=>void;mode:'geometry'|'casing';onGeometryPage:()=>void;wellboreContext?:WellboreContext|null;wellboreSelected?:boolean;onSaved?:()=>void};
 const nf=(v:number|null|undefined,d=1)=>v==null?'—':v.toLocaleString('en-US',{maximumFractionDigits:d});
 const ratingFields:[keyof Casing,string,number][]=[
   ['yield_strength_pa','Minimum yield strength (MPa)',1e6],['body_burst_pa','Body burst rating (MPa)',1e6],['body_collapse_pa','Body collapse rating (MPa)',1e6],['body_tension_n','Body tension rating (kN)',1000],['body_compression_n','Body compression rating (kN)',1000],
@@ -24,23 +25,27 @@ function TextField({label,value,onChange,optional=false}:{label:string;value:str
   return <label className="field-label">{label}<input required={!optional} value={value??''} maxLength={300} onChange={e=>onChange(e.target.value)}/></label>;
 }
 
-export function GeometryWorkspace({project,datasets,online,onError,onNotice,mode,onGeometryPage}:Props){
+export function GeometryWorkspace({project,datasets,online,onError,onNotice,mode,onGeometryPage,wellboreContext,wellboreSelected=false,onSaved}:Props){
   const surveys=datasets.filter(d=>d.kind==='survey');
   const [revisions,setRevisions]=useState<Revision[]>([]),[saved,setSaved]=useState<Revision|null>(null),[draft,setDraft]=useState<Geometry|null>(null),[dirty,setDirty]=useState(false),[busy,setBusy]=useState(false),[note,setNote]=useState(''),[ready,setReady]=useState(false);
   const [surveySource,setSurveySource]=useState<Dataset|null>(null);
   const base='/projects/'+project.id;
+  const revisionPath=base+'/engineering-revisions?module=M1'+(wellboreContext?'&wellbore_id='+wellboreContext.wellbore.id+'&trajectory_type='+wellboreContext.trajectory_type:'');
   useEffect(()=>{let active=true;setSurveySource(null);if(draft?.survey_dataset_id)api<Dataset>(base+'/datasets/'+draft.survey_dataset_id).then(d=>{if(active)setSurveySource(d);}).catch(e=>{if(active)onError(e.message);});return()=>{active=false;};},[base,draft?.survey_dataset_id]);
   useEffect(()=>{let active=true;setReady(false);setSaved(null);setDraft(null);
-    api<Revision[]>(base+'/engineering-revisions?module=M1').then(rs=>{if(!active)return;setRevisions(rs);setSaved(rs[0]??null);setDraft(rs[0]?.input??{survey_dataset_id:surveys[0]?.id??'',datum:project.datum,coordinate_reference:'Local project frame; no coordinate transformation',wellhead_north_m:0,wellhead_east_m:0,wellhead_elevation_m:0,survey_quality_note:'',tool_to_bit_offset_m:0,formations:[],hole_sections:[],casings:[]});setDirty(false);setReady(true);}).catch(e=>{if(active)onError(e.message);});
+    if(wellboreSelected&&!wellboreContext)return()=>{active=false;};
+    api<Revision[]>(revisionPath).then(rs=>{if(!active)return;setRevisions(rs);setSaved(rs[0]??null);setDraft(rs[0]?.input??(wellboreSelected?null:{survey_dataset_id:surveys[0]?.id??'',datum:project.datum,coordinate_reference:'Local project frame; no coordinate transformation',wellhead_north_m:0,wellhead_east_m:0,wellhead_elevation_m:0,survey_quality_note:'',tool_to_bit_offset_m:0,formations:[],hole_sections:[],casings:[]}));setDirty(false);setReady(true);}).catch(e=>{if(active)onError(e.message);});
     return()=>{active=false;};
-  },[project.id, datasets.map(d=>d.id).join(',')]);
+  },[revisionPath,wellboreSelected,wellboreContext?.active.trajectory?.id,datasets.map(d=>d.id).join(',')]);
   const update=(patch:Partial<Geometry>)=>{setDraft(v=>v?{...v,...patch}:v);setDirty(true);};
+  if(wellboreSelected&&ready&&!draft)return <div className="panel"><h2>No saved trajectory in this wellbore role</h2><p>Save a source revision and calculate its trajectory in Directional engineering before editing formation, hole or casing records.</p></div>;
   if(!ready||!draft)return <div className="panel empty-inline">Loading engineering revisions…</div>;
   const activeSurvey=surveySource?.id===draft.survey_dataset_id?surveySource:null;
   const td=Number(activeSurvey?.rows?.at(-1)?.md_m??0);
   const save=async(e:React.FormEvent)=>{e.preventDefault();setBusy(true);onError('');try{
-    const next=await api<Revision>(base+'/geometry',{method:'POST',body:JSON.stringify({base_revision_id:saved?.id??null,change_note:note,geometry:draft})});
-    setSaved(next);setDraft(next.input);setRevisions(await api<Revision[]>(base+'/engineering-revisions?module=M1'));setDirty(false);setNote('');onNotice('Geometry revision saved. Earlier inputs and reports remain preserved.');
+    const path=wellboreContext?'/v1/wellbores/'+wellboreContext.wellbore.id+'/trajectories':base+'/geometry';
+    const next=await api<Revision>(path,{method:'POST',body:JSON.stringify({base_revision_id:saved?.id??null,change_note:note,geometry:draft,...(wellboreContext?{survey_revision_id:wellboreContext.active.survey?.id}:{})})});
+    setSaved(next);setDraft(next.input);setRevisions(await api<Revision[]>(revisionPath));setDirty(false);setNote('');onSaved?.();onNotice('Geometry revision saved. Earlier inputs and reports remain preserved.');
   }catch(e){onError((e as Error).message);}finally{setBusy(false);}};
   const example=()=>{if(project.origin!=='synthetic'||!td)return;
     const mid=td/2;const a=emptyCasing('Surface casing',mid),b=emptyCasing('Production casing',td);

@@ -4,6 +4,7 @@ import json
 import hashlib
 import secrets
 import threading
+from contextvars import ContextVar
 from pathlib import Path
 from typing import Literal
 from fastapi import Body, FastAPI, File, Form, HTTPException, Query, Request, Response, UploadFile
@@ -59,12 +60,14 @@ from . import demo, programmes
 from packages.domain.errors import GeoDrillDomainError
 from .errors import domain_error_handler, api_error_handler, APIError
 from .routers import projects_router, directional_router, engineering_router, qualification_router, wells_router
+from .routers.trajectories import router as trajectories_router
 from packages.version import APP_VERSION
 
 import sys
 ROOT = Path(sys._MEIPASS).resolve() if getattr(sys, "frozen", False) and hasattr(sys, "_MEIPASS") else Path(__file__).resolve().parents[2]
 MAX_FILE_BYTES = 2 * 1024 * 1024
 ALLOWED_HOSTS = {"127.0.0.1:8765", "localhost:8765", "127.0.0.1:5173", "localhost:5173", "testserver"}
+geometry_scope = ContextVar('geometry_scope', default=None)
 
 
 def create_app(data_dir: Path | None = None, mode: str | None = None):
@@ -73,6 +76,7 @@ def create_app(data_dir: Path | None = None, mode: str | None = None):
     app.state.store = store
     session = secrets.token_urlsafe(32)
     lock = threading.RLock()
+    app.state.mutation_lock = lock
     team_mode = (mode or os.environ.get("GEODRILL_MODE", "local")).lower() == "team"
     allowed_hosts = set(ALLOWED_HOSTS)
     if team_mode:
@@ -121,9 +125,11 @@ def create_app(data_dir: Path | None = None, mode: str | None = None):
                 return JSONResponse({"detail": "Open the workstation to start a local session."}, status_code=401)
             if request.method not in {"GET", "HEAD"} and request.headers.get("x-geodrill-client") != "workstation":
                 return JSONResponse({"detail": "Missing workstation request header"}, status_code=403)
+        scope_token=geometry_scope.set((request.headers.get('x-geodrill-wellbore'),request.headers.get('x-geodrill-trajectory-type')) if request.headers.get('x-geodrill-wellbore') else None)
         try:
             response = await call_next(request)
         finally:
+            geometry_scope.reset(scope_token)
             if actor_token is not None:
                 current_actor.reset(actor_token)
         response.headers["X-Content-Type-Options"] = "nosniff"
@@ -153,6 +159,7 @@ def create_app(data_dir: Path | None = None, mode: str | None = None):
     app.include_router(engineering_router)
     app.include_router(qualification_router)
     app.include_router(wells_router)
+    app.include_router(trajectories_router)
 
     if team_mode:
         app.include_router(build_router(store))
@@ -247,13 +254,19 @@ def create_app(data_dir: Path | None = None, mode: str | None = None):
 
 
     @app.get("/api/projects/{project_id}/engineering-revisions")
-    def revisions_list(project_id: str, module: str | None = None):
-        return store.revisions(project_id, module)
+    def revisions_list(project_id: str, module: str | None = None, wellbore_id: str | None = None, trajectory_type: str | None = None):
+        return [r for r in store.revisions(project_id, module) if r.get('wellbore_id') == wellbore_id and (trajectory_type is None or r.get('trajectory_type') == trajectory_type)]
 
     def checked_geometry(project_id, revision_id):
         revision=store.revision(project_id, revision_id)
         if revision["module"] != "M1":
             raise ValueError("Expected a well-geometry revision.")
+        scope=geometry_scope.get()
+        if scope and (revision.get('wellbore_id')!=scope[0] or revision.get('trajectory_type')!=scope[1]):
+            raise ValueError('Geometry must belong to the selected wellbore and trajectory role.')
+        if revision.get('wellbore_id'):
+            from services.application.wellbore_revisions import WellboreRevisionService
+            WellboreRevisionService(store).get(revision['wellbore_id'],revision_id,'trajectory')
         source=store.dataset(project_id, revision["input"]["survey_dataset_id"])
         if source["source_hash"] != revision["result"]["survey_source_sha256"]:
             raise ValueError("Survey source differs from its preserved geometry revision.")
@@ -287,8 +300,21 @@ def create_app(data_dir: Path | None = None, mode: str | None = None):
                 raise HTTPException(409,str(error))
 
     @app.get("/api/projects/{project_id}/calculations")
-    def calculations_list(project_id: str, model: str | None = None):
-        return store.calculations(project_id,model)
+    def calculations_list(project_id: str, model: str | None = None, wellbore_id: str | None = None, trajectory_type: str | None = None):
+        records=store.calculations(project_id,model)
+        if wellbore_id is None:return records
+        owned=[]
+        for value in records:
+            geometry_id=value['inputs_si'].get('geometry_revision_id') or value.get('envelope',{}).get('geometry_revision_id')
+            if not geometry_id:continue
+            geometry=store.revision(project_id,geometry_id)
+            if geometry.get('wellbore_id')==wellbore_id and (trajectory_type is None or geometry.get('trajectory_type')==trajectory_type):owned.append(value)
+        return owned
+
+    @app.get('/api/projects/{project_id}/calculation-dependencies')
+    def calculation_dependencies(project_id: str):
+        from services.application.wellbore_revisions import WellboreRevisionService
+        return WellboreRevisionService(store).calculation_freshness(project_id)
 
     @app.post("/api/projects/{project_id}/calculations/casing")
     def calculate_casing(project_id: str, value: CasingCheckInput):

@@ -1,5 +1,6 @@
 import {useEffect,useRef,useState} from 'react';
-import {api} from './api';
+import {engineeringApi,scopeQuery,type EngineeringScope} from './api';
+import {CalculationFreshness} from './CalculationFreshness';
 import type {Revision} from './GeometryWorkspace';
 
 type Value=string|number|boolean|null|Value[]|{[key:string]:Value};
@@ -7,7 +8,7 @@ type Document=Record<string,Value>;
 type Schema={$ref?:string;type?:string;title?:string;description?:string;enum?:string[];anyOf?:Schema[];properties?:Record<string,Schema>;items?:Schema;required?:string[];$defs?:Record<string,Schema>;minimum?:number;maximum?:number;minLength?:number;maxLength?:number};
 type Model='stability'|'transport'|'surge-swab'|'torque-drag'|'buckling'|'dynamics'|'bit-condition'|'wear-fatigue'|'anomaly'|'gas-phase'|'supervision'|'offset-benchmarking'|'geomechanics';
 type Study={id:string;model:string;inputs_si:Document;result:Document;created_at:string};
-type Props={model:Model;project:{id:string;origin:string;datum:string};online:boolean;onError:(s:string)=>void;onNotice:(s:string)=>void};
+type Props=EngineeringScope & {model:Model;project:{id:string;origin:string;datum:string};online:boolean;onError:(s:string)=>void;onNotice:(s:string)=>void};
 const descriptions:Record<Model,[string,string]>={
   geomechanics:['Formation Geomechanics & In-Situ Stress','Bind isotropic elastic rock and closure-pressure assumptions to the accepted survey orientation. Compare Mohr–Coulomb or Mogi–Coulomb margins, hydrostatic fluid-density scenarios and numerical pressure intervals. Supplied certificate states and hashes do not establish independent verification or an approved mud window.'],
   'offset-benchmarking':['Offset Cohort Benchmarks & Analytics','Select historical records by formation, hole size, bit family, trajectory and currency. Review exclusions and supplied adjudication notes before comparing empirical duration and cost quantiles. These descriptive scenarios do not establish forecast probabilities or a budget commitment.'],
@@ -168,7 +169,9 @@ function Result({model,result}:{model:Model;result:Document}){
     {(result.limitations as string[]|undefined)?.length?<div className="scope-note"><div><strong>Interpretation limits</strong><ul>{(result.limitations as string[]).map((s,i)=><li key={i}>{s}</li>)}</ul></div></div>:null}
   </>;
 }
-export function ResearchStudy({model,project,online,onError,onNotice}:Props){
+export function ResearchStudy({model,project,online,onError,onNotice,wellboreId,trajectoryRole}:Props){
+  const api=engineeringApi({wellboreId,trajectoryRole});
+  const scoped=scopeQuery({wellboreId,trajectoryRole});
   const base='/projects/'+project.id;
   const [revisions,setRevisions]=useState<Revision[]>([]),[schemas,setSchemas]=useState<Record<Model,Schema>|null>(null),[form,setForm]=useState<Document|null>(null),[history,setHistory]=useState<Study[]>([]),[hydraulics,setHydraulics]=useState<Study[]>([]),[result,setResult]=useState<Study|null>(null),[busy,setBusy]=useState(false),[dirty,setDirty]=useState(false);
   const inputFile=useRef<HTMLInputElement>(null);const resultView=useRef<HTMLDivElement>(null);const generation=useRef(0);
@@ -177,14 +180,14 @@ export function ResearchStudy({model,project,online,onError,onNotice}:Props){
   const linked=hydraulicLinked||model==='buckling';
   const linkKey=hydraulicLinked?'hydraulics_calculation_id':'torque_drag_calculation_id';
   const sourceModel=hydraulicLinked?'hydraulics':'torque-drag';
-  useEffect(()=>{let active=true;Promise.all([api<Revision[]>(base+'/engineering-revisions?module=M1'),api<Record<Model,Schema>>('/research/schemas'),api<Study[]>(base+'/calculations?model='+model),linked?api<Study[]>(base+'/calculations?model='+sourceModel):Promise.resolve([])]).then(async([r,s,h,hy])=>{
+  useEffect(()=>{let active=true;Promise.all([api<Revision[]>(base+'/engineering-revisions?module=M1'+scoped),api<Record<Model,Schema>>('/research/schemas'),api<Study[]>(base+'/calculations?model='+model+scoped),linked?api<Study[]>(base+'/calculations?model='+sourceModel+scoped):Promise.resolve([])]).then(async([r,s,h,hy])=>{
     const draft=r.length?await api<Document>(base+'/research/'+model+'/template/'+r[0].id):null;
     if(active){if(draft&&linked)draft[linkKey]=hy.find(c=>c.inputs_si.geometry_revision_id===r[0]?.id)?.id??'';setRevisions(r);setSchemas(s);setHistory(h);setHydraulics(hy);setForm(draft);}
-  }).catch(e=>{if(active)onError(e.message);});return()=>{active=false;generation.current++;};},[base,model,linked,linkKey,sourceModel]);
+  }).catch(e=>{if(active)onError(e.message);});return()=>{active=false;generation.current++;};},[base,scoped,model,linked,linkKey,sourceModel]);
   useEffect(()=>{if(!result)return;const frame=requestAnimationFrame(()=>resultView.current?.scrollIntoView({block:'start'}));return()=>cancelAnimationFrame(frame);},[result?.id]);
   const update=(key:string,v:Value)=>{setForm(f=>f?{...f,[key]:v,...(key!=='evidence_state'&&key!=='study_name'&&f.evidence_state==='supplied'?{evidence_state:'unknown'}:{})}:f);setDirty(true);};
   const load=async(id:string)=>{const seq=++generation.current;setBusy(true);try{const draft=await api<Document>(base+'/research/'+model+'/template/'+id);if(seq!==generation.current)return;if(linked)draft[linkKey]=hydraulics.find(c=>c.inputs_si.geometry_revision_id===id)?.id??'';setForm(draft);setResult(null);setDirty(true);onNotice('Draft assumptions loaded. Review the evidence state and all inputs.');}catch(e){onError((e as Error).message);}finally{if(seq===generation.current)setBusy(false);}};
-  return <><div className="scope-note"><div><strong>{descriptions[model][0]}</strong><p>{descriptions[model][1]}</p></div></div>
+  return <><CalculationFreshness projectId={project.id} calculationId={result?.id}/><div className="scope-note"><div><strong>{descriptions[model][0]}</strong><p>{descriptions[model][1]}</p></div></div>
     {!revisions.length?<section className="panel"><h2>Save well geometry first</h2><p>This study requires an immutable M1 geometry revision and accepted directional survey.</p></section>:null}
     {form&&importsAvailable&&<section className="panel"><div className="panel-heading"><div><h2>Preserve study input JSON</h2><p>Import complete typed SI inputs, including native samples and external phase studies. The original file and SHA-256 are retained.</p></div></div><div className="research-import"><input ref={inputFile} type="file" aria-label="Study input JSON" accept=".json,application/json" disabled={busy||!online} onChange={async e=>{const file=e.target.files?.[0];if(!file)return;setBusy(true);onError('');try{if(file.size>2*1024*1024)throw new Error('Study input file exceeds 2 MiB.');const body=new FormData();body.append('file',file);const imported=await api<{inputs_si:Document;source_sha256:string}>(base+'/research/'+model+'/imports',{method:'POST',body});setForm(imported.inputs_si);setResult(null);setDirty(true);onNotice('Original SI input document preserved. Review evidence and calculate to save a study.');}catch(error){onError((error as Error).message);}finally{setBusy(false);if(inputFile.current)inputFile.current.value='';}}}/><button type="button" className="button secondary" onClick={()=>{const blob=new Blob([JSON.stringify({...form,input_dataset_id:null},null,2)],{type:'application/json'});const url=URL.createObjectURL(blob);const link=document.createElement('a');link.href=url;link.download=model+'-study-inputs-SI.json';link.click();setTimeout(()=>URL.revokeObjectURL(url),1000);}}>Download current inputs · SI JSON</button></div>{form.input_dataset_id&&<p className="well-note">Preserved input document: {String(form.input_dataset_id)}. Edits are compared with the original in the saved result.</p>}</section>}
     {form&&schemas&&<section className="panel"><div className="panel-heading"><div><h2>Study inputs & evidence</h2><p>Pressure and force fields display engineering units; saved inputs use SI units. Supplied evidence resets to unknown when assumptions change.</p></div><button className="button secondary" disabled={busy||!online} onClick={()=>load(String(form.geometry_revision_id))}>Reset draft assumptions</button></div>

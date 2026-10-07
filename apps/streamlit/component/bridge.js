@@ -28,6 +28,10 @@
     const url=new URL(typeof input==="string"?input:input.url,location.href);
     if(url.origin!==location.origin || !url.pathname.startsWith("/api/"))return nativeFetch(input,options);
     const req={id:instance+":"+(++serial),path:url.pathname+url.search,method:options.method??"GET"};
+    const headers=new Headers(options.headers??{});req.headers={};
+    for(const name of ['x-geodrill-wellbore','x-geodrill-trajectory-type']){
+      const value=headers.get(name);if(value!==null)req.headers[name]=value;
+    }
     if(options.body instanceof FormData){
       req.form=[];
       for(const [name,value] of options.body.entries()){
