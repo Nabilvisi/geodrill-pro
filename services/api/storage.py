@@ -205,6 +205,10 @@ class Store:
     def calculation(self, project_id, model, inputs, result):
         self.project(project_id)
         value = {"id": str(uuid4()), "model": model, "inputs_si": inputs, "result": result, "created_at": now()}
+        if inputs.get('geometry_revision_id'):
+            geometry=self.revision(project_id,inputs['geometry_revision_id'])
+            if geometry.get('wellbore_id'):
+                value.update(wellbore_id=geometry['wellbore_id'],trajectory_type=geometry['trajectory_type'],survey_revision_id=geometry['survey_revision_id'])
         with self.connect() as db:
             db.execute("BEGIN IMMEDIATE")
             db.execute("INSERT INTO calculations VALUES(?,?,?,?)", (value["id"], project_id, canonical(value), value["created_at"]))
@@ -240,6 +244,11 @@ class Store:
                        "project": project, "datasets": datasets, "events": self.events(project_id), "calculations": self.calculations(project_id), "engineering_revisions": self.revisions(project_id),
                        "audit_head": history["head"], "audit_entries": [e for e in history["entries"] if e["project_id"] == project_id],
                        "limitations": ["No live interface or equipment control.", "Surface MSE is a proxy. Point-balance pressure losses are supplied; M6 laminar losses are model-calculated within its declared envelope.", "No independently validated uncertainty or field accuracy.", "Replay is normalized source-time playback, not arrival-time/as-known reconstruction."]}
+            from .wellbore_archive import report_hierarchy
+            hierarchy=report_hierarchy(self,project_id)
+            if hierarchy['wells'] or hierarchy['fields']:
+                payload['wellbore_state']=hierarchy
+                payload['schema_version']='1.2'
             encoded = canonical(payload)
             sha = digest(encoded.encode())
             db.execute("BEGIN IMMEDIATE")
@@ -284,7 +293,7 @@ class Store:
         sha = digest(encoded.encode())
         with self.connect() as db:
             db.execute("BEGIN IMMEDIATE")
-            latest = db.execute("SELECT id FROM engineering_revisions WHERE project_id=? AND module=? ORDER BY rowid DESC LIMIT 1", (project_id,module)).fetchone()
+            latest = db.execute("SELECT id FROM engineering_revisions WHERE project_id=? AND module=? AND json_extract(payload,'$.wellbore_id') IS NULL ORDER BY rowid DESC LIMIT 1", (project_id,module)).fetchone()
             current = latest["id"] if latest else None
             if current != base_revision_id:
                 raise RevisionConflict("Geometry changed since it was opened. Reload the latest revision before saving.")
@@ -336,6 +345,12 @@ class Store:
                     _add(f"keys/trusted/{fingerprint}.pub", public_key.public_bytes_raw())
 
             with self.connect() as db:
+                db.execute('BEGIN')
+                from .wellbore_archive import read_hierarchy
+                hierarchy=read_hierarchy(db,project_id)
+                has_hierarchy=any(hierarchy.values())
+                if has_hierarchy:
+                    _add('wellbores/hierarchy.json',canonical(hierarchy).encode('utf-8'))
                 datasets = [dict(r) for r in db.execute("SELECT * FROM datasets WHERE project_id=?", (project_id,)).fetchall()]
                 _add("datasets/datasets.json", canonical(datasets).encode("utf-8"))
                 for d in datasets:
@@ -400,7 +415,7 @@ class Store:
 
             manifest = {
                 "format": "geodrill-project-bundle",
-                "format_version": "1.0",
+                "format_version": "1.1" if has_hierarchy else "1.0",
                 "project_id": project_id,
                 "project_name": project["name"],
                 "exported_at": now(),
@@ -444,7 +459,7 @@ class Store:
         except Exception:
             raise ValueError("Corrupted bundle manifest")
 
-        if not isinstance(manifest, dict) or manifest.get("format") != "geodrill-project-bundle" or manifest.get("format_version") != "1.0":
+        if not isinstance(manifest, dict) or manifest.get("format") != "geodrill-project-bundle" or manifest.get("format_version") not in {'1.0','1.1'}:
             raise ValueError("Unsupported project bundle format")
         file_hashes = manifest.get("file_hashes", {})
         if not isinstance(file_hashes, dict) or set(file_hashes) != set(names) - {"manifest.json"}:
@@ -535,6 +550,19 @@ class Store:
                     raise ValueError("Bundle programme transition signature mismatch")
                 previous = transition["hash"]
 
+        hierarchy=None
+        if (manifest['format_version']=='1.1') != ('wellbores/hierarchy.json' in names):
+            raise ValueError('Bundle hierarchy format identity is inconsistent.')
+        if manifest['format_version']=='1.1':
+            from .wellbore_archive import validate_hierarchy
+            from packages.engineering.models import SurveyRequest
+            survey_sources={}
+            for dataset in json.loads(zf.read('datasets/datasets.json')):
+                if dataset['kind']=='survey':
+                    rows=pl.read_parquet(io.BytesIO(zf.read(f"datasets/parquet/{dataset['id']}.parquet"))).to_dicts()
+                    survey_sources[dataset['id']]=SurveyRequest(stations=[{k:r[k] for k in ('md_m','inclination_rad','azimuth_rad')} for r in rows])
+            hierarchy=validate_hierarchy(json.loads(zf.read('wellbores/hierarchy.json')),project_id,json.loads(zf.read('datasets/datasets.json')),json.loads(zf.read('revisions/revisions.json')),survey_sources,json.loads(zf.read('calculations/calculations.json')))
+
         with self._restore_transaction() as (db, created_files):
             db.execute("BEGIN IMMEDIATE")
             existing = db.execute("SELECT id FROM projects WHERE id=?", (project_id,)).fetchone()
@@ -620,6 +648,10 @@ class Store:
             for m in members:
                 db.execute("INSERT OR REPLACE INTO project_members VALUES(?,?,?,?)",
                            (m["project_id"], m["user_id"], m["added_by"], m["added_at"]))
+
+            if hierarchy:
+                from .wellbore_archive import restore_hierarchy
+                restore_hierarchy(db,hierarchy)
 
             self.audit(db, "bundle.restored", project_id, {"manifest_hash": digest(manifest_raw),
                        "original_history": json.loads(zf.read("audit/audit.json")),

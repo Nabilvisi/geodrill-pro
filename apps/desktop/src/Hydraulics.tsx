@@ -1,5 +1,6 @@
 import {useEffect,useRef,useState} from 'react';
-import {api} from './api';
+import {engineeringApi,scopeQuery,type EngineeringScope} from './api';
+import {CalculationFreshness} from './CalculationFreshness';
 import type {Revision} from './GeometryWorkspace';
 
 type StringSection={name:string;top_md_m:number;bottom_md_m:number;outside_diameter_m:number;inside_diameter_m:number;source_note:string};
@@ -19,7 +20,7 @@ type Study={id:string;created_at:string;inputs_si:Input;result:{status:string;mu
   nominal:null|{annular_loss_pa:number;pipe_loss_pa:number;bit_loss_pa:number;surface_loss_pa:number;standpipe_gauge_pa:number;required_supply_gauge_pa:number;segments:Segment[];numerical_loss_change_indicator_pa:number;bottom_path_balance_residual_pa:number;mass_in_kg_s:number;mass_out_kg_s:number};
   sensitivity:null|{tested_admissible_corners:number;tested_withheld_corners:Record<string,unknown>[];minimum_above_pore:Minimum;minimum_below_fracture:Minimum;cases:unknown[]};
   surface_equipment?:{maximum_tested_supply_pa:number;supplied_rating_pa:number|null;margin_pa:number|null;rating_source:string|null}}};
-type Props={project:{id:string;datum:string;origin:string};online:boolean;onError:(s:string)=>void;onNotice:(s:string)=>void};
+type Props=EngineeringScope & {project:{id:string;datum:string;origin:string};online:boolean;onError:(s:string)=>void;onNotice:(s:string)=>void};
 const fmt=(v:number|null|undefined,d=3)=>v==null?'—':(Math.abs(v)<.5*10**(-d)?0:v).toLocaleString('en-US',{maximumFractionDigits:d});
 function initial(project:Props['project'],revision?:Revision):Input{
   const td=revision?.result.total_depth_md_m??1000;
@@ -56,11 +57,13 @@ function PressurePlot({rows}:{rows:Point[]}){
     <text x={left} y={15}>MD (m), increasing downward</text><text x={width-right} y={15} textAnchor="end">Pressure (MPa gauge)</text>
   </svg>;
 }
-export function Hydraulics({project,online,onError,onNotice}:Props){
+export function Hydraulics({project,online,onError,onNotice,wellboreId,trajectoryRole}:Props){
+  const api=engineeringApi({wellboreId,trajectoryRole});
+  const scoped=scopeQuery({wellboreId,trajectoryRole});
   const base='/projects/'+project.id;
   const resultView=useRef<HTMLElement|null>(null);
   const [revisions,setRevisions]=useState<Revision[]>([]),[form,setForm]=useState<Input>(()=>initial(project)),[history,setHistory]=useState<Study[]>([]),[result,setResult]=useState<Study|null>(null),[busy,setBusy]=useState(false),[dirty,setDirty]=useState(false);
-  useEffect(()=>{let active=true;Promise.all([api<Revision[]>(base+'/engineering-revisions?module=M1'),api<Study[]>(base+'/calculations?model=hydraulics')]).then(([r,h])=>{if(active){setRevisions(r);setForm(initial(project,r[0]));setHistory(h);}}).catch(e=>{if(active)onError(e.message);});return()=>{active=false;};},[base]);
+  useEffect(()=>{let active=true;Promise.all([api<Revision[]>(base+'/engineering-revisions?module=M1'+scoped),api<Study[]>(base+'/calculations?model=hydraulics'+scoped)]).then(([r,h])=>{if(active){setRevisions(r);setForm(initial(project,r[0]));setHistory(h);}}).catch(e=>{if(active)onError(e.message);});return()=>{active=false;};},[base,scoped]);
   useEffect(()=>{if(!result)return;const frame=requestAnimationFrame(()=>resultView.current?.scrollIntoView({block:'start'}));return()=>cancelAnimationFrame(frame);},[result?.id]);
   const update=(change:Partial<Input>)=>{setForm(f=>({...f,...change}));setDirty(true);};
   const mud=(change:Partial<Input['mud']>)=>{setForm(f=>({...f,mud:{...f.mud,...change}}));setDirty(true);};
@@ -71,9 +74,9 @@ export function Hydraulics({project,online,onError,onNotice}:Props){
   const example=async()=>{setBusy(true);try{setForm(await api<Input>(base+'/examples/hydraulics/'+form.geometry_revision_id));setDirty(true);onNotice('Synthetic fluid, string, nozzle, pressure-window and rating assumptions loaded.');}catch(e){onError((e as Error).message);}finally{setBusy(false);}};
   const changeString=(i:number,change:Partial<StringSection>)=>update({string_sections:form.string_sections.map((s,j)=>j===i?{...s,...change}:s)});
   const changeKnot=(i:number,change:Partial<Knot>)=>window({evidence_state:'unreviewed',knots:form.pressure_window.knots.map((k,j)=>j===i?{...k,...change}:k)});
-  return <><div className="scope-note"><div><strong>M6 · Steady single-phase circulation</strong><p>Calculate pipe and concentric-annulus friction with Newtonian, Bingham or Herschel–Bulkley rheology. Hydrostatic head uses TVD; friction uses MD. Continuous margin extrema and tested sensitivity scenarios remain separate from operating approval.</p></div></div>
+  return <><CalculationFreshness projectId={project.id} calculationId={result?.id}/><div className="scope-note"><div><strong>M6 · Steady single-phase circulation</strong><p>Calculate pipe and concentric-annulus friction with Newtonian, Bingham or Herschel–Bulkley rheology. Hydrostatic head uses TVD; friction uses MD. Continuous margin extrema and tested sensitivity scenarios remain separate from operating approval.</p></div></div>
   <section className="panel hydraulic-editor"><div className="panel-heading"><div><h2>Scenario, mud record & circulation envelope</h2><p>Fully developed laminar flow, stationary concentric walls, constant fluid properties.</p></div>{project.origin==='synthetic'&&<button className="button secondary" onClick={example} disabled={busy||!online||!form.geometry_revision_id}>Load synthetic hydraulics example</button>}</div>
-  <form onSubmit={async e=>{e.preventDefault();setBusy(true);onError('');try{const saved=await api<Study>(base+'/calculations/hydraulics',{method:'POST',body:JSON.stringify(form)});setResult(saved);setDirty(false);setHistory(await api<Study[]>(base+'/calculations?model=hydraulics'));onNotice('Pressure profile, limiting locations and supplied evidence saved.');}catch(e){onError((e as Error).message);}finally{setBusy(false);}}}>
+  <form onSubmit={async e=>{e.preventDefault();setBusy(true);onError('');try{const saved=await api<Study>(base+'/calculations/hydraulics',{method:'POST',body:JSON.stringify(form)});setResult(saved);setDirty(false);setHistory(await api<Study[]>(base+'/calculations?model=hydraulics'+scoped));onNotice('Pressure profile, limiting locations and supplied evidence saved.');}catch(e){onError((e as Error).message);}finally{setBusy(false);}}}>
     <div className="lab-fields">
       <label className="field-label">Study name<input required minLength={3} maxLength={100} value={form.study_name} onChange={e=>update({study_name:e.target.value})}/></label>
       <label className="field-label">Geometry context<select required value={form.geometry_revision_id} onChange={e=>{setForm(initial(project,revisions.find(r=>r.id===e.target.value)));setDirty(true);onNotice('New geometry selected. The draft context and evidence states were reset.');}}><option value="">Save M1 geometry first</option>{revisions.map(r=><option key={r.id} value={r.id}>{r.id.slice(0,8)+' · '+r.change_note}</option>)}</select></label>

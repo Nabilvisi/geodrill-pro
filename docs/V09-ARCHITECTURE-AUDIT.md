@@ -22,6 +22,10 @@ The application is labelled **0.9.0-alpha.1**, an engineering research workstati
 - Context headers show the actual saved revision and declared/unknown references. Research, withheld and stale states are not replaced with a generic verified badge. The approved blue/teal palette is applied to the refreshed shell, with native CSS replacing unconfigured Tailwind classes in repaired pages.
 - Windows preview packaging keeps the prior bundle and records exact source bytes. A dedicated `v09-verified-release` branch can trigger an unsigned prerelease using the existing regression, smoke, archive, installer and recovery checks. Version tags continue to require trusted publisher signing.
 
+## Alpha.2 continuation candidate
+
+The next source increment adds wellbore-owned immutable planned/actual/scenario sources and trajectories, explicit CSV/adoption/authored inputs, scoped geometry and study selection, saved uncertainty/proximity with unsupported correlation rejected, and subject/offset dependency staleness. Reports and project/workstation recovery retain hierarchy, historical records and dependency state. The local suite passes 697 tests. [Detailed acceptance](V09-WELLBORE-REVISIONS.md). This is a candidate; the alpha.1 publication evidence below remains historical and unchanged.
+
 ## Architecture acceptance matrix
 
 | Phase | Current evidence | Status and acceptance still open |
@@ -29,10 +33,10 @@ The application is labelled **0.9.0-alpha.1**, an engineering research workstati
 | 0 — Baseline freeze | Clean 3268a82 retained in Git; 668-test local rerun; previous bundle retained on rebuild; original report archived | Baseline observed. This is not a newly signed v0.8 freeze release or a clean-machine qualification. |
 | 1 — Architecture refactor | Domain envelopes, application services, modular v1 routers and preserved kernel/API paths exist | Partial. `services/api/main.py` still carries legacy research/application logic; uniform stable errors and complete dependency graph remain open. |
 | 2 — Design system and shell | Brand assets, feature navigation, contextual header, command palette, repaired blue/teal styling | Partial. Docking, persisted panel layouts, complete light/dark themes, density modes and broad keyboard/accessibility acceptance remain open. |
-| 3 — Project/well domain | SQLite migration/hierarchy, persisted CRUD tree, membership checks and cross-parent rejection tests | Partial. Per-wellbore survey/trajectory revision migration, edit workflows, and tree-driven complete engineering context remain open. |
-| 4 — Directional flagship | Source-backed survey and minimum-curvature coordinates; uncertainty/proximity/geodesy kernels; metadata withholding; shared MD | Partial. Complete planned/actual wellbore workflow, integrated offset selection/proximity UI, synchronized depth plots and field/tool-specialist review remain open. |
+| 3 — Project/well domain | SQLite migration/hierarchy, persisted CRUD tree, membership checks and cross-parent rejection tests | Owned survey/trajectory revisions, original-source import/adoption, edit and scoped context now implemented in alpha.2 candidate. Broader entity edit/delete policies and uniform case management remain open. |
+| 4 — Directional flagship | Source-backed survey and minimum-curvature coordinates; uncertainty/proximity/geodesy kernels; metadata withholding; shared MD | Planned/actual/scenario revisions, role comparisons, shared MD, saved uncertainty and explicit offset proximity now connected in alpha.2 candidate. Covariance separation factors/correlated errors, advanced synchronization and field/tool-specialist review remain open. |
 | 5 — 3D workspace | Interim saved-kernel SVG projection, source/datum disclosure, casing/formation layers and selected-station coordinates | Incomplete. No Three.js/R3F dependency, full scene graph, uncertainty/collision meshes, all entity picking, WebGL load/performance acceptance or BHA/target/offset scene integration. |
-| 6 — Engineering workspaces | Existing source → saved geometry → research calculation → immutable report paths retained; repaired v1 torque/drag and geomechanics integration | Partial. Common case selection/comparison across all new workspaces and full wellbore revision ownership remain open. Existing model-specific limitations still apply. |
+| 6 — Engineering workspaces | Existing source → saved geometry → research calculation → immutable report paths retained; repaired v1 torque/drag and geomechanics integration | Wellbore/role geometry selection and immutable calculation dependency overlays now connected in alpha.2 candidate. Common case comparison across all workspaces and broader dependency graph remain open. Existing model-specific limitations still apply. |
 | 7 — Realtime foundation | Read-only capture/client/replay and quality infrastructure with deterministic fixture tests | Partial. Existing lab implementation does not establish authorized live provider interoperability, all WITSML objects, field latency or uninterrupted reconnect under representative conditions. |
 | 8 — Desktop | Existing PyInstaller/FastAPI launcher, source snapshots, portable ZIP, Inno installer and recovery checks | Legacy research distribution. Tauri managed sidecar, trusted signing, automatic updater, binary rollback and independent clean-machine operator acceptance remain open. |
 | 9 — Enterprise | Local team roles, membership/audit controls and new v1 isolation tests | Incomplete. PostgreSQL/PostGIS/Timescale, object storage, OIDC, production tenancy/monitoring and external security review are not delivered by the local team API. |
@@ -52,6 +56,6 @@ Passing tests, an executable smoke run, a spatial rendering or a successful depl
 
 ## Next implementation gates
 
-1. Finish the wellbore-owned survey/trajectory/revision migration and complete directional uncertainty/proximity workflow with source staleness and fixed report acceptance.
+1. Finish candidate Windows and GitHub CI acceptance and review its bounded wellbore workflow before publication; do not label the full architecture complete.
 2. Implement the architecture's Three.js/R3F scene and synchronized grid/plots, then validate coordinates, picking, covariance axes and representative load. Introduce docking/themes without altering calculation authority.
 3. Complete Tauri/update/rollback and the intended enterprise stack as separately verified increments, followed by model-specific independent qualification and external security review.

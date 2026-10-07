@@ -1,5 +1,6 @@
 import {useEffect,useState} from 'react';
-import {api} from './api';
+import {engineeringApi,scopeQuery,type EngineeringScope} from './api';
+import {CalculationFreshness} from './CalculationFreshness';
 import type {Revision} from './GeometryWorkspace';
 
 type Interval={lower:number;upper:number;meaning:string};
@@ -7,7 +8,7 @@ type Display={rh_ohm_m:number|null;rv_ohm_m:number|null;boundary_distance_m:numb
 type Sample={source_index:number;native_md_m:number;aligned_md_m:number;status:string;reasons:string[];display:Display|null;receipt_delay_s:number|null;supplied:Record<string,unknown>};
 type Source={id:string;kind:string;filename:string;source_hash:string;metadata:Record<string,unknown>;row_count:number};
 type Study={id:string;created_at:string;inputs_si:Record<string,unknown>;result:{status:string;origin:string;model:string;eligible_count:number;withheld_count:number;missing_resistivity_interval_count:number;source_sha256:string;geometry_sha256:string;tool:Record<string,unknown>;source_reference:string;data_rights_note:string;integration_readiness:Record<string,boolean>;warnings:string[];rows:Sample[]}};
-type Props={project:{id:string;datum:string;origin:string};online:boolean;onError:(s:string)=>void;onNotice:(s:string)=>void};
+type Props=EngineeringScope & {project:{id:string;datum:string;origin:string};online:boolean;onError:(s:string)=>void;onNotice:(s:string)=>void};
 const format=(x:number|null,d=3)=>x==null?'Not supplied':x.toLocaleString('en-US',{maximumFractionDigits:d});
 function ResultPlot({rows,boundary=false}:{rows:Sample[];boundary?:boolean}){
   const eligible=rows.filter(r=>r.display!==null&&(boundary?r.display!.boundary_distance_m:r.display!.rh_ohm_m)!==null);
@@ -29,18 +30,20 @@ function ResultPlot({rows,boundary=false}:{rows:Sample[];boundary?:boolean}){
     <text x={width/2} y={height-7} textAnchor="middle">Aligned MD (m)</text><text x={left} y={15}>{boundary?'Signed supplied distance (m)':'Horizontal resistivity (ohm.m)'}</text>
   </svg>;
 }
-export function EMVendor({project,online,onError,onNotice}:Props){
+export function EMVendor({project,online,onError,onNotice,wellboreId,trajectoryRole}:Props){
+  const api=engineeringApi({wellboreId,trajectoryRole});
+  const scoped=scopeQuery({wellboreId,trajectoryRole});
   const base='/projects/'+project.id;
   const [sources,setSources]=useState<Source[]>([]),[source,setSource]=useState('');
   const [revisions,setRevisions]=useState<Revision[]>([]),[revision,setRevision]=useState('');
   const [history,setHistory]=useState<Study[]>([]),[result,setResult]=useState<Study|null>(null);
   const [study,setStudy]=useState(''),[datum,setDatum]=useState(project.datum),[alignment,setAlignment]=useState('unverified'),[offset,setOffset]=useState('0'),[alignmentNote,setAlignmentNote]=useState(''),[reviewNote,setReviewNote]=useState('');
   const [file,setFile]=useState<File|null>(null),[busy,setBusy]=useState(false),[dirty,setDirty]=useState(false);
-  useEffect(()=>{let active=true;Promise.all([api<Source[]>(base+'/datasets'),api<Revision[]>(base+'/engineering-revisions?module=M1'),api<Study[]>(base+'/calculations?model=em_vendor')]).then(([s,r,h])=>{if(active){setSources(s.filter(x=>x.kind==='em_vendor'));setSource(s.find(x=>x.kind==='em_vendor')?.id??'');setRevisions(r);setRevision(r[0]?.id??'');setHistory(h);}}).catch(e=>{if(active)onError(e.message);});return()=>{active=false;};},[base]);
+  useEffect(()=>{let active=true;Promise.all([api<Source[]>(base+'/datasets'),api<Revision[]>(base+'/engineering-revisions?module=M1'+scoped),api<Study[]>(base+'/calculations?model=em_vendor'+scoped)]).then(([s,r,h])=>{if(active){setSources(s.filter(x=>x.kind==='em_vendor'));setSource(s.find(x=>x.kind==='em_vendor')?.id??'');setRevisions(r);setRevision(r[0]?.id??'');setHistory(h);}}).catch(e=>{if(active)onError(e.message);});return()=>{active=false;};},[base,scoped]);
   const refreshSources=async(id:string)=>{setSources((await api<Source[]>(base+'/datasets')).filter(x=>x.kind==='em_vendor'));setSource(id);setAlignment('unverified');setAlignmentNote('');setReviewNote('');setDirty(true);};
   const example=async()=>{setBusy(true);try{const imported=await api<{id:string}>(base+'/examples/em-vendor',{method:'POST'});await refreshSources(imported.id);setStudy('Synthetic vendor-result review');setAlignment('supplied_confirmed');setOffset('0');setAlignmentNote('Generated native MD aligned with the synthetic project; no tool offset applied');setReviewNote('Synthetic software example only; no physical EM instrument, forward solve or qualified inversion');onNotice('Synthetic import loaded with vendor quality, missing values and unqualified tool metadata.');}catch(e){onError((e as Error).message);}finally{setBusy(false);}};
   const selected=sources.find(x=>x.id===source);
-  return <><div className="scope-note"><div><strong>M5 · Imported EM vendor results</strong><p>Inspect supplied resistivity and boundary interpretations against saved well geometry. Acquisition time, receipt delay, uncertainty and tool metadata stay attached to the source. Native EM inversion requires a qualified instrument and forward model.</p></div></div>
+  return <><CalculationFreshness projectId={project.id} calculationId={result?.id}/><div className="scope-note"><div><strong>M5 · Imported EM vendor results</strong><p>Inspect supplied resistivity and boundary interpretations against saved well geometry. Acquisition time, receipt delay, uncertainty and tool metadata stay attached to the source. Native EM inversion requires a qualified instrument and forward model.</p></div></div>
     <section className="panel em-import"><div className="panel-heading"><div><h2>Preserve the vendor interchange</h2><p>Strict JSON contract · maximum 1,000 native samples · original file and SHA-256 retained</p></div><a className="button secondary" href={'/api'+base+'/em-vendor/template'} download>Download example JSON</a></div>
       <form className="em-upload" onSubmit={async e=>{e.preventDefault();if(!file)return;setBusy(true);onError('');try{const body=new FormData();body.append('file',file);const imported=await api<{id:string;duplicate:boolean}>(base+'/em-vendor/imports',{method:'POST',body});await refreshSources(imported.id);onNotice(imported.duplicate?'Identical source already preserved.':'EM vendor source preserved. Confirm depth alignment before review.');}catch(e){onError((e as Error).message);}finally{setBusy(false);}}}>
         <label className="field-label">Vendor result JSON<input type="file" accept=".json,application/json" required onChange={e=>setFile(e.target.files?.[0]??null)}/></label><button className="button primary" disabled={busy||!online||!file}>Import vendor results</button>
@@ -48,7 +51,7 @@ export function EMVendor({project,online,onError,onNotice}:Props){
       </form><p className="well-note">The example declares its synthetic origin. Historical imports must match this project's well name and datum and must truthfully identify their origin, source and data rights.</p>
     </section>
     <section className="panel em-editor"><div className="panel-heading"><div><h2>Depth alignment & review context</h2><p>Keep measurement-reference MD separate from tool-to-bit spacing.</p></div></div>
-      <form onSubmit={async e=>{e.preventDefault();setBusy(true);onError('');try{const inputs={study_name:study,dataset_id:source,geometry_revision_id:revision,depth_datum:datum,alignment_status:alignment,md_offset_m:Number(offset),depth_alignment_note:alignmentNote,reviewer_note:reviewNote};const saved=await api<Study>(base+'/calculations/em-vendor',{method:'POST',body:JSON.stringify(inputs)});setResult(saved);setHistory(await api<Study[]>(base+'/calculations?model=em_vendor'));setDirty(false);onNotice('Vendor review saved with original evidence and geometry hashes.');}catch(e){onError((e as Error).message);}finally{setBusy(false);}}}>
+      <form onSubmit={async e=>{e.preventDefault();setBusy(true);onError('');try{const inputs={study_name:study,dataset_id:source,geometry_revision_id:revision,depth_datum:datum,alignment_status:alignment,md_offset_m:Number(offset),depth_alignment_note:alignmentNote,reviewer_note:reviewNote};const saved=await api<Study>(base+'/calculations/em-vendor',{method:'POST',body:JSON.stringify(inputs)});setResult(saved);setHistory(await api<Study[]>(base+'/calculations?model=em_vendor'+scoped));setDirty(false);onNotice('Vendor review saved with original evidence and geometry hashes.');}catch(e){onError((e as Error).message);}finally{setBusy(false);}}}>
         <div className="lab-fields"><label className="field-label">Study name<input required maxLength={100} minLength={3} value={study} onChange={e=>{setStudy(e.target.value);setDirty(true);}}/></label>
           <label className="field-label">EM vendor source<select required value={source} onChange={e=>{setSource(e.target.value);setAlignment('unverified');setAlignmentNote('');setReviewNote('');setDirty(true);}}><option value="">Import a source</option>{sources.map(s=><option key={s.id} value={s.id}>{s.filename+' · '+s.row_count+' samples'}</option>)}</select></label>
           <label className="field-label">Geometry context<select required value={revision} onChange={e=>{setRevision(e.target.value);setAlignment('unverified');setAlignmentNote('');setDirty(true);}}><option value="">Save M1 geometry first</option>{revisions.map(r=><option key={r.id} value={r.id}>{r.id.slice(0,8)+' · '+r.change_note}</option>)}</select></label>

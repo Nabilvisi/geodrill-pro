@@ -82,6 +82,14 @@ class Workspace:
                     size+=len(value.encode());data[part["name"]]=value
             if size>MAX_BODY+65536:raise ValueError("Multipart input exceeds the 2 MiB limit.")
             kw.update(data=data,files=files)
+        headers=request.get('headers',{})
+        if not isinstance(headers,dict) or set(headers)-{'x-geodrill-wellbore','x-geodrill-trajectory-type'}:
+            raise ValueError('Only workstation geometry-scope headers are allowed.')
+        if any(not isinstance(v,str) or not v or len(v)>128 for v in headers.values()):
+            raise ValueError('Invalid workstation geometry scope.')
+        if headers and (set(headers)!={'x-geodrill-wellbore','x-geodrill-trajectory-type'} or headers['x-geodrill-trajectory-type'] not in {'planned','actual','scenario'}):
+            raise ValueError('Both wellbore and valid trajectory role are required for geometry scope.')
+        kw['headers']={**kw.get('headers',{}),**headers}
         response=self.client.request(method,path,**kw)
         # Keep the original immutable export bytes for Streamlit's native HTTP
         # download control as well as the embedded workstation's blob link.

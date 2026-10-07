@@ -2,7 +2,7 @@
 ; Per-user installer. Packaging does not establish engineering qualification.
 
 #define MyAppName "GeoDrill Pro Engineering Workstation"
-#define MyAppVersion "0.9.0-alpha.1"
+#define MyAppVersion "0.9.0-alpha.2"
 #define MyAppPublisher "GeoDrill Pro Engineering Team"
 #define MyAppURL "https://geodrill-pro.streamlit.app/"
 #define MyAppExeName "GeoDrillPro.exe"
