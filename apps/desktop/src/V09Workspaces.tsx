@@ -1,10 +1,11 @@
-import React from 'react';
+import React, {useEffect, useState} from 'react';
 import {
   ArrowRight, CheckCircle2, CircleAlert, Database, Gauge, Layers3,
   Radio, ShieldCheck, WifiOff, Activity, FileCheck2, Clock3, Target,
   Crosshair, Boxes, BookOpen, LockKeyhole, Settings2
 } from 'lucide-react';
 import type {Revision} from './GeometryWorkspace';
+import {api} from './api';
 import {
   IconProjects, IconWellPlanning, IconDirectional, IconSurvey, IconAntiCollision,
   Icon3DWell, IconHydraulics, IconTorqueDrag, IconCasing, IconBHA,
@@ -102,37 +103,48 @@ function SubjectPlan({revision,selectedMD,onSelectMD}:{revision:Revision|null;se
 export function AntiCollisionWorkspace({
   project,survey,revision,selectedMD,onSelectMD,onDirectional,onData,on3D
 }:{project:ProjectLike;survey:Dataset|null;revision:Revision|null;selectedMD:number|null;onSelectMD:(md:number)=>void;onDirectional:()=>void;onData:()=>void;on3D:()=>void}){
+  const [studies,setStudies]=useState<Array<{
+    id:string;created_at:string;result:{
+      geometry_revision_id:string;offset_well_name:string;offset_source_filename:string;min_c2c_distance_m:number;
+      geometry_type:string;closest_approach?:{ref_md_m:number;offset_md_m:number;c2c_distance_m:number};
+      uncertainty_evidence?:{both_linked_and_calculated:boolean};clearance_generated:boolean;
+    }
+  }>>([]);
+  useEffect(()=>{let active=true;api<typeof studies>('/projects/'+project.id+'/calculations?model=anticollision')
+    .then(v=>{if(active)setStudies(v);}).catch(()=>{if(active)setStudies([]);});return()=>{active=false;};},[project.id,revision?.id]);
   const geometryCurrent=Boolean(revision&&revision.input.survey_dataset_id===survey?.id);
+  const latest=revision?studies.find(s=>s.result.geometry_revision_id===revision.id)??null:null;
+  const uncertaintyReady=Boolean(latest?.result.uncertainty_evidence?.both_linked_and_calculated);
   return <div className="v09-workspace">
     <div className="workspace-toolbar">
-      <div><span className="workspace-kicker">ANTI-COLLISION / RESEARCH WORKFLOW</span><strong>{project.well_name}</strong></div>
-      <div className="toolbar-actions"><button className="button secondary" onClick={onDirectional}>Directional</button><button className="button secondary" onClick={on3D}>Open 3D</button></div>
+      <div><span className="workspace-kicker">ANTI-COLLISION / SOURCE-BOUND REVIEW</span><strong>{project.well_name}</strong></div>
+      <div className="toolbar-actions"><button className="button secondary" onClick={onDirectional}>Directional</button><button className="button primary" onClick={on3D}><Icon3DWell size={16}/>Open 3D spatial study</button></div>
     </div>
     <div className="workspace-three-column">
       <aside className="workspace-rail">
         <div className="rail-section"><span>SUBJECT WELL</span><strong>{project.well_name}</strong><small>{survey?.filename??'No active survey'}</small></div>
-        <div className="rail-section"><span>GEOMETRY</span><div className={geometryCurrent?'state-row ok':'state-row warn'}>{geometryCurrent?<CheckCircle2 size={15}/>:<CircleAlert size={15}/>}<b>{geometryCurrent?'Current':'Missing / stale'}</b></div><small>{revision?revision.id.slice(0,8):'No saved revision'}</small></div>
-        <div className="rail-section"><span>OFFSETS</span><div className="state-row muted"><Database size={15}/><b>0 selected</b></div><small>Offset surveys are not yet bound to this workspace.</small></div>
+        <div className="rail-section"><span>GEOMETRY</span><div className={geometryCurrent?'state-row ok':'state-row warn'}>{geometryCurrent?<CheckCircle2 size={15}/>:<CircleAlert size={15}/>}<b>{geometryCurrent?'Current selection':'Saved / historical'}</b></div><small>{revision?revision.id.slice(0,8):'No saved revision'}</small></div>
+        <div className="rail-section"><span>OFFSET STUDY</span><div className={latest?'state-row ok':'state-row muted'}>{latest?<CheckCircle2 size={15}/>:<Database size={15}/>}<b>{latest?latest.result.offset_source_filename:'Not calculated'}</b></div><small>{latest?'Study '+latest.id.slice(0,8)+' · '+new Date(latest.created_at).toUTCString():'Select a preserved offset survey and explicit tie-in in the 3D workspace.'}</small></div>
         <button className="button secondary rail-button" onClick={onData}>Import / review sources</button>
       </aside>
       <section className="workspace-canvas">
-        <div className="canvas-heading"><div><h3>Plan view</h3><p>Subject trajectory only. No separation factor is generated without offset geometry and uncertainty evidence.</p></div><span className="badge amber">Clearance withheld</span></div>
+        <div className="canvas-heading"><div><h3>Subject plan context</h3><p>The authoritative multi-well comparison, uncertainty ellipsoids and closest-approach vector are rendered in the Three.js spatial workspace.</p></div><span className="badge amber">Clearance withheld</span></div>
         <SubjectPlan revision={revision} selectedMD={selectedMD} onSelectMD={onSelectMD}/>
-        <div className="engineering-empty-band"><IconAntiCollision size={24}/><div><strong>Offset comparison is intentionally empty.</strong><span>Add coordinate-compatible offset surveys and error-model evidence before calculating proximity.</span></div></div>
+        <div className="engineering-empty-band"><IconAntiCollision size={24}/><div><strong>{latest?'Saved source-bound proximity study available.':'No saved offset proximity study for this geometry.'}</strong><span>{latest?'Minimum center-to-center distance '+fmt(latest.result.min_c2c_distance_m,3)+' m · '+latest.result.geometry_type.replaceAll('_',' ')+'. Open 3D for the full spatial evidence.':'Open 3D to select a preserved offset survey, document its tie-in/frame, calculate uncertainty and save closest approach.'}</span></div></div>
       </section>
       <aside className="workspace-inspector">
         <div className="inspector-heading"><Target size={18}/><strong>Study readiness</strong></div>
         <div className="check-list">
-          <div className={survey?'done':''}>{survey?<CheckCircle2/>:<CircleAlert/>}<span>Subject survey</span></div>
-          <div className={geometryCurrent?'done':''}>{geometryCurrent?<CheckCircle2/>:<CircleAlert/>}<span>Current geometry revision</span></div>
-          <div><CircleAlert/><span>Coordinate-compatible offsets</span></div>
-          <div><CircleAlert/><span>Offset uncertainty evidence</span></div>
+          <div className={revision?'done':''}>{revision?<CheckCircle2/>:<CircleAlert/>}<span>Saved subject geometry</span></div>
+          <div className={latest?'done':''}>{latest?<CheckCircle2/>:<CircleAlert/>}<span>Source-backed offset proximity</span></div>
+          <div className={uncertaintyReady?'done':''}>{uncertaintyReady?<CheckCircle2/>:<CircleAlert/>}<span>Both survey uncertainties linked and calculated</span></div>
+          <div><CircleAlert/><span>Independent operational clearance / approval</span></div>
         </div>
-        <div className="inspector-note"><ShieldCheck size={18}/><p><strong>No drilling clearance.</strong> Proximity, uncertainty and operational approval remain separate qualification gates.</p></div>
+        <div className="inspector-note"><ShieldCheck size={18}/><p><strong>No drilling clearance.</strong> The saved study is positional evidence only. Operational collision management and approval remain human-governed qualification gates.</p></div>
         <dl className="compact-dl"><div><dt>CRS / frame</dt><dd>{revision?.input.coordinate_reference??'Not declared'}</dd></div><div><dt>Datum</dt><dd>{project.datum}</dd></div><div><dt>North</dt><dd>{project.north_reference}</dd></div></dl>
       </aside>
     </div>
-    <div className="panel"><div className="panel-heading"><div><h2>Offset separation table</h2><p>Rows appear only after source-backed offsets are attached.</p></div></div><div className="table-scroll"><table><thead><tr><th>Offset well</th><th>Closest approach</th><th>Subject MD</th><th>Uncertainty</th><th>Separation factor</th><th>Status</th></tr></thead><tbody><tr><td colSpan={6} className="empty-table-cell">No offset wells selected. Nothing has been calculated.</td></tr></tbody></table></div></div>
+    <div className="panel"><div className="panel-heading"><div><h2>Offset separation evidence</h2><p>Only persisted studies produced from preserved project surveys are shown.</p></div><button className="text-button" onClick={on3D}>Create / inspect in 3D <ArrowRight size={15}/></button></div><div className="table-scroll"><table><thead><tr><th>Offset well</th><th>Minimum C2C</th><th>Subject MD</th><th>Uncertainty</th><th>Clearance</th><th>Status</th></tr></thead><tbody>{latest?<tr><td>{latest.result.offset_well_name||latest.result.offset_source_filename}</td><td>{fmt(latest.result.min_c2c_distance_m,3)} m</td><td>{latest.result.closest_approach?fmt(latest.result.closest_approach.ref_md_m,2)+' m':'—'}</td><td>{uncertaintyReady?'Both linked':'Incomplete / withheld'}</td><td>Not generated</td><td><span className="badge amber">Engineering review</span></td></tr>:<tr><td colSpan={6} className="empty-table-cell">No source-bound anti-collision study has been saved for this geometry revision.</td></tr>}</tbody></table></div></div>
   </div>;
 }
 
@@ -192,8 +204,8 @@ export function RealtimeWorkspace({
 
 const capabilities=[
   {name:'Directional & Survey',status:'Internal verification',tone:'green',scope:'Source-bound minimum-curvature geometry, geodesy and uncertainty diagnostics.',page:'Directional engineering'},
-  {name:'Anti-Collision',status:'Research diagnostic',tone:'amber',scope:'Proximity workflow UI; clearance remains withheld without qualified offsets and uncertainty.',page:'Anti-Collision'},
-  {name:'3D Well Model',status:'Source-bound preview',tone:'amber',scope:'Persisted kernel coordinates and engineering layers; WebGL production engine remains open.',page:'3D well engineering'},
+  {name:'Anti-Collision',status:'Internal verification',tone:'amber',scope:'Persisted source-bound proximity and uncertainty workflow; drilling clearance is never generated.',page:'Anti-Collision'},
+  {name:'3D Well Model',status:'Internal verification',tone:'amber',scope:'Three.js WebGL engine with persisted geometry, targets, offset surveys, uncertainty ellipsoids and closest-approach evidence.',page:'3D well engineering'},
   {name:'Hydraulics',status:'Research envelope',tone:'amber',scope:'Declared steady-flow envelopes with explicit applicability limits.',page:'Hydraulics'},
   {name:'Torque & Drag',status:'Research envelope',tone:'amber',scope:'Quasi-static soft-string cases with supplied friction and residual evidence.',page:'Torque & drag'},
   {name:'Casing',status:'Research envelope',tone:'amber',scope:'Load catalogues and evidence-linked body / connection screening.',page:'Casing program'},
