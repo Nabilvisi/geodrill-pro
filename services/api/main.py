@@ -4,6 +4,7 @@ import json
 import hashlib
 import secrets
 import threading
+import math
 from pathlib import Path
 from typing import Literal
 from fastapi import Body, FastAPI, File, Form, HTTPException, Query, Request, Response, UploadFile
@@ -552,6 +553,28 @@ def create_app(data_dir: Path | None = None, mode: str | None = None):
             )
         raise HTTPException(422, "Provide either (latitude_deg, longitude_deg) or (easting_m, northing_m).")
 
+    def verified_survey_source(project_id: str, dataset_id: str):
+        source = store.dataset(project_id, dataset_id)
+        if source["kind"] != "survey":
+            raise ValueError("Directional studies require preserved directional-survey datasets.")
+        raw = store.root / "raw" / source["source_hash"]
+        if not raw.exists() or digest(raw.read_bytes()) != source["source_hash"]:
+            raise ValueError("Survey original source integrity check failed.")
+        return source
+
+    def survey_kernel_stations(source):
+        rows = source["rows"]
+        if len(rows) < 2:
+            raise ValueError("Directional studies require at least two survey stations.")
+        stations = []
+        for row in rows:
+            stations.append({
+                "md_m": float(row["md_m"]),
+                "inclination_deg": math.degrees(float(row["inclination_rad"])),
+                "azimuth_deg": math.degrees(float(row["azimuth_rad"])) % 360.0,
+            })
+        return stations
+
     @app.post("/api/projects/{project_id}/directional/uncertainty")
     def directional_uncertainty(project_id: str, payload: dict = Body(...)):
         project = store.project(project_id)
@@ -559,10 +582,171 @@ def create_app(data_dir: Path | None = None, mode: str | None = None):
             payload["latitude_deg"] = project["latitude"]
         return calculate_survey_uncertainty(payload)
 
+    @app.post("/api/projects/{project_id}/directional/uncertainty-study", status_code=201)
+    def directional_uncertainty_study(project_id: str, payload: dict = Body(...)):
+        with lock:
+            project = store.project(project_id)
+            dataset_id = str(payload.get("dataset_id", "")).strip()
+            if not dataset_id:
+                raise ValueError("A preserved survey dataset_id is required.")
+            source = verified_survey_source(project_id, dataset_id)
+            revision_id = payload.get("geometry_revision_id")
+            revision = checked_geometry(project_id, str(revision_id)) if revision_id else None
+            if revision is not None and revision["input"]["survey_dataset_id"] != dataset_id:
+                raise ValueError("Selected geometry revision is not bound to the selected survey dataset.")
+            metadata = payload.get("metadata", {})
+            if not isinstance(metadata, dict):
+                raise ValueError("Survey uncertainty metadata must be a JSON object.")
+            kernel_payload = dict(metadata)
+            kernel_payload["stations"] = survey_kernel_stations(source)
+            kernel_payload.setdefault("tool_model", "ISCWSA MWD Rev5.11")
+            kernel_payload.setdefault("tool_revision", "Rev5.11")
+            kernel_payload.setdefault("source_label", "iscwsa_calculated")
+            if "latitude_deg" not in kernel_payload and "latitude" in project:
+                kernel_payload["latitude_deg"] = project["latitude"]
+            result = calculate_survey_uncertainty(kernel_payload)
+            result.update({
+                "dataset_id": source["id"],
+                "source_filename": source["filename"],
+                "source_sha256": source["source_hash"],
+                "parquet_sha256": source["parquet_sha256"],
+                "geometry_revision_id": revision["id"] if revision else None,
+                "geometry_sha256": revision["sha256"] if revision else None,
+                "clearance_generated": False,
+                "equipment_authority": "none",
+            })
+            inputs = {
+                "dataset_id": source["id"],
+                "geometry_revision_id": revision["id"] if revision else None,
+                "metadata": metadata,
+            }
+            return store.calculation(project_id, "directional-uncertainty", inputs, result)
+
     @app.post("/api/projects/{project_id}/directional/proximity")
     def directional_proximity(project_id: str, payload: dict = Body(...)):
         store.project(project_id)
         return calculate_proximity(payload)
+
+    @app.post("/api/projects/{project_id}/directional/anticollision-study", status_code=201)
+    def directional_anticollision_study(project_id: str, payload: dict = Body(...)):
+        with lock:
+            project = store.project(project_id)
+            reference_dataset_id = str(payload.get("reference_dataset_id", "")).strip()
+            offset_dataset_id = str(payload.get("offset_dataset_id", "")).strip()
+            geometry_revision_id = str(payload.get("reference_geometry_revision_id", "")).strip()
+            if not reference_dataset_id or not offset_dataset_id or not geometry_revision_id:
+                raise ValueError("Reference survey, offset survey, and saved reference geometry are required.")
+            if reference_dataset_id == offset_dataset_id:
+                raise ValueError("Reference and offset survey datasets must be different preserved sources.")
+
+            revision = checked_geometry(project_id, geometry_revision_id)
+            if revision["input"]["survey_dataset_id"] != reference_dataset_id:
+                raise ValueError("Reference geometry revision is not bound to the selected reference survey.")
+            reference = verified_survey_source(project_id, reference_dataset_id)
+            offset = verified_survey_source(project_id, offset_dataset_id)
+
+            reference_frame = str(revision["input"]["coordinate_reference"]).strip()
+            offset_frame = str(payload.get("offset_coordinate_reference", "")).strip()
+            offset_datum = str(payload.get("offset_datum", "")).strip()
+            source_note = str(payload.get("offset_source_note", "")).strip()
+            if not offset_frame or offset_frame != reference_frame:
+                raise ValueError("Offset coordinate reference must explicitly match the saved reference geometry frame before proximity can be calculated.")
+            if not offset_datum or offset_datum != project["datum"]:
+                raise ValueError("Offset datum must explicitly match the project datum before proximity can be calculated.")
+            if len(source_note) < 3:
+                raise ValueError("Document the source of the offset surface/tie-in coordinates.")
+
+            start = payload.get("offset_start_nev")
+            if not isinstance(start, list) or len(start) != 3:
+                raise ValueError("offset_start_nev must contain [North, East, TVD] in metres.")
+            offset_start = [float(v) for v in start]
+            if not all(math.isfinite(v) and abs(v) <= 1e8 for v in offset_start):
+                raise ValueError("Offset tie-in coordinates must be finite engineering values.")
+
+            reference_meta = reference.get("metadata", {})
+            offset_meta = offset.get("metadata", {})
+            if reference_meta.get("datum") and reference_meta["datum"] != project["datum"]:
+                raise ValueError("Reference survey datum does not match the project.")
+            if offset_meta.get("datum") and offset_meta["datum"] != project["datum"]:
+                raise ValueError("Offset survey datum does not match the project.")
+            if reference_meta.get("north_reference") and reference_meta["north_reference"] != project["north_reference"]:
+                raise ValueError("Reference survey north reference does not match the project.")
+            if offset_meta.get("north_reference") and offset_meta["north_reference"] != project["north_reference"]:
+                raise ValueError("Offset survey north reference does not match the project.")
+
+            correlation_mode = str(payload.get("correlation_mode", "independent"))
+            if correlation_mode not in {"independent", "systematic_geomagnetic", "fully_correlated"}:
+                raise ValueError("Unsupported anti-collision correlation mode.")
+
+            def linked_uncertainty(calc_id, dataset_id):
+                if not calc_id:
+                    return None
+                match = next((c for c in store.calculations(project_id, "directional-uncertainty") if c["id"] == calc_id), None)
+                if match is None:
+                    raise ValueError("Linked survey uncertainty calculation was not found in this project.")
+                if match["inputs_si"].get("dataset_id") != dataset_id:
+                    raise ValueError("Linked survey uncertainty calculation belongs to a different survey dataset.")
+                return match
+
+            ref_unc = linked_uncertainty(payload.get("reference_uncertainty_calculation_id"), reference_dataset_id)
+            off_unc = linked_uncertainty(payload.get("offset_uncertainty_calculation_id"), offset_dataset_id)
+
+            kernel_payload = {
+                "reference_well_name": str(payload.get("reference_well_name") or project.get("well_name") or "Reference well"),
+                "reference_stations": survey_kernel_stations(reference),
+                "reference_start_nev": [
+                    float(revision["input"]["wellhead_north_m"]),
+                    float(revision["input"]["wellhead_east_m"]),
+                    0.0,
+                ],
+                "offset_well_name": str(payload.get("offset_well_name") or offset["filename"]),
+                "offset_stations": survey_kernel_stations(offset),
+                "offset_start_nev": offset_start,
+                "geomagnetic": payload.get("geomagnetic"),
+                "correlation_mode": correlation_mode,
+            }
+            result = calculate_proximity(kernel_payload)
+            result.update({
+                "reference_dataset_id": reference["id"],
+                "reference_source_filename": reference["filename"],
+                "reference_source_sha256": reference["source_hash"],
+                "reference_parquet_sha256": reference["parquet_sha256"],
+                "offset_dataset_id": offset["id"],
+                "offset_source_filename": offset["filename"],
+                "offset_source_sha256": offset["source_hash"],
+                "offset_parquet_sha256": offset["parquet_sha256"],
+                "geometry_revision_id": revision["id"],
+                "geometry_sha256": revision["sha256"],
+                "coordinate_reference": reference_frame,
+                "depth_datum": project["datum"],
+                "north_reference": project["north_reference"],
+                "offset_start_nev": offset_start,
+                "offset_source_note": source_note,
+                "uncertainty_evidence": {
+                    "reference_calculation_id": ref_unc["id"] if ref_unc else None,
+                    "reference_withheld": bool(ref_unc["result"].get("withheld")) if ref_unc else None,
+                    "offset_calculation_id": off_unc["id"] if off_unc else None,
+                    "offset_withheld": bool(off_unc["result"].get("withheld")) if off_unc else None,
+                    "both_linked_and_calculated": bool(ref_unc and off_unc and not ref_unc["result"].get("withheld") and not off_unc["result"].get("withheld")),
+                },
+                "clearance_generated": False,
+                "equipment_authority": "none",
+            })
+            inputs = {
+                "reference_dataset_id": reference["id"],
+                "reference_geometry_revision_id": revision["id"],
+                "offset_dataset_id": offset["id"],
+                "offset_well_name": kernel_payload["offset_well_name"],
+                "offset_start_nev": offset_start,
+                "offset_coordinate_reference": offset_frame,
+                "offset_datum": offset_datum,
+                "offset_source_note": source_note,
+                "correlation_mode": correlation_mode,
+                "geomagnetic": payload.get("geomagnetic"),
+                "reference_uncertainty_calculation_id": ref_unc["id"] if ref_unc else None,
+                "offset_uncertainty_calculation_id": off_unc["id"] if off_unc else None,
+            }
+            return store.calculation(project_id, "anticollision", inputs, result)
 
     @app.get("/api/directional/diagnostic-cases")
     def directional_diagnostic_cases():
