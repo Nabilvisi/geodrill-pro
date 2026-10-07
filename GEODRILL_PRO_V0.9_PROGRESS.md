@@ -1,5 +1,208 @@
 # GeoDrill Pro v0.9 — Implementation Progress
 
+## Session Update — Full v0.9 Workstation UI — 7 October 2026
+
+### Session Metadata
+
+- Repository: https://github.com/Nabilvisi/geodrill-pro
+- Branch: `v0.9-full-ui`
+- Pull request: #3 — GeoDrill Pro v0.9 — full drilling workstation UI
+- Base: `main` at `67ca21d93ce2aef5c40abb3c065c4d29bebda47b`
+- Five Hour Limit Remaining: not exposed to this session; no percentage invented
+- Implementation policy: existing engineering kernels, provenance, withholding rules, recovery and saved-study behavior preserved
+
+### Objective
+
+Replace the research-page-first presentation with the v0.9 drilling-workstation UI defined in the full-stack architecture: original GeoDrill branding, drilling-domain navigation, unified workflow launcher, professional Anti-Collision / Realtime / Qualification workspaces, dark/light shell support, and frontend build validation, without fabricating engineering outputs or rewriting verified kernels.
+
+### Completed
+
+- Created isolated implementation branch `v0.9-full-ui`; published work remains untouched pending review.
+- Replaced primary user navigation with:
+  - Projects
+  - Well Planning
+  - Directional
+  - Survey
+  - Anti-Collision
+  - 3D Well Model
+  - Hydraulics
+  - Torque & Drag
+  - Casing
+  - BHA
+  - Geomechanics
+  - Realtime
+  - Offsets
+  - Evidence
+  - Reports
+  - Qualification
+  - Admin
+- Removed the visible numbered-module roadmap from the main UI and removed its obsolete `modules` constant from `main.tsx`.
+- Retained advanced specialist/research pages behind Qualification rather than deleting their tested implementations.
+- Added a v0.9 workflow launcher to Projects/Overview with drilling-domain cards and project readiness counts.
+- Added Anti-Collision workspace with:
+  - subject-well plan view using saved kernel geometry;
+  - geometry/current-state diagnostics;
+  - coordinate/datum/north context;
+  - offset readiness checklist;
+  - deliberately empty separation table when no source-backed offset exists;
+  - explicit `Clearance withheld` state.
+- Added Realtime workspace with:
+  - historical telemetry KPIs and sparklines;
+  - source/replay status;
+  - channel-quality context;
+  - live-integration readiness panel;
+  - explicit read-only/no-equipment-authority state.
+- Added Qualification & Review workspace:
+  - primary workflow qualification cards;
+  - release/authority boundaries;
+  - advanced research library for specialist studies.
+- Added original GeoDrill canonical SVG assets:
+  - `apps/desktop/src/assets/brand/geodrill-mark.svg`
+  - `apps/desktop/src/assets/brand/geodrill-horizontal.svg`
+  - `public/geodrill-mark.svg`
+- Reworked `BrandMark.tsx` to render the canonical G + directional trajectory + target + subsurface-layer symbol directly.
+- Replaced favicon usage with the canonical GeoDrill mark.
+- Added v0.9 workstation styling in `apps/desktop/src/full-ui.css`, including responsive layouts and initial light/dark theme coverage.
+- Added UI theme persistence through local storage.
+- Extended PR CI to:
+  - install Node/pnpm;
+  - TypeScript type-check;
+  - production Vite build;
+  - rebuild embedded Streamlit workstation;
+  - run full Python/source regression.
+- Opened draft PR #3 for review and CI.
+
+### Files Added
+
+| File | Purpose |
+|---|---|
+| `apps/desktop/src/V09Workspaces.tsx` | Workflow launcher, Anti-Collision, Realtime and Qualification workspaces |
+| `apps/desktop/src/full-ui.css` | v0.9 workstation layout, dark/light shell, responsive engineering workspace styles |
+| `apps/desktop/src/assets/brand/geodrill-mark.svg` | Canonical original application mark |
+| `apps/desktop/src/assets/brand/geodrill-horizontal.svg` | Canonical horizontal product wordmark |
+| `public/geodrill-mark.svg` | Browser/app favicon source |
+
+### Files Modified
+
+| File | Change |
+|---|---|
+| `apps/desktop/src/main.tsx` | Workflow navigation, launcher, new workspaces, theme state, removal of visible numbered-module framing |
+| `apps/desktop/src/design-system/BrandMark.tsx` | Canonical original GeoDrill brand symbol and wordmark |
+| `index.html` | Single GeoDrill favicon |
+| `.github/workflows/ci.yml` | Frontend type-check/build + Streamlit rebuild before regression |
+| `GEODRILL_PRO_V0.9_PROGRESS.md` | This implementation checkpoint |
+
+### Architecture Decisions
+
+#### Preserve kernels; redesign interaction layer
+
+The UI refactor does not move authoritative equations into React. Existing Python engineering kernels remain authoritative. UI geometry renders saved/source-bound kernel coordinates.
+
+#### Anti-collision abstains instead of inventing offsets
+
+The new Anti-Collision workspace does not fabricate offset wells, ellipsoids, separation factors or clearance. Until coordinate-compatible offset surveys and uncertainty evidence are attached, the workspace displays readiness gaps and `Clearance withheld`.
+
+#### Realtime remains read-only/replay
+
+Historical telemetry drives the new operations UI. WITSML/ETP remains a future read-only integration gate. No command/control path was introduced.
+
+#### Research features remain available but secondary
+
+Specialist research pages remain reachable through Qualification. They no longer define the primary product navigation.
+
+### Engineering Kernel Changes
+
+None. No equation, unit convention, datum/north convention, error model, threshold, applicability rule, or authority boundary was changed.
+
+### Branding Changes
+
+The application now uses the original GeoDrill v0.9 visual identity: Deep Blue / Teal / Graphite / Stone / Orange, plus the G + well trajectory + target + subsurface-layer symbol. Proprietary vendor logos/trade dress are not used.
+
+### 3D Status
+
+The existing source-bound `Well3DWorkspace` remains the current interim spatial viewer. It is **not** yet the architecture target Three.js/React Three Fiber scene. The new UI links to it but does not claim WebGL production 3D completion.
+
+Open 3D work:
+- Three.js/R3F renderer;
+- target objects;
+- source-backed offset wells;
+- uncertainty ellipsoids;
+- anti-collision closest-approach geometry;
+- casing/BHA mesh representation;
+- formation/fault surfaces;
+- picking/selection validation;
+- clipping/section plane;
+- representative-load performance validation.
+
+### Realtime Status
+
+Implemented UI: historical replay/read-only telemetry context.
+
+Still open:
+- WITSML adapter;
+- ETP subscription/reconnect;
+- arrival-time persistence;
+- deduplication/quarantine;
+- provider interoperability fixtures;
+- latency metrics.
+
+### Verification
+
+Initial PR CI run 37569737538:
+- TypeScript type-check: passed on Ubuntu before regression.
+- Vite production build: passed; 1600 modules transformed.
+- Initial regression: 681 passed, 2 failed.
+- Both failures were expected stale checked-in Streamlit frontend guards caused by changed UI source:
+  - `test_streamlit_rerun_keeps_workspace`
+  - `test_checked_in_streamlit_component_matches_current_source`
+- No engineering calculation regression was identified.
+- CI was repaired to run `python tools/build_streamlit.py` before full regression.
+- Corrected run 37569907452 is the validation run for the rebuilt embedded workstation. Record its final result before merge.
+
+### Known Open Items
+
+- Production Three.js/R3F 3D system.
+- Source-backed offset-well ingestion and end-to-end anti-collision calculations in the new workspace.
+- WITSML/ETP realtime adapters.
+- Persistent dockable layouts / command palette / full keyboard workflow.
+- Full light/dark token migration across every legacy research page.
+- Project → Field → Well → Wellbore domain migration in every current UI path.
+- Tauri desktop shell/updater/signing.
+- Enterprise PostgreSQL/PostGIS/Timescale/object-store/OIDC architecture.
+- Independent engineering qualification and external security review.
+
+### Important Do Not Break Items
+
+- Source bytes and source hashes.
+- Immutable saved studies/reports.
+- SI kernel boundary.
+- Explicit datum/north/CRS context.
+- Missing-evidence withholding.
+- Membership/project isolation.
+- `equipment_control=false`.
+- `equipment_authority=none`.
+- No automated drilling clearance.
+
+### Next Session — Start Here
+
+1. Read this session update and `GEODRILL_PRO_V0.9_FULL_STACK_ARCHITECTURE.md`.
+2. Check PR #3 and final CI status.
+3. If CI is green, perform visual/browser review of Projects, Anti-Collision, Realtime, Qualification, Directional and 3D at desktop and mobile widths.
+4. Keep PR draft until visual review is accepted.
+5. Next major product increment: implement the actual Three.js/R3F spatial engine and source-backed offset-well domain flow rather than adding additional research calculations.
+
+### Next 3 Priorities
+
+1. Three.js/R3F authoritative 3D workstation with linked table/plot/scene selection.
+2. Source-backed offset wells + uncertainty + anti-collision calculation workflow.
+3. Read-only WITSML/ETP ingestion with quality/provenance/replay parity.
+
+### Handoff Summary
+
+GeoDrill Pro now has the v0.9 drilling-workstation UI structure on `v0.9-full-ui` and draft PR #3. The old research-page-first/numbered-module navigation has been replaced by drilling workflows, the new original brand identity is integrated, and truthful Anti-Collision, Realtime and Qualification workspaces are connected without modifying engineering equations. The frontend compiles; the first regression exposed only stale embedded Streamlit assets, and CI was changed to rebuild them before regression. Production Three.js 3D, real offset anti-collision inputs, WITSML/ETP, docking persistence, enterprise infrastructure and independent qualification remain explicitly open.
+
+---
+
 ## Session Metadata
 
 - Date: 2026-10-07 (Asia/Jakarta)
