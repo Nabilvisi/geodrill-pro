@@ -181,13 +181,13 @@ export function Well3DWorkspace({
   const wellbores:WellboreModel[]=wells.flatMap(w=>w.wellbores);
   const selectedWellbore=wellbores.find(w=>w.id===targetWellboreId)??null;
   const targets:SpatialTarget[]=(selectedWellbore?.targets??[]).map(t=>({
-    id:t.id,name:t.name,center_tvd_m:t.center_tvd_m,center_north_m:t.center_north_m,center_east_m:t.center_east_m,
+    id:t.id,name:t.name,geometry_type:t.geometry_type,center_tvd_m:t.center_tvd_m,center_north_m:t.center_north_m,center_east_m:t.center_east_m,
     radius_m:t.radius_m,tolerance_m:t.tolerance_m,
   }));
 
   const allTvds=[...subjectPoints.map(p=>p.tvd_m),...offsetPoints.map(p=>p.tvd_m)].filter(Number.isFinite);
   const maxTvd=Math.max(1,...allTvds);
-  if(clipTvd===0&&maxTvd>0)setTimeout(()=>setClipTvd(maxTvd),0);
+  const effectiveClipTvd=clipTvd>0?Math.min(clipTvd,maxTvd):maxTvd;
 
   const selected=selectedMD===null?null:subjectPoints.reduce((best,p)=>Math.abs(p.md_m-selectedMD)<Math.abs(best.md_m-selectedMD)?p:best,subjectPoints[0]);
   const subjectStale=Boolean(survey&&survey.id!==revision.input.survey_dataset_id);
@@ -275,7 +275,7 @@ export function Well3DWorkspace({
       <div className="segmented spatial-presets">{([
         ['perspective','Perspective'],['plan','Plan'],['north-section','N section'],['east-section','E section']
       ] as [CameraPreset,string][]).map(([value,label])=><button key={value} className={cameraPreset===value?'selected':''} onClick={()=>setCameraPreset(value)}><Camera size={13}/>{label}</button>)}</div>
-      <div className="spatial-clip"><label><input type="checkbox" checked={clipEnabled} onChange={e=>setClipEnabled(e.target.checked)}/>TVD section</label><input aria-label="3D TVD clipping depth" type="range" min="0" max={maxTvd} step={Math.max(1,maxTvd/250)} value={Math.min(clipTvd,maxTvd)} disabled={!clipEnabled} onChange={e=>setClipTvd(Number(e.target.value))}/><strong>{clipEnabled?nf(clipTvd,0)+' m':'Full depth'}</strong></div>
+      <div className="spatial-clip"><label><input type="checkbox" checked={clipEnabled} onChange={e=>setClipEnabled(e.target.checked)}/>TVD section</label><input aria-label="3D TVD clipping depth" type="range" min="0" max={maxTvd} step={Math.max(1,maxTvd/250)} value={effectiveClipTvd} disabled={!clipEnabled} onChange={e=>setClipTvd(Number(e.target.value))}/><strong>{clipEnabled?nf(effectiveClipTvd,0)+' m':'Full depth'}</strong></div>
       <button className="button secondary" onClick={()=>{setCameraPreset('perspective');setClipEnabled(false);setLayers(initialLayers);}}><RotateCcw size={14}/>Reset scene</button>
     </div>
 
@@ -294,7 +294,7 @@ export function Well3DWorkspace({
           onSelectMD={onSelectMD}
           layers={layers}
           cameraPreset={cameraPreset}
-          clipTvdM={clipEnabled?clipTvd:null}
+          clipTvdM={clipEnabled?effectiveClipTvd:null}
         />
         <div className="spatial-legend">
           <span><i className="legend-subject"/>Subject</span><span><i className="legend-offset"/>Offset</span><span><i className="legend-cpa"/>Closest approach</span><span><i className="legend-target"/>Target</span><span><i className="legend-unc"/>2σ uncertainty</span>
@@ -346,7 +346,7 @@ export function Well3DWorkspace({
         <label className="field-label">Tie-in coordinate source / survey note<textarea rows={3} value={offsetSourceNote} maxLength={500} placeholder="e.g. Survey control report, revision, date and responsible source" onChange={e=>setOffsetSourceNote(e.target.value)}/></label>
         <label className="field-label">Survey-error correlation treatment<select value={correlationMode} onChange={e=>setCorrelationMode(e.target.value as typeof correlationMode)}><option value="independent">Independent</option><option value="systematic_geomagnetic">Shared systematic geomagnetic reference</option><option value="fully_correlated">Fully correlated · retained as unsupported unless evidence exists</option></select></label>
         {!offsetFrameReady&&offsetSource&&<div className="alert warning">Offset overlay withheld until its frame and datum match the saved subject geometry and a tie-in source note is recorded.</div>}
-        <div className="heading-actions"><button className="button secondary" onClick={onDataPage}>Import offset survey</button><button className="button primary" disabled={!offsetSource||busy!==''} onClick={calculateProximity}>{busy==='proximity'?<LoaderCircle className="spin" size={15}/>:<Crosshair size={15}/>}Calculate & save closest approach</button></div>
+        <div className="heading-actions"><button className="button secondary" onClick={onDataPage}>Import offset survey</button><button className="button primary" disabled={!offsetSource||!offsetFrameReady||busy!==''} onClick={calculateProximity}>{busy==='proximity'?<LoaderCircle className="spin" size={15}/>:<Crosshair size={15}/>}Calculate & save closest approach</button></div>
       </section>
 
       <section className="panel spatial-evidence-card">
@@ -369,7 +369,7 @@ export function Well3DWorkspace({
       <section className="panel spatial-evidence-card">
         <div className="panel-heading"><div><h2>Subsurface targets</h2><p>Targets come from the persisted project hierarchy and are rendered only for the explicitly selected wellbore.</p></div><Target size={20}/></div>
         <label className="field-label">Target wellbore<select value={targetWellboreId} onChange={e=>setTargetWellboreId(e.target.value)}><option value="">Do not render project targets</option>{wells.flatMap(w=>w.wellbores.map(wb=><option value={wb.id} key={wb.id}>{w.name} / {wb.name}</option>))}</select></label>
-        {selectedWellbore?<div className="target-list">{selectedWellbore.targets.map(t=><div key={t.id}><MapPin size={14}/><span><strong>{t.name}</strong> · TVD {nf(t.center_tvd_m,1)} m · radius {nf(t.radius_m,1)} m · tolerance ±{nf(t.tolerance_m,1)} m</span></div>)}{!selectedWellbore.targets.length&&<p className="muted">The selected wellbore has no persisted targets.</p>}</div>:<p className="muted">Choose a wellbore to establish the target-layer identity explicitly.</p>}
+        {selectedWellbore?<div className="target-list">{selectedWellbore.targets.map(t=><div key={t.id}><MapPin size={14}/><span><strong>{t.name}</strong> · TVD {nf(t.center_tvd_m,1)} m · {t.geometry_type==='circle'?'radius '+nf(t.radius_m,1)+' m':'center marker only · '+t.geometry_type} · tolerance ±{nf(t.tolerance_m,1)} m</span></div>)}{!selectedWellbore.targets.length&&<p className="muted">The selected wellbore has no persisted targets.</p>}</div>:<p className="muted">Choose a wellbore to establish the target-layer identity explicitly.</p>}
         <button className="button secondary" onClick={onAntiCollisionPage}><Eye size={15}/>Open Anti-Collision readiness view</button>
       </section>
     </div>
