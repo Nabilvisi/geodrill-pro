@@ -90,8 +90,9 @@
     "source": "Owned planned/actual edit, comparison, MD, geometry, scoped study, offset/source staleness, history, reload and original fixed report passed.",
     "streamlit_local": "Rendered alpha.2, hierarchy, explicit adoption, trajectory, withheld uncertainty and report preparation passed.",
     "original_csv_chooser": "Blocked by existing Chrome extension file URL permission; original CSV bytes covered by API tests.",
-    "streamlit_native_download": "Interrupted browser control; native download not claimed. Original bytes verified in transport test.",
-    "packaged": "Rendered selected owned bore, saved withholding and stale offset passed."
+    "streamlit_native_download": "Passed in a fresh local Streamlit browser tab on unchanged alpha.2 application source; actual downloaded fixed snapshot and SHA-256 match the original browser-session database record.",
+    "packaged": "Rendered selected owned bore, saved withholding and stale offset passed.",
+    "native_download_acceptance_source_commit": "38abd5d24203518ee6f6b26db578a708299374c7"
   },
   "published_baseline": {
     "version": "0.9.0-alpha.1",

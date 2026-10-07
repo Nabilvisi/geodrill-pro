@@ -128,13 +128,13 @@ No live provider or control connection added. Existing read-only replay/capture 
 - Passed: 697 local regression tests.
 - Failed: 0 regression tests.
 - Skipped: 0.
-- Known failures: restricted installer attempt was denied registry registration, exited 4 and rolled back; normal-permission recovery rerun passed. Browser original CSV chooser needs its existing file URL permission; manual native Streamlit download was interrupted. These are not counted as successful manual checks.
+- Known failures: restricted installer attempt was denied registry registration, exited 4 and rolled back; normal-permission recovery rerun passed. Browser original CSV chooser needs its existing file URL permission; the earlier native Streamlit download interruption was resolved in a fresh tab; the downloaded fixed snapshot and SHA-256 match the original browser-session database record. These are not counted as successful manual checks.
 
 ## Manual Verification
 
 Source browser: create well/main/offset; save planned and synthetic actual stations; inspect canonical comparison and shared MD; save synthetic hole/casing geometry; calculate/reopen scoped torque/drag; revise source and offset; observe stale trajectory, stale proximity and stale study overlays; inspect old history without changing current head; reload selected wellbore/role; create/download fixed JSON and compare its stored snapshot/hash.
 
-Local Streamlit alpha.2: rendered embedded candidate, created well/bore, explicitly adopted original synthetic project survey, saved trajectory and withheld uncertainty, created fixed report and observed native download preparation. Native browser download could not complete after browser-control interruption; original-byte transport tests passed. Original CSV upload is independently API-tested, not claimed as a completed Chrome chooser check.
+Local Streamlit alpha.2: rendered embedded candidate, created well/bore, explicitly adopted original synthetic project survey, saved trajectory and withheld uncertainty, created fixed report and observed native download preparation. Native browser download subsequently passed in a fresh tab on the unchanged candidate; the actual downloaded snapshot and SHA-256 match the original session database record. Original-byte transport tests also passed. Original CSV upload is independently API-tested, not claimed as a completed Chrome chooser check.
 
 Actual rebuilt exe: 200/ok alpha.2, owned planned/actual sources, scope lists, withheld uncertainty, offset staleness, canonical report and exact frontend assets; rendered selected bore in Chrome. Existing data untouched; verification used build-only data. Installer/recovery/uninstall acceptance passed and is recorded separately.
 
@@ -150,7 +150,7 @@ Application source committed on v09-wellbore-revisions; evidence/docs are additi
 - Description: no covariance separation-factor/correlated-error implementation, Three.js/docking/Tauri/enterprise completion or independent qualification; broader domain edit/case management remains open.
 - Reproduction: see architecture acceptance matrix and unsupported diagnostic UI choices.
 - Workaround: bounded research workflows, original evidence and explicit withholding.
-- Next action: finish candidate release acceptance, then implement the next bounded architecture gate. Browser chooser/native download restrictions are separate environment/manual checks.
+- Next action: finish candidate release acceptance, then implement the next bounded architecture gate. Browser CSV chooser restrictions remain a separate environment/manual check; the native Streamlit download check is now complete.
 
 ## Incomplete Work
 
@@ -200,7 +200,8 @@ Refresh actual usage first and obey the supplied handoff threshold; do not claim
 ## Acceptance Criteria Still Open
 
 - [ ] Final candidate release approval, merge, hosted and downloaded public artifact checks.
-- [ ] Native browser CSV chooser and interrupted Streamlit download manual acceptance.
+- [ ] Native browser CSV chooser acceptance; original-byte CSV integration tests pass.
+- [x] Native Streamlit report download; original stored snapshot and SHA-256 match verified.
 - [ ] Full architecture phases 2/5/7/8/9/10 acceptance, including independent engineering/security qualification.
 
 ## Deferred Work
