@@ -3,6 +3,7 @@ import { createRoot } from 'react-dom/client';
 import { Activity, ArrowDownToLine, ArrowRight, ArrowUpRight, Bell, BookOpen, Box, Check, ChevronDown, ChevronRight, CircleHelp, Database, FileCheck2, FileText, FlaskConical, FolderOpen, Layers3, LoaderCircle, Map, Pause, Play, Plus, RefreshCw, RotateCcw, Search, ShieldCheck, SlidersHorizontal, Upload, X } from 'lucide-react';
 import './styles.css';
 import './workstation.css';
+import './full-ui.css';
 import {api} from './api';
 import {GeometryWorkspace, type Revision} from './GeometryWorkspace';
 import {LogClustering} from './LogClustering';
@@ -15,6 +16,7 @@ import './research.css';
 import {CloudReportDownload} from './CloudReportDownload';
 import {DirectionalWorkspace} from './DirectionalWorkspace';
 import {Well3DWorkspace} from './Well3DWorkspace';
+import {WorkflowLauncher, AntiCollisionWorkspace, RealtimeWorkspace, QualificationWorkspace} from './V09Workspaces';
 import {
   BrandMark,
   WorkspaceHeader,
@@ -45,62 +47,35 @@ type EventRecord = {id:string;dataset_id:string;row_index:number;code:string;sev
 type Calculation = {id:string;model:string;inputs_si:Record<string,number|string>;result:Record<string,unknown>;created_at:string};
 type Audit = {integrity:string;head:string;entries:{sequence:number;action:string;at:string;project_id:string;hash:string;details:Record<string,unknown>}[]};
 type Report = {sha256:string;snapshot:{id:string;created_at:string;intended_use:string;project:Project;datasets:Dataset[];events:EventRecord[];calculations:Calculation[];limitations:string[];engineering_revisions?:Revision[];audit_head:string}};
-type Page = 'Overview'|'Directional engineering'|'3D well engineering'|'Well geometry'|'Casing program'|'Log clustering'|'Shaly sand'|'EM vendor results'|'Hydraulics'|'Wellbore stability'|'Cuttings transport'|'Surge & swab'|'Torque & drag'|'Buckling assessment'|'BHA dynamics'|'Bit condition'|'Wear & fatigue'|'Flow anomalies'|'Gas & phase studies'|'Supervisory research'|'Offset benchmarks'|'Formation geomechanics'|'Evidence search'|'Data workspace'|'Engineering lab'|'Events & review'|'Capability roadmap'|'Audit trail'|'Reports';
-const navigationSections: { category: string; items: { name: Page; icon: React.ComponentType<{ size?: number | string; color?: string }> }[] }[] = [
-  {
-    category: 'PROJECTS',
-    items: [
-      { name: 'Overview', icon: IconProjects },
-      { name: 'Data workspace', icon: Database },
-    ],
-  },
-  {
-    category: 'PLAN & DESIGN',
-    items: [
-      { name: 'Directional engineering', icon: IconDirectional },
-      { name: '3D well engineering', icon: Icon3DWell },
-      { name: 'Well geometry', icon: IconSurvey },
-      { name: 'Casing program', icon: IconCasing },
-    ],
-  },
-  {
-    category: 'ENGINEERING',
-    items: [
-      { name: 'Hydraulics', icon: IconHydraulics },
-      { name: 'Torque & drag', icon: IconTorqueDrag },
-      { name: 'Buckling assessment', icon: Activity },
-      { name: 'Formation geomechanics', icon: IconGeomechanics },
-      { name: 'Wellbore stability', icon: Activity },
-      { name: 'Cuttings transport', icon: Activity },
-      { name: 'Surge & swab', icon: Activity },
-      { name: 'BHA dynamics', icon: IconBHA },
-      { name: 'Bit condition', icon: Activity },
-      { name: 'Wear & fatigue', icon: Activity },
-      { name: 'Log clustering', icon: SlidersHorizontal },
-      { name: 'Shaly sand', icon: Layers3 },
-      { name: 'EM vendor results', icon: Activity },
-      { name: 'Engineering lab', icon: FlaskConical },
-    ],
-  },
-  {
-    category: 'OPERATIONS',
-    items: [
-      { name: 'Offset benchmarks', icon: IconOffsets },
-      { name: 'Flow anomalies', icon: IconRealtime },
-      { name: 'Gas & phase studies', icon: Activity },
-      { name: 'Supervisory research', icon: Activity },
-      { name: 'Events & review', icon: Bell },
-    ],
-  },
-  {
-    category: 'GOVERNANCE',
-    items: [
-      { name: 'Evidence search', icon: IconEvidence },
-      { name: 'Reports', icon: IconReports },
-      { name: 'Capability roadmap', icon: IconQualification },
-      { name: 'Audit trail', icon: IconAdmin },
-    ],
-  },
+type Page = 'Overview'|'Directional engineering'|'3D well engineering'|'Well geometry'|'Casing program'|'Log clustering'|'Shaly sand'|'EM vendor results'|'Hydraulics'|'Wellbore stability'|'Cuttings transport'|'Surge & swab'|'Torque & drag'|'Buckling assessment'|'BHA dynamics'|'Bit condition'|'Wear & fatigue'|'Flow anomalies'|'Gas & phase studies'|'Supervisory research'|'Offset benchmarks'|'Formation geomechanics'|'Evidence search'|'Data workspace'|'Engineering lab'|'Events & review'|'Capability roadmap'|'Audit trail'|'Reports'|'Anti-Collision'|'Realtime';
+const navigationSections: { category: string; items: { name: Page; label: string; icon: React.ComponentType<{ size?: number | string; color?: string }> }[] }[] = [
+  {category:'PROJECTS',items:[
+    {name:'Overview',label:'Projects',icon:IconProjects},
+  ]},
+  {category:'PLAN & DESIGN',items:[
+    {name:'Well geometry',label:'Well Planning',icon:IconWellPlanning},
+    {name:'Directional engineering',label:'Directional',icon:IconDirectional},
+    {name:'Data workspace',label:'Survey',icon:IconSurvey},
+    {name:'Anti-Collision',label:'Anti-Collision',icon:IconAntiCollision},
+    {name:'3D well engineering',label:'3D Well Model',icon:Icon3DWell},
+  ]},
+  {category:'ENGINEERING',items:[
+    {name:'Hydraulics',label:'Hydraulics',icon:IconHydraulics},
+    {name:'Torque & drag',label:'Torque & Drag',icon:IconTorqueDrag},
+    {name:'Casing program',label:'Casing',icon:IconCasing},
+    {name:'BHA dynamics',label:'BHA',icon:IconBHA},
+    {name:'Formation geomechanics',label:'Geomechanics',icon:IconGeomechanics},
+  ]},
+  {category:'OPERATIONS',items:[
+    {name:'Realtime',label:'Realtime',icon:IconRealtime},
+    {name:'Offset benchmarks',label:'Offsets',icon:IconOffsets},
+  ]},
+  {category:'GOVERNANCE',items:[
+    {name:'Evidence search',label:'Evidence',icon:IconEvidence},
+    {name:'Reports',label:'Reports',icon:IconReports},
+    {name:'Capability roadmap',label:'Qualification',icon:IconQualification},
+    {name:'Audit trail',label:'Admin',icon:IconAdmin},
+  ]},
 ];
 const menu = navigationSections.flatMap(s => s.items);
 const cloudSession = (window as Window & {GEODRILL_CLOUD?:boolean}).GEODRILL_CLOUD === true;
@@ -169,6 +144,7 @@ function App(){
   const [selectedMD,setSelectedMD]=useState<number|null>(null);
   useEffect(()=>{setSelectedMD(null);},[project?.id,survey?.id]);
   const [reports,setReports]=useState<{id:string;sha256:string;created_at:string}[]>([]);
+  const [theme,setTheme]=useState<'light'|'dark'>(()=>(localStorage.getItem('geodrill-theme')==='dark'?'dark':'light'));
   const fileInput=useRef<HTMLInputElement>(null);const selectedProject=useRef<string|null>(null);
   const rows=telemetry?.rows??[],row=rows[cursor];const pending=events.filter(e=>!e.acknowledgement).length;
   const loadProject=useCallback(async(p:Project)=>{
@@ -180,6 +156,7 @@ function App(){
   },[]);
   useEffect(()=>{let active=true;(async()=>{try{await api('/session');const ps=await api<Project[]>('/projects');if(!active)return;setProjects(ps);const saved=localStorage.getItem('geodrill-project');const p=ps.find(p=>p.id===saved)??(cloudSession?ps.find(p=>p.name==='North Sea · Research'):undefined)??ps[0];if(p)await loadProject(p);else setLoading(false);}catch(e){if(active){setError((e as Error).message);setOnline(false);setLoading(false);}}})();return()=>{active=false;};},[loadProject]);
   useEffect(()=>{if(project)localStorage.setItem('geodrill-project',project.id);},[project]);
+  useEffect(()=>{localStorage.setItem('geodrill-theme',theme);document.documentElement.style.colorScheme=theme;},[theme]);
   useEffect(()=>{const id=setInterval(()=>api('/health').then(()=>setOnline(true)).catch(()=>{setOnline(false);setPlaying(false);}),15000);return()=>clearInterval(id);},[]);
   useEffect(()=>{if(!notice)return;const id=setTimeout(()=>setNotice(''),6500);return()=>clearTimeout(id);},[notice]);
   useEffect(()=>{if(!playing||!rows.length)return;if(cursor>=rows.length-1){setPlaying(false);return;}const gap=(new Date(String(rows[cursor+1].timestamp)).getTime()-new Date(String(rows[cursor].timestamp)).getTime())/speed;const id=setTimeout(()=>setCursor(c=>c+1),Math.max(30,gap));return()=>clearTimeout(id);},[playing,cursor,rows,speed]);
@@ -194,28 +171,28 @@ function App(){
   const seek=(index:number)=>{setPlaying(false);setCursor(index);};
   const field=units==='field';const depthFactor=field?1/0.3048:1,depthUnit=field?'ft':'m';
   const filteredEvents=events.filter(e=>`${e.code} ${e.message}`.toLowerCase().includes(query.toLowerCase()));
-  const title:Record<Page,string>={'Overview':'Well overview','Directional engineering':'Directional well planning & survey analysis','3D well engineering':'3D interactive wellbore & horizon model','Well geometry':'Well geometry','Casing program':'Casing programme','Log clustering':'Log response clustering','Shaly sand':'Shaly-sand interpretation','EM vendor results':'EM vendor result review','Hydraulics':'Hydraulics & pressure profiles','Wellbore stability':'Elastic & thermal stability','Cuttings transport':'Cuttings transport & solids balance','Surge & swab':'Offline surge & swab','Torque & drag':'Soft-string torque & drag','Buckling assessment':'Buckling & load transfer','BHA dynamics':'BHA dynamics','Bit condition':'Bit condition','Wear & fatigue':'Wear & fatigue','Flow anomalies':'Flow anomalies','Gas & phase studies':'Gas & phase studies','Supervisory research':'Supervisory research','Formation geomechanics':'Formation geomechanics','Offset benchmarks':'Offset cohort benchmarks','Evidence search':'Project evidence search','Data workspace':'Your data, in context','Engineering lab':'Engineering calculations','Events & review':'Events & review','Capability roadmap':'Capability roadmap','Audit trail':'Audit trail','Reports':'Saved reports'};
-  return <div className="app-shell"><aside className="sidebar"><div className="brand" style={{ padding: "0 4px" }}><BrandMark size={32} /></div><div className="workspace-label">WORKSPACE <span>{cloudSession?'SESSION':'LOCAL'}</span></div><div className="project-switch"><FolderOpen size={17}/><select aria-label="Active project" value={project?.id??''} onChange={e=>{const p=projects.find(p=>p.id===e.target.value);if(p)void loadProject(p);}}><option value="" disabled>Select a project</option>{projects.map(p=><option key={p.id} value={p.id}>{p.name}</option>)}</select><ChevronDown size={14}/></div>
+  const title:Record<Page,string>={'Overview':'Well overview','Directional engineering':'Directional well planning & survey analysis','3D well engineering':'3D interactive wellbore & horizon model','Well geometry':'Well geometry','Casing program':'Casing programme','Log clustering':'Log response clustering','Shaly sand':'Shaly-sand interpretation','EM vendor results':'EM vendor result review','Hydraulics':'Hydraulics & pressure profiles','Wellbore stability':'Elastic & thermal stability','Cuttings transport':'Cuttings transport & solids balance','Surge & swab':'Offline surge & swab','Torque & drag':'Soft-string torque & drag','Buckling assessment':'Buckling & load transfer','BHA dynamics':'BHA dynamics','Bit condition':'Bit condition','Wear & fatigue':'Wear & fatigue','Flow anomalies':'Flow anomalies','Gas & phase studies':'Gas & phase studies','Supervisory research':'Supervisory research','Formation geomechanics':'Formation geomechanics','Offset benchmarks':'Offset cohort benchmarks','Evidence search':'Project evidence search','Data workspace':'Your data, in context','Engineering lab':'Engineering calculations','Events & review':'Events & review','Capability roadmap':'Capability roadmap','Audit trail':'Audit trail','Reports':'Saved reports','Anti-Collision':'Anti-Collision & separation review','Realtime':'Realtime drilling & historical replay'};
+  return <div className={`app-shell ${theme==='dark'?'theme-dark':''}`}><aside className="sidebar"><div className="brand" style={{ padding: "0 4px" }}><BrandMark size={32} /></div><div className="workspace-label">WORKSPACE <span>{cloudSession?'SESSION':'LOCAL'}</span></div><div className="project-switch"><FolderOpen size={17}/><select aria-label="Active project" value={project?.id??''} onChange={e=>{const p=projects.find(p=>p.id===e.target.value);if(p)void loadProject(p);}}><option value="" disabled>Select a project</option>{projects.map(p=><option key={p.id} value={p.id}>{p.name}</option>)}</select><ChevronDown size={14}/></div>
     <nav className="workstation-nav">{navigationSections.map(section => (
       <div key={section.category} className="nav-section">
         <div className="nav-label" style={{ marginTop: '18px', marginBottom: '6px' }}>{section.category}</div>
-        {section.items.map(({ name, icon: Icon }) => (
+        {section.items.map(({ name, label, icon: Icon }) => (
           <button
-            aria-label={name}
+            aria-label={label}
             key={name}
             className={`nav-item ${page === name ? 'active' : ''}`}
             onClick={() => setPage(name)}
           >
             <Icon size={18} />
-            <span>{name}</span>
+            <span>{label}</span>
             {name === 'Events & review' && pending > 0 && <b>{pending}</b>}
           </button>
         ))}
       </div>
     ))}</nav>
     <div className="sidebar-bottom"><div className="mode-card"><ShieldCheck size={20}/><strong>Engineering research</strong><p>{cloudSession?'Session analysis & historical replay.':'Local analysis & historical replay.'}<br/>No equipment authority.</p><div><span className={`dot ${online?'':'bad'}`}/>{online?(cloudSession?'Session workspace available':'Local service available'):(cloudSession?'Session workspace disconnected':'Local service disconnected')}</div></div><div className="version"><span>GeoDrill Pro</span><span>v0.9.0-alpha.1</span></div></div></aside>
-    <div className="main-shell"><header className="topbar"><div className="breadcrumb">Workspace <ChevronRight size={14}/> <strong>{project?.well_name??'Getting started'}</strong></div><div className="top-actions"><span className="local-badge"><span className="dot"/> {cloudSession?'Cloud session':'Offline capable'}</span><button className="icon-button" aria-label="View events" onClick={()=>setPage('Events & review')}><Bell size={19}/>{pending>0&&<i/>}</button><div className="avatar" title={cloudSession?"Isolated browser-session workspace":"Single local workstation user"}>LE</div></div></header>
-    <main><label className="mobile-page-switch"><span>Open page</span><select aria-label="Open workspace page" value={page} onChange={e=>setPage(e.target.value as Page)}><optgroup label="Engineering">{menu.map(item=><option key={item.name} value={item.name}>{item.name}</option>)}</optgroup><optgroup label="Workspace tools">{(['Reports','Capability roadmap','Audit trail'] as Page[]).map(name=><option key={name} value={name}>{name}</option>)}</optgroup></select></label>{project && (
+    <div className="main-shell"><header className="topbar"><div className="breadcrumb">Workspace <ChevronRight size={14}/> <strong>{project?.well_name??'Getting started'}</strong></div><div className="top-actions"><span className="local-badge"><span className="dot"/> {cloudSession?'Cloud session':'Offline capable'}</span><button className="icon-button" aria-label="View events" onClick={()=>setPage('Events & review')}><Bell size={19}/>{pending>0&&<i/>}</button><button className="icon-button theme-toggle" aria-label="Toggle light or dark theme" title="Toggle theme" onClick={()=>setTheme(t=>t==='light'?'dark':'light')}>{theme==='light'?'◐':'☀'}</button><div className="avatar" title={cloudSession?"Isolated browser-session workspace":"Single local workstation user"}>LE</div></div></header>
+    <main><label className="mobile-page-switch"><span>Open page</span><select aria-label="Open workspace page" value={page} onChange={e=>setPage(e.target.value as Page)}>{navigationSections.map(section=><optgroup key={section.category} label={section.category}>{section.items.map(item=><option key={item.name} value={item.name}>{item.label}</option>)}</optgroup>)}</select></label>{project && (
         <div style={{ marginBottom: '16px' }}>
           <WorkspaceHeader
             projectName={project.name}
@@ -232,7 +209,7 @@ function App(){
           />
         </div>
       )}
-      <div className="page-heading"><div><div className="eyebrow">GEODRILL PRO / {project?.origin==='synthetic'?'SYNTHETIC RESEARCH PROJECT':'ENGINEERING WORKSPACE'}</div><h1>{title[page]}</h1><p>{page==='Overview'?'A clear view of your well. Every calculation, traceable.':page==='Data workspace'?'Import, inspect and preserve the evidence behind your analysis.':page==='Engineering lab'?'Explicit assumptions. Canonical SI units. Reproducible results.':page==='Capability roadmap'?'The audited roadmap, with implementation status kept explicit.':'Explore the evidence behind your engineering decisions.'}</p></div><div className="heading-actions"><button className="button secondary" onClick={()=>setCreateOpen(true)} disabled={busy}><Plus size={16}/>New project</button><button className="button primary" onClick={exportReport} disabled={!project||busy||loading||!online}>{busy?<LoaderCircle className="spin" size={16}/>:<ArrowDownToLine size={16}/>}Create report</button></div></div>
+      <div className="page-heading"><div><div className="eyebrow">GEODRILL PRO / {project?.origin==='synthetic'?'SYNTHETIC RESEARCH PROJECT':'ENGINEERING WORKSPACE'}</div><h1>{title[page]}</h1><p>{page==='Overview'?'A clear view of your well. Every calculation, traceable.':page==='Data workspace'?'Import, inspect and preserve the evidence behind your analysis.':page==='Engineering lab'?'Explicit assumptions. Canonical SI units. Reproducible results.':page==='Capability roadmap'?'Qualification state, model boundaries and open release gates.':page==='Anti-Collision'?'Subject well, offsets, uncertainty evidence and clearance status in one workspace.':page==='Realtime'?'Read-only operational context, replay and live-integration readiness.':'Explore the evidence behind your engineering decisions.'}</p></div><div className="heading-actions"><button className="button secondary" onClick={()=>setCreateOpen(true)} disabled={busy}><Plus size={16}/>New project</button><button className="button primary" onClick={exportReport} disabled={!project||busy||loading||!online}>{busy?<LoaderCircle className="spin" size={16}/>:<ArrowDownToLine size={16}/>}Create report</button></div></div>
     {error&&<div role="alert" className="alert error"><strong>Action could not be completed.</strong> {error}<button aria-label="Dismiss error" onClick={()=>setError('')}><X size={16}/></button></div>}
     {!online&&<div className="alert error">{cloudSession?'Session workspace is unavailable.':'Local service is unavailable.'} Displayed data is a cached view; actions are paused.<button onClick={()=>location.reload()}>Reconnect</button></div>}
     {notice&&<div className="toast" role="status"><Check size={17}/>{notice}</div>}
@@ -240,7 +217,7 @@ function App(){
     {loading&&<div className="loading"><LoaderCircle className="spin"/>Loading verified project data…</div>}
     {project&&!loading&&<>
       <div className="context-bar"><div><span className="context-icon"><Map size={17}/></span><strong>{project.well_name}</strong><span className="divider"/><span>{project.datum}</span></div><div><span className={`badge ${project.origin==='synthetic'?'amber':'neutral'}`}>{project.origin==='synthetic'?'Synthetic data':'Historical data'}</span><div className="segmented"><button className={!field?'selected':''} onClick={()=>setUnits('metric')}>Metric</button><button className={field?'selected':''} onClick={()=>setUnits('field')}>Field</button></div></div></div>
-      {page==='Overview'&&<>
+      {page==='Overview'&&<><WorkflowLauncher project={project} surveyStations={survey?.rows?.length??0} telemetryRecords={rows.length} geometryReady={Boolean(geometryOverview)} pendingEvents={pending} onOpen={p=>setPage(p as Page)}/>
         <div className="metric-grid">{[
           {label:'MEASURED DEPTH',value:convert(num(row,'md_m'),depthFactor),unit:depthUnit,detail:`${fmt(convert(num(row,'tvd_m'),depthFactor),1)} ${depthUnit} true vertical depth`,icon:ArrowDownToLine,color:'green'},
           {label:'RATE OF PENETRATION',value:convert(num(row,'rop_m_s'),3600*depthFactor),unit:`${depthUnit}/h`,detail:'Source observation · no smoothing',icon:Activity,color:'green'},
@@ -255,6 +232,8 @@ function App(){
         </div><div className="geometry-panel panel"><div className="panel-heading"><div><h2>Well trajectory</h2><p>Minimum-curvature geometry</p></div><button className="icon-button" aria-label="Open well geometry" onClick={()=>setPage('Well geometry')}><ArrowUpRight size={18}/></button></div><WellView rows={geometryOverview?.result.samples??survey?.rows??[]} project={{...project,formations:geometryOverview?.input.formations??project.formations}}/><div className="well-footer"><span><span className="line-key"/>Survey path</span><span>{survey?.rows?.length??0} stations</span></div><div className="well-note">{project.formations?'Interpreted formation markers. ':''}Survey uncertainty not evaluated.</div></div></div>
         <div className="bottom-grid"><div className="panel"><div className="panel-heading"><div><h2>Review queue <span className="count">{pending}</span></h2><p>Data conditions worth a closer look</p></div><button className="text-button" onClick={()=>setPage('Events & review')}>View all <ArrowRight size={15}/></button></div>{events.filter(e=>!e.acknowledgement).slice(0,3).map(e=><button className="event-summary" key={e.id} onClick={()=>{if(e.dataset_id===telemetry?.id)seek(e.row_index);setPage('Events & review');}}><span className={`event-dot ${e.severity}`}/><div><strong>{e.code.replaceAll('_',' ').toLowerCase()}</strong><p>{e.message}</p></div><ChevronRight size={15}/></button>)}{!pending&&<div className="empty-inline"><Check size={18}/>No unacknowledged data events.</div>}</div><div className="panel provenance-card"><div className="panel-heading"><div><h2>Built on traceable evidence</h2><p>Sources and calculations stay connected</p></div><FileCheck2 size={22}/></div><div className="provenance-stats"><div><strong>{datasets.length}</strong><span>Preserved sources</span></div><div><strong>SI</strong><span>Canonical units</span></div><div><strong>Local</strong><span>Data storage</span></div></div><button className="text-button" onClick={()=>setPage('Audit trail')}>Inspect the audit trail <ArrowRight size={15}/></button></div></div>
       </>}
+      {page==='Anti-Collision'&&<AntiCollisionWorkspace project={project} survey={survey} revision={geometryOverview} selectedMD={selectedMD} onSelectMD={setSelectedMD} onDirectional={()=>setPage('Directional engineering')} onData={()=>setPage('Data workspace')} on3D={()=>setPage('3D well engineering')}/>}
+      {page==='Realtime'&&<RealtimeWorkspace project={project} telemetry={telemetry} pendingEvents={pending} onData={()=>setPage('Data workspace')} onEvents={()=>setPage('Events & review')}/>}
       {page==='Directional engineering'&&<DirectionalWorkspace key={project.id} projectId={project.id} projectName={project.name} datum={project.datum} northReference={project.north_reference} survey={survey} revision={geometryOverview} selectedMD={selectedMD} onSelectMD={setSelectedMD} onError={setError} onDataPage={()=>setPage('Data workspace')} onGeometryPage={()=>setPage('Well geometry')} on3DPage={()=>setPage('3D well engineering')}/>}
       {page==='3D well engineering'&&<Well3DWorkspace revision={geometryOverview} activeSurveyID={survey?.id} datum={project.datum} northReference={project.north_reference} selectedMD={selectedMD} onSelectMD={setSelectedMD} onGeometryPage={()=>setPage('Well geometry')}/>}
       {(page==='Well geometry'||page==='Casing program')&&<GeometryWorkspace key={project.id+page} project={project} datasets={datasets} online={online} onError={setError} onNotice={setNotice} mode={page==='Well geometry'?'geometry':'casing'} onGeometryPage={()=>setPage('Well geometry')}/>}
@@ -284,7 +263,7 @@ function App(){
       {page==='Engineering lab'&&<EngineeringLab project={project} onError={setError} onNotice={setNotice} online={online}/>}
       {page==='Reports'&&<div className="panel"><div className="panel-heading"><div><h2>Fixed evidence snapshots</h2><p>Reopen, download or print a saved report. Later reviews never change an earlier snapshot.</p></div></div>{reports.length?<div className="table-scroll"><table><thead><tr><th>Created (UTC)</th><th>Report</th><th>SHA-256</th><th/></tr></thead><tbody>{reports.map(r=><tr key={r.id}><td>{new Date(r.created_at).toISOString().replace('T',' ').slice(0,19)}</td><td><code>{r.id.slice(0,8)}</code></td><td><code>{r.sha256.slice(0,20)}…</code></td><td><button className="text-button" disabled={busy} onClick={()=>action(async()=>setReport(await api<Report>(`/projects/${project.id}/reports/${r.id}`)))}>Open report <ArrowUpRight size={14}/></button></td></tr>)}</tbody></table></div>:<div className="empty-inline"><FileText size={20}/>Create your first report using the button above.</div>}</div>}
       {page==='Events & review'&&<div className="panel"><div className="panel-heading"><div><h2>Data-quality events <span className="count">{events.length}</span></h2><p>Acknowledgement records your review; it does not resolve a condition or approve an operation.</p></div><label className="search-box"><Search size={16}/><input aria-label="Search events" placeholder="Search events…" value={query} onChange={e=>setQuery(e.target.value)}/></label></div>{filteredEvents.map(e=><div className="event-row" key={e.id}><div className={`event-icon ${e.severity}`}><CircleHelp size={18}/></div><div><div className="event-row-title"><strong>{e.code.replaceAll('_',' ')}</strong><span className={`badge ${e.acknowledgement?'green':'amber'}`}>{e.acknowledgement?'Acknowledged':'Awaiting review'}</span></div><p>{e.message}</p>{e.acknowledgement&&<small>Review note: {e.acknowledgement.note} · {new Date(e.acknowledgement.at).toLocaleString()}</small>}</div>{!e.acknowledgement&&<button className="button secondary" disabled={busy||!online} onClick={()=>setAck(e)}>Review</button>}</div>)}{!filteredEvents.length&&<div className="empty-inline"><Check size={18}/>No matching events.</div>}</div>}
-      {page==='Capability roadmap'&&<><div className="scope-note"><BookOpen size={20}/><div><strong>Build the evidence before extending the authority.</strong><p>Audited software subsets through Module 17 are available. Field qualification and equipment integration remain separate release gates.</p></div></div><div className="module-grid">{modules.map(([id,name,status,description])=><div className={`panel module-card ${status==='Available subset'?'available':''}`} key={id}><div><span className="module-number">M{id}</span><span className={`badge ${status==='Available subset'?'green':status==='Excluded'?'amber':'neutral'}`}>{status}</span></div><h3>{name}</h3><p>{description}</p>{status==='Available subset'&&<button className="text-button" onClick={()=>setPage(id==='01'?'Well geometry':id==='02'?'Casing program':id==='03'?'Log clustering':id==='04'?'Shaly sand':id==='05'?'EM vendor results':id==='06'?'Hydraulics':id==='07'?'Wellbore stability':id==='08'?'Cuttings transport':id==='09'?'Surge & swab':id==='10'?'Torque & drag':id==='11'?'Buckling assessment':id==='12'?'BHA dynamics':id==='13'?'Bit condition':id==='14'?'Wear & fatigue':id==='15'?'Flow anomalies':id==='16'?'Gas & phase studies':'Supervisory research')}>Open module <ArrowRight size={15}/></button>}</div>)}</div></>}
+      {page==='Capability roadmap'&&<QualificationWorkspace onOpen={p=>setPage(p as Page)}/>}
       {page==='Audit trail'&&<div className="panel"><div className="panel-heading"><div><h2>Local evidence trail</h2><p>Hash-linked append-only events. Local integrity checks do not establish external attestation.</p></div><button className="button secondary" onClick={()=>action(async()=>{setAudit(await api<Audit>('/audit'));setNotice('Audit hash chain verified.');})}><RefreshCw size={15}/>Verify chain</button></div>{audit&&<><div className="audit-head"><span className="badge green"><Check size={13}/>Chain {audit.integrity}</span><code>HEAD {audit.head}</code></div><div className="table-scroll"><table><thead><tr><th>#</th><th>Time (UTC)</th><th>Action</th><th>Evidence hash</th><th>Details</th></tr></thead><tbody>{[...audit.entries].reverse().filter(e=>e.project_id===project.id).map(e=><tr key={e.sequence}><td>{e.sequence}</td><td>{new Date(e.at).toISOString().replace('T',' ').slice(0,19)}</td><td>{e.action}</td><td><code>{e.hash.slice(0,16)}…</code></td><td><details><summary>Inspect</summary><pre>{JSON.stringify(e.details,null,2)}</pre></details></td></tr>)}</tbody></table></div></>}</div>}
       <footer className="main-footer"><span><ShieldCheck size={14}/>Engineering research release · not field-qualified</span><span>All calculations trace to preserved inputs <span>•</span> No equipment control</span></footer>
     </>}
