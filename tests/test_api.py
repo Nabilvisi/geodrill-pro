@@ -131,3 +131,135 @@ def test_demo_load_does_not_duplicate(setup):
     c,p,_,_=setup
     assert c.post('/api/demo').json()['id']==p['id']
     assert len(c.get('/api/projects').json())==1
+
+def test_source_bound_uncertainty_and_anticollision_are_saved_without_clearance(setup):
+    c,p,_,_=setup
+    base=f"/api/projects/{p['id']}"
+    datasets=c.get(base+"/datasets").json()
+    reference_summary=next(d for d in datasets if d["kind"]=="survey")
+    reference=c.get(base+"/datasets/"+reference_summary["id"]).json()
+
+    geometry_payload={
+        "base_revision_id":None,
+        "change_note":"Bind synthetic survey for source-backed anti-collision regression.",
+        "geometry":{
+            "survey_dataset_id":reference["id"],
+            "datum":p["datum"],
+            "coordinate_reference":"Local project frame; no coordinate transformation",
+            "wellhead_north_m":0.0,
+            "wellhead_east_m":0.0,
+            "wellhead_elevation_m":0.0,
+            "survey_quality_note":"Synthetic regression survey with explicit project references.",
+            "tool_to_bit_offset_m":0.0,
+            "formations":[],
+            "hole_sections":[],
+            "casings":[],
+        },
+    }
+    geometry=c.post(base+"/geometry",json=geometry_payload)
+    assert geometry.status_code==201,geometry.text
+    revision=geometry.json()
+
+    offset_raw=demo.SURVEY.replace(b"2850,50,52\n",b"2850,50,52.001\n")
+    imported=c.post(base+"/imports",data={"kind":"survey"},files={"file":("synthetic-offset.csv",offset_raw,"text/csv")})
+    assert imported.status_code==201,imported.text
+    assert imported.json()["duplicate"] is False
+    offset=c.get(base+"/datasets/"+imported.json()["id"]).json()
+
+    metadata={
+        "latitude_deg":60.0,
+        "longitude_deg":3.0,
+        "b_total_nt":50000.0,
+        "dip_deg":70.0,
+        "declination_deg":-2.5,
+        "tool_model":"ISCWSA MWD Rev5.11",
+        "tool_revision":"Rev5.11",
+    }
+    ref_unc=c.post(base+"/directional/uncertainty-study",json={
+        "dataset_id":reference["id"],
+        "geometry_revision_id":revision["id"],
+        "metadata":metadata,
+    })
+    off_unc=c.post(base+"/directional/uncertainty-study",json={
+        "dataset_id":offset["id"],
+        "metadata":metadata,
+    })
+    assert ref_unc.status_code==201,ref_unc.text
+    assert off_unc.status_code==201,off_unc.text
+    assert ref_unc.json()["result"]["withheld"] is False
+    assert off_unc.json()["result"]["withheld"] is False
+    assert ref_unc.json()["result"]["source_sha256"]==reference["source_hash"]
+    assert off_unc.json()["result"]["source_sha256"]==offset["source_hash"]
+
+    study_payload={
+        "reference_dataset_id":reference["id"],
+        "reference_geometry_revision_id":revision["id"],
+        "offset_dataset_id":offset["id"],
+        "offset_well_name":"Synthetic offset",
+        "offset_start_nev":[20.0,0.0,0.0],
+        "offset_coordinate_reference":revision["input"]["coordinate_reference"],
+        "offset_datum":p["datum"],
+        "offset_source_note":"Synthetic surveyed surface tie-in for regression only.",
+        "correlation_mode":"independent",
+        "reference_uncertainty_calculation_id":ref_unc.json()["id"],
+        "offset_uncertainty_calculation_id":off_unc.json()["id"],
+    }
+    anti=c.post(base+"/directional/anticollision-study",json=study_payload)
+    assert anti.status_code==201,anti.text
+    result=anti.json()["result"]
+    assert result["min_c2c_distance_m"]>0
+    assert result["clearance_generated"] is False
+    assert result["equipment_authority"]=="none"
+    assert result["reference_source_sha256"]==reference["source_hash"]
+    assert result["offset_source_sha256"]==offset["source_hash"]
+    assert result["uncertainty_evidence"]["both_linked_and_calculated"] is True
+
+    saved=c.get(base+"/calculations?model=anticollision").json()
+    assert [v["id"] for v in saved]==[anti.json()["id"]]
+    report=c.post(base+"/reports")
+    assert report.status_code==201,report.text
+    snapshot=c.get(base+"/reports/"+report.json()["id"]).json()["snapshot"]
+    assert any(v["id"]==anti.json()["id"] and v["model"]=="anticollision" for v in snapshot["calculations"])
+
+    mismatch=c.post(base+"/directional/anticollision-study",json={
+        **study_payload,
+        "offset_coordinate_reference":"EPSG:32631",
+    })
+    assert mismatch.status_code==422
+    assert "coordinate reference" in mismatch.json()["detail"].lower()
+
+
+def test_source_bound_anticollision_rejects_missing_offset_tie_in_evidence(setup):
+    c,p,_,_=setup
+    base=f"/api/projects/{p['id']}"
+    reference=next(d for d in c.get(base+"/datasets").json() if d["kind"]=="survey")
+    geometry=c.post(base+"/geometry",json={
+        "base_revision_id":None,
+        "change_note":"Bind source for anti-collision evidence rejection.",
+        "geometry":{
+            "survey_dataset_id":reference["id"],
+            "datum":p["datum"],
+            "coordinate_reference":"Local project frame; no coordinate transformation",
+            "wellhead_north_m":0.0,
+            "wellhead_east_m":0.0,
+            "wellhead_elevation_m":0.0,
+            "survey_quality_note":"Synthetic regression survey.",
+            "tool_to_bit_offset_m":0.0,
+            "formations":[],"hole_sections":[],"casings":[],
+        },
+    }).json()
+    offset_raw=demo.SURVEY.replace(b"1700,38,45\n",b"1700,38,45.002\n")
+    offset_id=c.post(base+"/imports",data={"kind":"survey"},files={"file":("offset-two.csv",offset_raw,"text/csv")}).json()["id"]
+    response=c.post(base+"/directional/anticollision-study",json={
+        "reference_dataset_id":reference["id"],
+        "reference_geometry_revision_id":geometry["id"],
+        "offset_dataset_id":offset_id,
+        "offset_start_nev":[15.0,0.0,0.0],
+        "offset_coordinate_reference":geometry["input"]["coordinate_reference"],
+        "offset_datum":p["datum"],
+        "offset_source_note":"",
+        "correlation_mode":"independent",
+    })
+    assert response.status_code==422
+    assert "source" in response.json()["detail"].lower()
+
