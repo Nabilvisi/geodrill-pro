@@ -13,7 +13,7 @@ export type SpatialPoint={
 };
 export type SpatialFormation={name:string;top_tvd_m:number;uncertainty_m:number};
 export type SpatialCasing={name:string;top_md_m:number;bottom_md_m:number;outside_diameter_m:number;state:string};
-export type SpatialTarget={id:string;name:string;center_tvd_m:number;center_north_m:number;center_east_m:number;radius_m:number;tolerance_m:number};
+export type SpatialTarget={id:string;name:string;geometry_type:string;center_tvd_m:number;center_north_m:number;center_east_m:number;radius_m:number;tolerance_m:number};
 export type SpatialUncertainty={
   md_m:number;
   tvd_m:number;
@@ -186,13 +186,20 @@ export function GeoDrill3DScene({
 
       if(layers.targets){
         for(const t of targets.filter(t=>visible(t.center_tvd_m))){
-          const radius=Math.max(.5,t.radius_m),height=Math.max(1,t.tolerance_m*2);
-          const geom=new THREE.CylinderGeometry(radius,radius,height,32,1,true);geometries.push(geom);
-          const mat=new THREE.MeshBasicMaterial({color:colors.target,transparent:true,opacity:.18,side:THREE.DoubleSide,depthWrite:false});materials.push(mat);
-          const mesh=new THREE.Mesh(geom,mat);mesh.position.copy(toWorld(t.center_north_m,t.center_east_m,t.center_tvd_m));mesh.userData={kind:'target',name:t.name};scene.add(mesh);
-          const ringGeom=new THREE.RingGeometry(radius*.92,radius,40);geometries.push(ringGeom);
-          const ringMat=new THREE.MeshBasicMaterial({color:colors.target,transparent:true,opacity:.85,side:THREE.DoubleSide});materials.push(ringMat);
-          const ring=new THREE.Mesh(ringGeom,ringMat);ring.rotation.x=-Math.PI/2;ring.position.copy(mesh.position);scene.add(ring);
+          const center=toWorld(t.center_north_m,t.center_east_m,t.center_tvd_m);
+          if(t.geometry_type==='circle'){
+            const radius=Math.max(.5,t.radius_m),height=Math.max(1,t.tolerance_m*2);
+            const geom=new THREE.CylinderGeometry(radius,radius,height,32,1,true);geometries.push(geom);
+            const mat=new THREE.MeshBasicMaterial({color:colors.target,transparent:true,opacity:.18,side:THREE.DoubleSide,depthWrite:false});materials.push(mat);
+            const mesh=new THREE.Mesh(geom,mat);mesh.position.copy(center);mesh.userData={kind:'target',name:t.name,geometry_type:t.geometry_type};scene.add(mesh);
+            const ringGeom=new THREE.RingGeometry(radius*.92,radius,40);geometries.push(ringGeom);
+            const ringMat=new THREE.MeshBasicMaterial({color:colors.target,transparent:true,opacity:.85,side:THREE.DoubleSide});materials.push(ringMat);
+            const ring=new THREE.Mesh(ringGeom,ringMat);ring.rotation.x=-Math.PI/2;ring.position.copy(center);scene.add(ring);
+          }else{
+            const geom=new THREE.SphereGeometry(markerRadius*1.2,14,10);geometries.push(geom);
+            const mat=new THREE.MeshBasicMaterial({color:colors.target,wireframe:true,transparent:true,opacity:.8});materials.push(mat);
+            const marker=new THREE.Mesh(geom,mat);marker.position.copy(center);marker.userData={kind:'target-center',name:t.name,geometry_type:t.geometry_type};scene.add(marker);
+          }
         }
       }
 
