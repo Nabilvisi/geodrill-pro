@@ -40,6 +40,8 @@ jobs:
         run: |
           pnpm exec tsc -p tsconfig.json --noEmit
           pnpm exec vite build
+      - name: Rebuild embedded Streamlit workstation
+        run: python tools/build_streamlit.py
       - name: Run full regression and source benchmarks
         run: python -m pytest -q --junitxml=build/ci-tests.xml
       - uses: actions/upload-artifact@v4
