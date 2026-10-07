@@ -1,5 +1,435 @@
 # GeoDrill Pro v0.9 — Implementation Progress
 
+## Session Update — Source-Bound 3D Spatial Engine & Anti-Collision — 7 October 2026
+
+### Session Metadata
+
+- Repository: https://github.com/Nabilvisi/geodrill-pro
+- Branch: `v0.9-full-ui`
+- Pull request: #3 — GeoDrill Pro v0.9 — full drilling workstation UI
+- Validated runtime head before this documentation checkpoint: `e37275cd54685e6706d68589f93b48cbbe00a6d2`
+- CI validation run: `37572485224`
+- Five Hour Limit Remaining: not exposed to this session; no percentage invented
+- Implementation policy: Python engineering kernels remain authoritative; React/Three.js only visualize preserved inputs and saved kernel outputs
+
+### Objective
+
+Complete the next v0.9 milestone: replace the interim SVG projection with a real WebGL spatial engine and connect it to preserved offset surveys, source-bound ISCWSA uncertainty, saved closest-approach calculations, persisted targets, formations and casing without fabricating drilling clearance or equipment authority.
+
+### Completed
+
+- Added and pinned `three@0.186.1` with a frozen pnpm lock entry and verified package integrity.
+- Replaced the interim 3D SVG projection with a real Three.js WebGL scene.
+- Added OrbitControls with orbit, pan and zoom.
+- Added camera presets:
+  - perspective;
+  - plan;
+  - north section;
+  - east section.
+- Kept equal metric spatial scaling. Scene origin is re-based around the active coordinate extent for WebGL precision; engineering coordinates remain unchanged.
+- Standardized scene axes:
+  - X = East;
+  - Y = elevation/up, therefore increasing TVD is negative Y;
+  - Z = North.
+- Added source-bound subject trajectory from the saved geometry revision.
+- Added source-bound offset trajectory from a second preserved survey dataset plus an explicit surface/tie-in N/E/TVD.
+- Added station picking through a Three.js raycaster with synchronized selected MD.
+- Added selected-station engineering inspector with MD, North, East and TVD.
+- Added saved formation planes from geometry revision inputs.
+- Added persisted casing as trajectory-following tubes. Physical OD is preserved; a minimum visual radius is used only when the true OD would be sub-pixel at whole-well scale.
+- Added project-hierarchy targets:
+  - circular targets render as source-defined cylinders/rings;
+  - non-circular target types render as center markers only, avoiding fabricated geometry.
+- Added subject and offset 2σ uncertainty ellipsoids from saved ISCWSA calculations.
+- Added saved closest-approach vector and endpoint markers.
+- Added TVD section control that limits displayed evidence to the selected depth without altering source data.
+- Added layer controls for subject, offset, formations, casing, targets, both uncertainty sets, closest approach, stations and grid.
+- Added renderer diagnostics and graceful WebGL failure state.
+- Added source/evidence cards and explicit frame/datum/north context.
+- Added saved anti-collision history and reopening of earlier persisted studies.
+- Updated the Anti-Collision landing page so it reopens the latest saved source-bound study instead of permanently showing an empty offset state.
+- Updated Qualification wording so WebGL and source-backed proximity are described as internally verified software capabilities, not operational qualification.
+
+### Source-Bound Study API
+
+Added two persisted project operations while retaining the earlier raw diagnostic compatibility routes.
+
+#### `POST /api/projects/{project_id}/directional/uncertainty-study`
+
+The server:
+- receives a preserved survey `dataset_id`;
+- optionally verifies an immutable geometry revision belongs to that survey;
+- reloads the stored normalized survey itself rather than trusting browser-supplied trajectory coordinates;
+- re-verifies the original source hash;
+- converts stored radians to explicit-degree kernel stations;
+- executes the existing ISCWSA uncertainty kernel;
+- saves the result through the calculation/audit evidence path;
+- preserves source SHA-256, Parquet SHA-256 and geometry identity;
+- saves withheld results when required geomagnetic evidence is missing;
+- never substitutes generic uncertainty;
+- sets `clearance_generated=false` and `equipment_authority=none`.
+
+#### `POST /api/projects/{project_id}/directional/anticollision-study`
+
+The server:
+- requires different preserved subject and offset survey datasets;
+- requires an immutable subject geometry revision bound to the subject survey;
+- verifies raw source integrity for both surveys;
+- requires the offset coordinate frame to explicitly equal the subject frame;
+- requires the offset depth datum to explicitly equal the project datum;
+- requires a documented offset tie-in/source note;
+- requires finite `[North, East, TVD]` offset tie-in coordinates;
+- validates stored survey datum/north metadata where available;
+- optionally links persisted subject and offset uncertainty calculations, verifying dataset ownership;
+- executes the existing proximity/closest-approach kernel;
+- saves the result, source hashes, geometry hash, tie-in evidence and uncertainty linkage in the project evidence trail;
+- always returns `clearance_generated=false`;
+- always returns `equipment_authority=none`.
+
+### Engineering Kernel Changes
+
+None.
+
+The existing:
+- minimum-curvature geometry;
+- ISCWSA MWD Rev5.11 uncertainty implementation;
+- proximity / closest-approach implementation;
+- correlation treatment and abstention behavior
+
+remain authoritative and unchanged. This milestone adds evidence-bound orchestration and visualization around those kernels.
+
+### Files Added
+
+| File | Purpose |
+|---|---|
+| `apps/desktop/src/GeoDrill3DScene.tsx` | Three.js WebGL spatial renderer, picking, layers, uncertainty and closest-approach visualization |
+| `apps/desktop/src/three-shim.d.ts` | TypeScript declarations for the pinned Three.js runtime modules used by the current frontend |
+
+### Files Modified
+
+| File | Change |
+|---|---|
+| `services/api/main.py` | Persisted source-bound uncertainty and anti-collision study endpoints |
+| `tests/test_api.py` | End-to-end preserved-survey uncertainty/proximity/report tests and evidence rejection tests |
+| `tests/test_v09_verification.py` | Regression guard requiring Three.js and the saved-study endpoints |
+| `package.json`, `pnpm-lock.yaml` | Exact `three@0.186.1` dependency and integrity-locked install |
+| `apps/desktop/src/Well3DWorkspace.tsx` | Full spatial workstation, evidence forms, saved studies, layer/camera/section controls |
+| `apps/desktop/src/GeometryWorkspace.tsx` | Exposes persisted reference N/E coordinates to the spatial UI |
+| `apps/desktop/src/V09Workspaces.tsx` | Anti-Collision saved-study summary and updated capability wording |
+| `apps/desktop/src/main.tsx` | Connects project data, datasets and spatial-workstation navigation |
+| `apps/desktop/src/full-ui.css` | Dense 3D engineering workstation styling, responsive layout and dark-theme coverage |
+| `GEODRILL_PRO_V0.9_PROGRESS.md` | This milestone checkpoint |
+
+### Verification
+
+Runtime head `e37275cd54685e6706d68589f93b48cbbe00a6d2` was validated by PR CI run `37572485224`.
+
+#### Ubuntu
+
+- Frozen pnpm install: passed.
+- `three 0.186.1` installed from the lockfile.
+- TypeScript type-check: passed.
+- Vite production build: passed.
+- Vite transformed: 1604 modules.
+- Embedded Streamlit workstation rebuild: passed.
+- Full regression: **686 passed, 0 failed, 1 existing warning in 56.36 s**.
+
+#### Windows
+
+- Frozen pnpm install: passed.
+- TypeScript type-check: passed.
+- Vite production build: passed.
+- Embedded Streamlit workstation rebuild: passed.
+- Full regression: **686 passed, 0 failed, 1 existing warning in 87.72 s**.
+
+The remaining warning is the pre-existing Starlette TestClient / httpx deprecation warning.
+
+### Frontend Bundle Note
+
+The production bundle is approximately:
+- JavaScript: 1,037.91 kB minified / 276.01 kB gzip;
+- CSS: 61.06 kB / 13.08 kB gzip.
+
+Vite emits a non-fatal >500 kB chunk warning after adding Three.js. This is not a correctness failure. The next performance cleanup should lazy-load the spatial workstation and/or split Three.js into its own manual chunk so users who never open 3D do not pay the full initial bundle cost.
+
+### 3D Status
+
+Implemented for this milestone:
+- real Three.js WebGL renderer;
+- persisted subject trajectory;
+- explicit source-backed offset trajectory;
+- formation layers;
+- casing geometry;
+- persisted circular targets and honest center-only representation for unsupported target shapes;
+- source-bound 2σ uncertainty ellipsoids;
+- closest-approach vector;
+- synchronized station picking;
+- camera presets;
+- layer visibility controls;
+- TVD section control;
+- responsive engineering inspector.
+
+Not claimed:
+- field-qualified collision avoidance;
+- drilling clearance;
+- live rig spatial feed;
+- authoritative fault-surface ingestion;
+- BHA rendering without a persisted source-backed BHA scene contract;
+- browser CUA visual acceptance in this chat session.
+
+### Anti-Collision Status
+
+The software now supports an end-to-end persisted workflow from:
+1. preserved subject survey;
+2. saved subject geometry revision;
+3. preserved offset survey;
+4. explicit offset tie-in/frame/datum/source evidence;
+5. optional persisted uncertainty studies;
+6. Python proximity kernel;
+7. saved anti-collision calculation;
+8. report/audit evidence;
+9. Three.js spatial visualization.
+
+A proximity result is positional engineering evidence only. It never becomes an operational clearance.
+
+### Important Authority Boundary
+
+- `equipment_control=false`
+- `equipment_authority=none`
+- `clearance_generated=false`
+- No automated drilling clearance.
+- No rig command path.
+- No field-qualification claim.
+
+### Remaining Work Outside This Milestone
+
+- Complete migration from legacy project-scoped surveys to fully wellbore-owned survey/trajectory revisions across every workflow.
+- Add a persisted, source-backed BHA scene contract before rendering BHA geometry in 3D.
+- Add supported fault/grid/surface interchange before rendering interpreted fault or reservoir surfaces.
+- Add full clipping-plane geometry if required beyond the current TVD evidence-section control.
+- Add WebGL visual regression / browser interaction benchmarks when a browser-execution environment is available.
+- Code-split/lazy-load Three.js to reduce initial JavaScript bundle size.
+- Add read-only WITSML / ETP ingestion, reconnect, deduplication, quarantine and arrival-time persistence.
+- Complete docking/layout persistence and full keyboard/command-palette acceptance.
+- Complete Tauri desktop updater/signing and rollback.
+- Complete intended enterprise PostgreSQL/PostGIS/Timescale/object-store/OIDC architecture.
+- Complete independent engineering qualification and external security review.
+
+### Next 3 Priorities
+
+1. Migrate subject/offset surveys and trajectory revisions to the explicit Wellbore-owned domain throughout the UI and saved-study contracts.
+2. Lazy-load/code-split the 3D workstation, then add browser visual/performance regression at representative trajectory and offset counts.
+3. Implement read-only WITSML/ETP ingestion with the same provenance, quality, replay and withholding discipline.
+
+### Handoff Summary
+
+The requested 3D/offset/uncertainty/anti-collision milestone is implemented on `v0.9-full-ui`. GeoDrill now uses a real Three.js WebGL spatial engine and persisted source-bound survey studies instead of the interim SVG projection. Subject and offset surveys remain traceable to preserved sources; uncertainty and closest approach are computed by the existing Python engineering kernels and saved into the calculation/audit/report evidence path. Missing evidence is withheld rather than fabricated, and no result creates drilling clearance or equipment authority. Runtime head `e37275cd54685e6706d68589f93b48cbbe00a6d2` passed **686 tests on both Ubuntu and Windows**, plus frozen dependency install, TypeScript, Vite and Streamlit build gates.
+
+---
+
+## Session Update — Full v0.9 Workstation UI — 7 October 2026
+
+### Session Metadata
+
+- Repository: https://github.com/Nabilvisi/geodrill-pro
+- Branch: `v0.9-full-ui`
+- Pull request: #3 — GeoDrill Pro v0.9 — full drilling workstation UI
+- Base: `main` at `67ca21d93ce2aef5c40abb3c065c4d29bebda47b`
+- Five Hour Limit Remaining: not exposed to this session; no percentage invented
+- Implementation policy: existing engineering kernels, provenance, withholding rules, recovery and saved-study behavior preserved
+
+### Objective
+
+Replace the research-page-first presentation with the v0.9 drilling-workstation UI defined in the full-stack architecture: original GeoDrill branding, drilling-domain navigation, unified workflow launcher, professional Anti-Collision / Realtime / Qualification workspaces, dark/light shell support, and frontend build validation, without fabricating engineering outputs or rewriting verified kernels.
+
+### Completed
+
+- Created isolated implementation branch `v0.9-full-ui`; published work remains untouched pending review.
+- Replaced primary user navigation with:
+  - Projects
+  - Well Planning
+  - Directional
+  - Survey
+  - Anti-Collision
+  - 3D Well Model
+  - Hydraulics
+  - Torque & Drag
+  - Casing
+  - BHA
+  - Geomechanics
+  - Realtime
+  - Offsets
+  - Evidence
+  - Reports
+  - Qualification
+  - Admin
+- Removed the visible numbered-module roadmap from the main UI and removed its obsolete `modules` constant from `main.tsx`.
+- Retained advanced specialist/research pages behind Qualification rather than deleting their tested implementations.
+- Added a v0.9 workflow launcher to Projects/Overview with drilling-domain cards and project readiness counts.
+- Added Anti-Collision workspace with:
+  - subject-well plan view using saved kernel geometry;
+  - geometry/current-state diagnostics;
+  - coordinate/datum/north context;
+  - offset readiness checklist;
+  - deliberately empty separation table when no source-backed offset exists;
+  - explicit `Clearance withheld` state.
+- Added Realtime workspace with:
+  - historical telemetry KPIs and sparklines;
+  - source/replay status;
+  - channel-quality context;
+  - live-integration readiness panel;
+  - explicit read-only/no-equipment-authority state.
+- Added Qualification & Review workspace:
+  - primary workflow qualification cards;
+  - release/authority boundaries;
+  - advanced research library for specialist studies.
+- Added original GeoDrill canonical SVG assets:
+  - `apps/desktop/src/assets/brand/geodrill-mark.svg`
+  - `apps/desktop/src/assets/brand/geodrill-horizontal.svg`
+  - `public/geodrill-mark.svg`
+- Reworked `BrandMark.tsx` to render the canonical G + directional trajectory + target + subsurface-layer symbol directly.
+- Replaced favicon usage with the canonical GeoDrill mark.
+- Added v0.9 workstation styling in `apps/desktop/src/full-ui.css`, including responsive layouts and initial light/dark theme coverage.
+- Added UI theme persistence through local storage.
+- Extended PR CI to:
+  - install Node/pnpm;
+  - TypeScript type-check;
+  - production Vite build;
+  - rebuild embedded Streamlit workstation;
+  - run full Python/source regression.
+- Opened draft PR #3 for review and CI.
+
+### Files Added
+
+| File | Purpose |
+|---|---|
+| `apps/desktop/src/V09Workspaces.tsx` | Workflow launcher, Anti-Collision, Realtime and Qualification workspaces |
+| `apps/desktop/src/full-ui.css` | v0.9 workstation layout, dark/light shell, responsive engineering workspace styles |
+| `apps/desktop/src/assets/brand/geodrill-mark.svg` | Canonical original application mark |
+| `apps/desktop/src/assets/brand/geodrill-horizontal.svg` | Canonical horizontal product wordmark |
+| `public/geodrill-mark.svg` | Browser/app favicon source |
+
+### Files Modified
+
+| File | Change |
+|---|---|
+| `apps/desktop/src/main.tsx` | Workflow navigation, launcher, new workspaces, theme state, removal of visible numbered-module framing |
+| `apps/desktop/src/design-system/BrandMark.tsx` | Canonical original GeoDrill brand symbol and wordmark |
+| `index.html` | Single GeoDrill favicon |
+| `.github/workflows/ci.yml` | Frontend type-check/build + Streamlit rebuild before regression |
+| `GEODRILL_PRO_V0.9_PROGRESS.md` | This implementation checkpoint |
+
+### Architecture Decisions
+
+#### Preserve kernels; redesign interaction layer
+
+The UI refactor does not move authoritative equations into React. Existing Python engineering kernels remain authoritative. UI geometry renders saved/source-bound kernel coordinates.
+
+#### Anti-collision abstains instead of inventing offsets
+
+The new Anti-Collision workspace does not fabricate offset wells, ellipsoids, separation factors or clearance. Until coordinate-compatible offset surveys and uncertainty evidence are attached, the workspace displays readiness gaps and `Clearance withheld`.
+
+#### Realtime remains read-only/replay
+
+Historical telemetry drives the new operations UI. WITSML/ETP remains a future read-only integration gate. No command/control path was introduced.
+
+#### Research features remain available but secondary
+
+Specialist research pages remain reachable through Qualification. They no longer define the primary product navigation.
+
+### Engineering Kernel Changes
+
+None. No equation, unit convention, datum/north convention, error model, threshold, applicability rule, or authority boundary was changed.
+
+### Branding Changes
+
+The application now uses the original GeoDrill v0.9 visual identity: Deep Blue / Teal / Graphite / Stone / Orange, plus the G + well trajectory + target + subsurface-layer symbol. Proprietary vendor logos/trade dress are not used.
+
+### 3D Status
+
+The existing source-bound `Well3DWorkspace` remains the current interim spatial viewer. It is **not** yet the architecture target Three.js/React Three Fiber scene. The new UI links to it but does not claim WebGL production 3D completion.
+
+Open 3D work:
+- Three.js/R3F renderer;
+- target objects;
+- source-backed offset wells;
+- uncertainty ellipsoids;
+- anti-collision closest-approach geometry;
+- casing/BHA mesh representation;
+- formation/fault surfaces;
+- picking/selection validation;
+- clipping/section plane;
+- representative-load performance validation.
+
+### Realtime Status
+
+Implemented UI: historical replay/read-only telemetry context.
+
+Still open:
+- WITSML adapter;
+- ETP subscription/reconnect;
+- arrival-time persistence;
+- deduplication/quarantine;
+- provider interoperability fixtures;
+- latency metrics.
+
+### Verification
+
+Initial PR CI run 37569737538:
+- TypeScript type-check: passed on Ubuntu before regression.
+- Vite production build: passed; 1600 modules transformed.
+- Initial regression: 681 passed, 2 failed.
+- Both failures were expected stale checked-in Streamlit frontend guards caused by changed UI source:
+  - `test_streamlit_rerun_keeps_workspace`
+  - `test_checked_in_streamlit_component_matches_current_source`
+- No engineering calculation regression was identified.
+- CI was repaired to run `python tools/build_streamlit.py` before full regression.
+- Corrected run 37569907452 is the validation run for the rebuilt embedded workstation. Record its final result before merge.
+
+### Known Open Items
+
+- Production Three.js/R3F 3D system.
+- Source-backed offset-well ingestion and end-to-end anti-collision calculations in the new workspace.
+- WITSML/ETP realtime adapters.
+- Persistent dockable layouts / command palette / full keyboard workflow.
+- Full light/dark token migration across every legacy research page.
+- Project → Field → Well → Wellbore domain migration in every current UI path.
+- Tauri desktop shell/updater/signing.
+- Enterprise PostgreSQL/PostGIS/Timescale/object-store/OIDC architecture.
+- Independent engineering qualification and external security review.
+
+### Important Do Not Break Items
+
+- Source bytes and source hashes.
+- Immutable saved studies/reports.
+- SI kernel boundary.
+- Explicit datum/north/CRS context.
+- Missing-evidence withholding.
+- Membership/project isolation.
+- `equipment_control=false`.
+- `equipment_authority=none`.
+- No automated drilling clearance.
+
+### Next Session — Start Here
+
+1. Read this session update and `GEODRILL_PRO_V0.9_FULL_STACK_ARCHITECTURE.md`.
+2. Check PR #3 and final CI status.
+3. If CI is green, perform visual/browser review of Projects, Anti-Collision, Realtime, Qualification, Directional and 3D at desktop and mobile widths.
+4. Keep PR draft until visual review is accepted.
+5. Next major product increment: implement the actual Three.js/R3F spatial engine and source-backed offset-well domain flow rather than adding additional research calculations.
+
+### Next 3 Priorities
+
+1. Three.js/R3F authoritative 3D workstation with linked table/plot/scene selection.
+2. Source-backed offset wells + uncertainty + anti-collision calculation workflow.
+3. Read-only WITSML/ETP ingestion with quality/provenance/replay parity.
+
+### Handoff Summary
+
+GeoDrill Pro now has the v0.9 drilling-workstation UI structure on `v0.9-full-ui` and draft PR #3. The old research-page-first/numbered-module navigation has been replaced by drilling workflows, the new original brand identity is integrated, and truthful Anti-Collision, Realtime and Qualification workspaces are connected without modifying engineering equations. The frontend compiles; the first regression exposed only stale embedded Streamlit assets, and CI was changed to rebuild them before regression. Production Three.js 3D, real offset anti-collision inputs, WITSML/ETP, docking persistence, enterprise infrastructure and independent qualification remain explicitly open.
+
+---
+
 ## Session Metadata
 
 - Date: 2026-10-07 (Asia/Jakarta)

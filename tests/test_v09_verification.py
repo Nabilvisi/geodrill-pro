@@ -185,3 +185,22 @@ def test_hierarchy_rejects_cross_project_field_and_cross_well_parent(client):
     parent=svc.create_wellbore(wb["id"],"Parent")
     with pytest.raises(ValueError,match="Sidetrack"):
         svc.create_wellbore(wa["id"],"Cross well",sidetrack_parent_id=parent["id"])
+
+def test_v09_spatial_workstation_uses_threejs_and_source_bound_studies():
+    root=Path(__file__).resolve().parents[1]
+    package=json.loads((root/"package.json").read_text(encoding="utf-8"))
+    assert package["dependencies"]["three"]=="0.186.1"
+    scene=(root/"apps/desktop/src/GeoDrill3DScene.tsx").read_text(encoding="utf-8")
+    workspace=(root/"apps/desktop/src/Well3DWorkspace.tsx").read_text(encoding="utf-8")
+    api_source=(root/"services/api/main.py").read_text(encoding="utf-8")
+    assert "new THREE.WebGLRenderer" in scene
+    assert "OrbitControls" in scene
+    assert "semi_major_2sigma_m" in scene
+    assert "closestApproach" in scene
+    assert "/directional/uncertainty-study" in workspace
+    assert "/directional/anticollision-study" in workspace
+    assert 'store.calculation(project_id, "directional-uncertainty"' in api_source
+    assert 'store.calculation(project_id, "anticollision"' in api_source
+    assert '"clearance_generated": False' in api_source
+    assert "equipment_authority" in api_source
+

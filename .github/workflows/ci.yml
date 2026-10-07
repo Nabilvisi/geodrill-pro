@@ -24,10 +24,24 @@ jobs:
           cache-dependency-path: |
             requirements.txt
             apps/streamlit/requirements.txt
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - uses: pnpm/action-setup@v4
+        with:
+          version: "10"
       - name: Install runtime and cloud test dependencies
         run: python -m pip install -r apps/streamlit/requirements.txt
       - name: Check dependency consistency
         run: python -m pip check
+      - name: Install locked frontend dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Type-check and build workstation frontend
+        run: |
+          pnpm exec tsc -p tsconfig.json --noEmit
+          pnpm exec vite build
+      - name: Rebuild embedded Streamlit workstation
+        run: python tools/build_streamlit.py
       - name: Run full regression and source benchmarks
         run: python -m pytest -q --junitxml=build/ci-tests.xml
       - uses: actions/upload-artifact@v4
