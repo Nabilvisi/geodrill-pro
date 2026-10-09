@@ -1,2 +1,4 @@
 # Preserve built component bytes on every platform for SHA-256 verification.
 apps/streamlit/component/** -text
+# Compiled renderer assets include upstream GLSL string whitespace. Preserve it.
+apps/streamlit/component/assets/*.js -whitespace

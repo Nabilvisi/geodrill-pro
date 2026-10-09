@@ -1,21 +1,17 @@
 """Run the packaged loopback workstation with explicit startup and lifetime checks."""
 import argparse
-import hashlib
 import json
 import logging
 import os
 from pathlib import Path
 import sys
-import httpx
 import webbrowser
 
 BUNDLE_DIR = Path(sys._MEIPASS) if getattr(sys, "frozen", False) else Path(__file__).resolve().parents[1]
 if str(BUNDLE_DIR) not in sys.path:
     sys.path.insert(0, str(BUNDLE_DIR))
 import uvicorn
-
-URL = "http://127.0.0.1:8765"
-
+from packages.loopback import checked_port, local_health, loopback_url, require_owned_service
 
 def create_app(**kwargs):
     # Import the API only on normal startup, never while preserving/restoring data.
@@ -31,6 +27,7 @@ def data_directory() -> Path:
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--no-browser", action="store_true")
+    parser.add_argument("--port", type=checked_port, default=8765, help="Explicit local loopback port (default 8765)")
     operation = parser.add_mutually_exclusive_group()
     operation.add_argument("--smoke-test", action="store_true", help="Exercise packaged API and diagnostics, then exit")
     operation.add_argument("--backup", type=Path, metavar="ARCHIVE", help="Back up the stopped workstation, then exit")
@@ -38,6 +35,7 @@ def main() -> int:
     parser.add_argument("--destination", type=Path, help="New data directory for restore")
     parser.add_argument("--expected-sha256", help="Retained archive hash required for restore")
     args = parser.parse_args()
+    url = loopback_url(args.port)
     runtime = data_directory()
     if args.backup or args.restore:
         from tools.backup_restore import backup_workstation, restore_workstation
@@ -61,7 +59,14 @@ def main() -> int:
     runtime.mkdir(parents=True, exist_ok=True)
     logging.basicConfig(filename=runtime / "desktop.log", level=logging.INFO)
     try:
-        app = create_app(data_dir=runtime)
+        if not args.smoke_test:
+            active = local_health(args.port)
+            if active is not None:
+                require_owned_service(active, BUNDLE_DIR, runtime, args.port)
+                if not args.no_browser:
+                    webbrowser.open(url)
+                return 0
+        app = create_app(data_dir=runtime, loopback_port=args.port)
         if args.smoke_test:
             from fastapi.testclient import TestClient
             from packages.engineering.directional import verify_iscwsa_diagnostics
@@ -79,20 +84,7 @@ def main() -> int:
                 encoding="utf-8",
             )
             return 0
-        instance = hashlib.sha256(str(BUNDLE_DIR.resolve()).encode()).hexdigest()[:16]
-        try:
-            response = httpx.get(URL + "/api/health", timeout=1, follow_redirects=False, trust_env=False)
-            response.raise_for_status()
-            active = response.json()
-        except (httpx.HTTPError, ValueError):
-            active = None
-        if active:
-            if active.get("instance_id") != instance:
-                raise RuntimeError("Port 8765 is occupied by another installation. Close that service first.")
-            if not args.no_browser:
-                webbrowser.open(URL)
-            return 0
-        config = uvicorn.Config(app, host="127.0.0.1", port=8765, log_level="warning", log_config=None)
+        config = uvicorn.Config(app, host="127.0.0.1", port=args.port, log_level="warning", log_config=None)
         server = uvicorn.Server(config)
         if not args.no_browser:
             # Open only after this server has completed startup.
@@ -101,7 +93,7 @@ def main() -> int:
             def open_when_ready():
                 for _ in range(120):
                     if server.started:
-                        webbrowser.open(URL)
+                        webbrowser.open(url)
                         return
                     if server.should_exit:
                         return

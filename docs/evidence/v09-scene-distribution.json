@@ -1,0 +1,86 @@
+{
+  "verified_at": "2026-10-09",
+  "scope": "Unpublished unsigned scene development preview; synthetic software acceptance",
+  "release_manifest": {
+    "version": "0.9.0-alpha.2",
+    "created_at_utc": "2026-10-09T12:37:08.663321+00:00",
+    "source_commit": "617c47476b78d16ed12cd09c978c675b08557da2",
+    "source_has_uncommitted_changes": false,
+    "source_snapshot_sha256": "961e0d16e950f0d787b77fa07678b10648b5634a8b85fdb70fa9006de35a9c5a",
+    "source_snapshot_file_count": 224,
+    "source_snapshot_scope": "Git-listed application, package, service, tool, test, workflow and original-source files; root build/dependency files. Generated verification reports excluded.",
+    "signing_mode": "unsigned",
+    "trusted_signature_verification": {
+      "GeoDrillPro.exe": false,
+      "GeoDrillPro-Setup.exe": false
+    },
+    "independent_engineering_qualification": "pending",
+    "external_security_audit": "pending",
+    "equipment_control": false,
+    "clearance_generated": false,
+    "assets": [
+      {
+        "name": "GeoDrillPro-Setup.exe",
+        "size_bytes": 122026592,
+        "sha256": "75a079ac90865d9e633e93c5f0677675e9808cf16a6192af7b46d845e3d0f885"
+      },
+      {
+        "name": "GeoDrillPro-Windows-x64.zip",
+        "size_bytes": 184610129,
+        "sha256": "e3a8be820502611d54a6d66d2d9bf5cf02a8dd659019a5d2f902821a87db911f"
+      }
+    ],
+    "executable_sha256": "28cd260b62918d3e2999783319aebb22d72c252be3ce0455014c1a1a91d71903"
+  },
+  "installer_recovery": {
+    "install_exit_code": 0,
+    "smoke_exit_code": 0,
+    "clearance_generated": false,
+    "equipment_control": false,
+    "installer_sha256": "75a079ac90865d9e633e93c5f0677675e9808cf16a6192af7b46d845e3d0f885",
+    "existing_restore_destination_preserved": true,
+    "backup_archive_sha256": "d6c8aed600f99b178fafb9a334ef0328de2393ed978db249c12ab48642ebbfd0",
+    "wrong_hash_restore_rejected": true,
+    "packaged_restore_exit_code": 0,
+    "persistent_evidence_preserved": true,
+    "restored_smoke_exit_code": 0,
+    "source_snapshot_sha256": "961e0d16e950f0d787b77fa07678b10648b5634a8b85fdb70fa9006de35a9c5a",
+    "passed": true,
+    "uninstall_exit_code": 0,
+    "signing_mode": "unsigned",
+    "installed_executable_sha256": "28cd260b62918d3e2999783319aebb22d72c252be3ce0455014c1a1a91d71903",
+    "restored_signing_identity_preserved": true,
+    "packaged_backup_exit_code": 0,
+    "extra_user_file_preserved": true
+  },
+  "source_launcher_start_reuse_stop_passed": true,
+  "packaged_explicit_port_start_reuse_passed": true,
+  "packaged_saved_scene_backup_restore_passed": true,
+  "packaged_browser": {
+    "webgl_rendered": true,
+    "actual_canvas_selection_passed": true,
+    "bidirectional_primary_selection_passed": true,
+    "feet_and_exaggeration_x2_preserved_displayed_canonical_coordinates": true,
+    "saved_sample_distance_m": 500.0,
+    "synthetic_trajectory_revision_prefix": "ca53b9e0",
+    "proof": "docs/evidence/v09-packaged-scene.jpg"
+  },
+  "github_ci": {
+    "run_id": 37931333221,
+    "source_commit": "617c47476b78d16ed12cd09c978c675b08557da2",
+    "windows_python_tests_passed": 723,
+    "linux_python_tests_passed": 723,
+    "scene_checks_passed_each_platform": 23,
+    "conclusion": "success"
+  },
+  "source_pr": "https://github.com/Nabilvisi/geodrill-pro/pull/5",
+  "public_observed_version": "0.9.0-alpha.1",
+  "scene_publication_verified": false,
+  "full_phase_5_complete": false,
+  "equipment_control": false,
+  "equipment_authority": "none",
+  "clearance_generated": false,
+  "packaged_saved_scene_restart_passed": true,
+  "owned_test_services_stopped": true,
+  "original_candidate_artifacts_unchanged": true
+}

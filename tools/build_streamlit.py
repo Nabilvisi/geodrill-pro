@@ -17,7 +17,9 @@ for f in (release/"assets").iterdir():
  if f.is_file():
   shutil.copy2(f,assets/f.name);manifest.append({"path":"assets/"+f.name,"sha256":hashlib.sha256(f.read_bytes()).hexdigest()})
 for f in release.iterdir():
- if f.is_file() and f.name!="index.html":shutil.copy2(f,target/f.name)
+ if f.is_file() and f.name!="index.html":
+  if f.suffix==".svg":(target/f.name).write_text(f.read_text(encoding="utf-8"),encoding="utf-8",newline="\n")
+  else:shutil.copy2(f,target/f.name)
 html=(release/"index.html").read_text(encoding="utf-8").replace('"/assets/','"./assets/').replace('"/favicon.svg','"./favicon.svg')
 html=html.replace("<head>","<head>\n<script src=\"./bridge.js\"></script>")
 (target/"index.html").write_text("\n".join(line.rstrip() for line in html.splitlines())+"\n",encoding="utf-8",newline="\n")
