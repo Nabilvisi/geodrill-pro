@@ -1,15 +1,19 @@
 {
   "version": "0.9.0-alpha.2",
-  "frontend_source_sha256": "66b32dce3d9ae1a1578685dd428179a437fcac8a836452c63cf0e0a416f487c1",
-  "source_release": "dist/release-5d4f96b32f6c4479ab6c09c7f45b95cf",
+  "frontend_source_sha256": "c96070864c9713c939ec37df7115561df51fd828e60c1f33ab4ac7a58dc4787d",
+  "source_release": "dist/release-ef017ebc0dae4c329c20d51d285decaa",
   "assets": [
+    {
+      "path": "assets/EngineeringSceneCanvas-Ddna_1zE.js",
+      "sha256": "4e7d470bb505ee6691db56396bc68f94968d136a8cb8380a92bdd3c4b38a0684"
+    },
+    {
+      "path": "assets/index-B5QbBp30.js",
+      "sha256": "2b3ed35f7c724884b20e85a75c24d8221e720a50272ddfa25e50beaa1d1ab77d"
+    },
     {
       "path": "assets/index-D1k-d0nj.css",
       "sha256": "65494c6cfa0faa55f303f8044b56e90e5bf19f261870ae995c2651dc143eb158"
-    },
-    {
-      "path": "assets/index-PgqFzM0o.js",
-      "sha256": "be904f227e1fb65527ef730b9d7713acc83a2d6b93b197db93923002477bfe30"
     }
   ]
 }
