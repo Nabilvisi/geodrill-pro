@@ -4,6 +4,8 @@
 
 **Current source candidate: 0.9.0-alpha.2 — engineering research workstation preview.** The next bounded increment adds immutable wellbore-owned planned/actual/scenario survey and trajectory revisions, scoped engineering context, saved uncertainty/proximity, dependency staleness and hierarchy-aware report/recovery. The local suite passes **697 tests**. [Increment acceptance](docs/V09-WELLBORE-REVISIONS.md) and [template-based progress](GEODRILL_PRO_V0.9_PROGRESS.md) distinguish candidate verification from publication. The published app and research-6 remain alpha.1. Docking/themes, Three.js, Tauri/updater, enterprise infrastructure and independent qualification remain open.
 
+**Isolated scene development — 9 October 2026:** `v09-engineering-scene` adds a real saved-coordinate Three.js/R3F workspace, primary table/plan/3D selection and canonical measurement. Actual raycast picking passes in the standalone and local Streamlit workstations, including feet and vertical exaggeration. The initial scene source passed 697 Python tests and 23 scene checks; the explicit loopback-port runtime increment is being validated separately. The complete scene graph and full architecture remain open in [the scene acceptance matrix](docs/V09-ENGINEERING-SCENE.md). This branch is separate from the preserved PR #4 candidate and has not been published.
+
 The release paragraphs below are historical v0.8 milestones at their recorded revisions.
 
 Published [research-5](https://github.com/Nabilvisi/geodrill-pro/releases/tag/research-5) verification: **635 tests passed locally, on Windows and Linux CI, and in the Windows release job**. Formation geomechanics now has a survey-bound input/import/calculation workflow, editable core/calibration evidence, stress plots and sampled elastic pressure intervals. Complete and withheld studies were saved and reopened on the hosted app; the actual downloaded portable executable also passed import, calculation, citation and fixed-report checks. Installation, backup/restore and uninstall passed; all four public downloads matched their hashes. [Geomechanics release evidence](docs/evidence/geomechanics-verification.json) identifies exact source, hosted assets and package hashes. Remaining software and qualification gaps are tracked in [the delivery matrix](docs/IMPROVEMENT-PLAN.md).
@@ -29,6 +31,15 @@ The source repository is [Nabilvisi/geodrill-pro](https://github.com/Nabilvisi/g
 ## Open the app
 
 On this computer, double-click **Start GeoDrill Pro.cmd**. It starts a hidden local service and opens `http://127.0.0.1:8765` in your default browser. If the service is already running, it opens the existing instance. **Stop GeoDrill Pro.cmd** stops only the responding installation and retains all data.
+
+When another application uses 8765, choose an unused loopback port explicitly:
+
+```powershell
+.\.venv\Scripts\python.exe tools\launch.py --port 8890
+.\dist\GeoDrillPro\GeoDrillPro.exe --port 8890
+```
+
+To stop a source service on that port, use `tools\launch.py --stop --port 8890` with the same data-directory setting. Reuse and stop checks require matching installation, application version and data-directory identity. An occupied or unidentified service remains running. Sessions on explicit ports use distinct cookies, while host, origin, session and request restrictions remain enforced. The listener stays on `127.0.0.1`.
 
 Chrome and the built-in Codex browser were both used to exercise the app. An initial navigation rejection was corrected in the application's local request boundary; Chrome now opens the workstation. No browser protection or extension setting was changed. At the original milestone, the connected Chrome file chooser was unavailable and the upload check used the built-in browser. Version 0.4.0 additionally verifies the EM JSON upload through an isolated Chrome profile using agent-browser.
 

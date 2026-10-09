@@ -62,6 +62,7 @@ from .errors import domain_error_handler, api_error_handler, APIError
 from .routers import projects_router, directional_router, engineering_router, qualification_router, wells_router
 from .routers.trajectories import router as trajectories_router
 from packages.version import APP_VERSION
+from packages.loopback import checked_port, runtime_identity
 
 import sys
 ROOT = Path(sys._MEIPASS).resolve() if getattr(sys, "frozen", False) and hasattr(sys, "_MEIPASS") else Path(__file__).resolve().parents[2]
@@ -70,15 +71,19 @@ ALLOWED_HOSTS = {"127.0.0.1:8765", "localhost:8765", "127.0.0.1:5173", "localhos
 geometry_scope = ContextVar('geometry_scope', default=None)
 
 
-def create_app(data_dir: Path | None = None, mode: str | None = None):
+def create_app(data_dir: Path | None = None, mode: str | None = None, loopback_port: int | None = None):
+    selected_port = checked_port(loopback_port) if loopback_port is not None else None
     app = FastAPI(title="GeoDrill Pro", version=APP_VERSION, docs_url=None, redoc_url=None, openapi_url=None)
     store = Store(data_dir or Path(os.environ.get("GEODRILL_DATA_DIR", ROOT / "data")))
     app.state.store = store
     session = secrets.token_urlsafe(32)
+    session_cookie = f"gd_session_{selected_port}" if selected_port is not None else "gd_session"
     lock = threading.RLock()
     app.state.mutation_lock = lock
     team_mode = (mode or os.environ.get("GEODRILL_MODE", "local")).lower() == "team"
     allowed_hosts = set(ALLOWED_HOSTS)
+    if selected_port is not None:
+        allowed_hosts |= {f"127.0.0.1:{selected_port}", f"localhost:{selected_port}"}
     if team_mode:
         allowed_hosts |= {h.strip() for h in os.environ.get("GEODRILL_ALLOWED_HOSTS", "").split(",") if h.strip()}
     app.state.team_mode = team_mode
@@ -121,7 +126,7 @@ def create_app(data_dir: Path | None = None, mode: str | None = None):
                     return JSONResponse({"detail": "Project not found"}, status_code=404)
                 actor_token = current_actor.set(f"user:{user['username']}")
         elif path.startswith("/api/") and path not in {"/api/session", "/api/health"}:
-            if not secrets.compare_digest(request.cookies.get("gd_session", ""), session):
+            if not secrets.compare_digest(request.cookies.get(session_cookie, ""), session):
                 return JSONResponse({"detail": "Open the workstation to start a local session."}, status_code=401)
             if request.method not in {"GET", "HEAD"} and request.headers.get("x-geodrill-client") != "workstation":
                 return JSONResponse({"detail": "Missing workstation request header"}, status_code=403)
@@ -166,13 +171,14 @@ def create_app(data_dir: Path | None = None, mode: str | None = None):
 
     @app.get("/api/session")
     def bootstrap(response: Response):
-        response.set_cookie("gd_session", session, httponly=True, samesite="strict", path="/")
+        response.set_cookie(session_cookie, session, httponly=True, samesite="strict", path="/")
         return {"mode": "engineering-research", "version": APP_VERSION, "equipment_authority": "none"}
 
     @app.get("/api/health")
     def health():
         return {"status": "ok", "version": APP_VERSION, "mode": "local-research", "equipment_control": False,
-                "instance_id": hashlib.sha256(str(ROOT).encode()).hexdigest()[:16], "pid": os.getpid()}
+                "instance_id": hashlib.sha256(str(ROOT).encode()).hexdigest()[:16],
+                "runtime_id": runtime_identity(store.root), "pid": os.getpid()}
 
     @app.get("/api/projects")
     def projects(request: Request):

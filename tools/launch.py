@@ -1,39 +1,37 @@
 """Start/stop the workstation without a console window for the server."""
 import argparse
-import hashlib
-import json
 import os
 from pathlib import Path
 import signal
 import subprocess
 import sys
 import time
-import urllib.request
 import webbrowser
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0,str(ROOT))
 from packages.frontend import frontend_dist
-URL = 'http://127.0.0.1:8765'
-INSTANCE = hashlib.sha256(str(ROOT).encode()).hexdigest()[:16]
+from packages.loopback import checked_port, local_health, loopback_url, require_owned_service
 
 
-def health():
-    try:
-        with urllib.request.urlopen(URL + '/api/health', timeout=1) as response:
-            return json.load(response)
-    except Exception:
-        return None
+def health(port=8765):
+    return local_health(port)
 
 
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--no-browser', action='store_true')
     parser.add_argument('--stop', action='store_true')
+    parser.add_argument('--port', type=checked_port, default=8765, help='Explicit local loopback port (default 8765)')
     args = parser.parse_args()
-    state = health()
-    if state and state.get('instance_id') != INSTANCE:
-        raise SystemExit('Port 8765 is occupied by a different app or an earlier development service. Close that service before launching this copy.')
+    url = loopback_url(args.port)
+    runtime = Path(os.environ.get('GEODRILL_DATA_DIR', ROOT / 'data'))
+    state = health(args.port)
+    if state is not None:
+        try:
+            require_owned_service(state, ROOT, runtime, args.port)
+        except RuntimeError as error:
+            raise SystemExit(str(error)) from error
     if args.stop:
         if state:
             # Only a currently responding server identifying this installation is stopped.
@@ -45,22 +43,22 @@ def main():
     if not (frontend_dist(ROOT) / 'index.html').exists():
         raise SystemExit('Frontend build is missing. See README.md for setup instructions.')
     if not state:
-        runtime = Path(os.environ.get('GEODRILL_DATA_DIR', ROOT / 'data'))
         runtime.mkdir(parents=True, exist_ok=True)
         with (runtime / 'server.log').open('ab') as log:
-            subprocess.Popen([sys.executable, str(ROOT / 'tools' / 'run_server.py')], cwd=ROOT,
+            subprocess.Popen([sys.executable, str(ROOT / 'tools' / 'run_server.py'), '--port', str(args.port)], cwd=ROOT,
                              stdout=log, stderr=log, stdin=subprocess.DEVNULL,
                              creationflags=subprocess.CREATE_NO_WINDOW if os.name == 'nt' else 0)
         for _ in range(40):
-            state = health()
-            if state and state.get('instance_id') == INSTANCE:
+            state = health(args.port)
+            if state is not None and not state.get('unidentified_service'):
+                require_owned_service(state, ROOT, runtime, args.port)
                 break
             time.sleep(.25)
         else:
             raise SystemExit('The local service did not start. See data/server.log for details.')
-    print('GeoDrill Pro is running at ' + URL)
+    print('GeoDrill Pro is running at ' + url)
     if not args.no_browser:
-        webbrowser.open(URL)
+        webbrowser.open(url)
 
 
 if __name__ == '__main__':
