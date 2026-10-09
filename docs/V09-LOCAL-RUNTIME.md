@@ -14,11 +14,11 @@ The source and Windows launchers accept `--port` while retaining loopback-only b
 
 ## Evidence on 9 October 2026
 
-26 focused runtime checks pass, including a real temporary listener and independent session-cookie jars. The earlier complete suite passed 722 tests; the final suite adds the actual-listener check and is running separately.
+26 focused runtime checks pass, including a real temporary listener and independent session-cookie jars. The final complete suite passed 723 tests, including the actual-listener check. Windows and Linux CI each passed the same 723 Python tests and 23 scene checks at 617c474.
 
 The actual source launcher started on the OS-selected free port 50137 using `build/source-port-check-data`, reused its exact process without duplication, and stopped only that owned process. Health matched installation `b58eaadb62f42ea7` and the isolated data identity. The retained local evidence is `build/source-loopback.json`.
 
-The standalone and Streamlit scene picking checks remain verified in [the scene matrix](V09-ENGINEERING-SCENE.md). New Windows package, installer/recovery and remote CI evidence must be recorded before release acceptance. A runtime check does not establish engineering qualification or drilling clearance.
+The standalone and Streamlit scene picking checks remain verified in [the scene matrix](V09-ENGINEERING-SCENE.md). The rebuilt Windows executable passed actual restored-scene WebGL picking, explicit-port startup/reuse and packaged diagnostics. Installer, backup/fresh restore, refusal and uninstall retention passed; [distribution evidence](evidence/v09-scene-distribution.json) records the exact source/artifact identities. Remote CI passed on both platforms. Packaged restart also retained the saved synthetic trajectory, source and runtime identities; owned test services were stopped with their data retained. Public scene deployment remains pending. A runtime check does not establish engineering qualification or drilling clearance.
 
 ## Usage
 

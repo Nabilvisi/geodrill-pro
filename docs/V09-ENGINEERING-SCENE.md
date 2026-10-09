@@ -1,12 +1,12 @@
 # Phase 5 engineering scene — verified selection foundation, remaining integration open
 
-Separate branch `v09-engineering-scene`, based on b53757b. The original alpha.2 candidate, PR #4 and its Windows artifacts are preserved. This development source is not published. The full supplied architecture remains the target.
+Separate branch `v09-engineering-scene`, based on b53757b. The original alpha.2 candidate, PR #4 and its Windows artifacts are preserved. The approved source is published as [draft PR #5](https://github.com/Nabilvisi/geodrill-pro/pull/5) at 617c474. The scene runtime and Windows artifacts remain unpublished. The full supplied architecture remains the target.
 
 ## Current evidence
 
 - Real lazy Three.js/R3F/Drei WebGL view of persisted kernel geometry.
 - Canonical N/E/positive-down coordinates map to renderer East/up/south axes with origin rebasing before Float32 conversion.
-- Twenty-three numerical/identity checks, TypeScript, production build and 697 Python regression tests pass on the changed scene source.
+- Twenty-three numerical/identity checks, TypeScript, production build and 723 Python regression tests pass on the changed scene source. Windows/Linux CI each pass 723 Python tests and 23 scene checks at 617c474.
 - Saved synthetic geometry renders; table MD selection and unit/exaggeration invariance pass in the browser.
 - Actual canvas clicks now select saved MD in both the standalone workstation and the real Streamlit component iframe. Client coordinates are normalized against the canvas CSS rectangle; point identity is selected by distance to the ray, then camera distance.
 - Primary-source table, plan and 3D selection synchronize in both directions. SVG plan points support mouse, Enter and Space selection.
@@ -20,7 +20,7 @@ Separate branch `v09-engineering-scene`, based on b53757b. The original alpha.2 
 | Saved-kernel coordinate authority, units and origin | Implemented foundation; numerical checks pass |
 | React Three Fiber/Three/Drei renderer | Local production build and actual synthetic rendering pass |
 | Orbit, pan, zoom and fit well/selected | Implemented; broad browser interaction acceptance remains open |
-| Selected station and entity picking | Primary saved-source station raycasting verified in standalone and Streamlit; other entity classes open |
+| Selected station and entity picking | Primary saved-source station raycasting verified in standalone, Streamlit and the rebuilt Windows executable; other entity classes open |
 | Table/plot/3D synchronization | Primary-source selection verified in both directions, including keyboard plan selection; cohort/entity scope open |
 | Planned/actual/scenario/offset saved cohorts | Open |
 | Targets, target picking and fit target | Open; require explicit reference context |
@@ -36,7 +36,7 @@ Separate branch `v09-engineering-scene`, based on b53757b. The original alpha.2 
 | Incremental buffers/instancing/LOD/worker/spatial index | BufferGeometry foundation; representative update/load acceptance open |
 | Representative 100-well interactive load and picking latency | Open; no performance guarantee |
 | WebGL failure/context-loss recovery and accessibility | Error disclosure/table foundation; full recovery/keyboard acceptance open |
-| Streamlit, desktop package, full regression and release acceptance | 697 source regressions, integrity guard and actual local Streamlit WebGL/picking pass; Windows/remote scene acceptance open |
+| Streamlit, desktop package, full regression and release acceptance | 723 local/Windows/Linux regressions, 23 scene checks, actual local Streamlit and packaged WebGL/picking, explicit-port ownership, installer/recovery pass. Scene deployment and full representative acceptance remain open |
 
 ## Limits and continuation
 
@@ -44,6 +44,6 @@ Scene geometry never independently derives a trajectory. Formation patches are i
 
 The current renderer chunk is 947.50 kB / 255.93 kB gzip and loads only for the 3D view. Vite's size warning and the upstream THREE.Clock deprecation remain recorded concerns. Work resumed on 9 October after allowance recovered. [Actual selection proof](evidence/v09-scene-raycast.jpg) and [machine-readable evidence](evidence/v09-scene-foundation.json) record the bounded acceptance. All remaining matrix rows retain their full architectural criteria.
 
-The original alpha.2 candidate stays clean at b53757b in `geodrill-pro`; PR #4 is open. Public Streamlit was awakened and visibly confirmed as alpha.1 on 9 October. The scene source is not published. A separate application currently owns port 8765; isolated acceptance uses 8877 and 8888 and must not stop the unrelated service.
+The original alpha.2 candidate stays clean at b53757b in `geodrill-pro`; PR #4 is open. Public Streamlit was awakened and visibly confirmed as alpha.1 on 9 October. Draft PR #5 publishes the approved source and passing CI. The rebuilt scene package has its own manifest at 617c474 and passed actual packaged picking, backup/restore and installation/uninstallation; see [distribution evidence](evidence/v09-scene-distribution.json). An unrelated application owns port 8765; the validated explicit-port option permits an isolated session without stopping it.
 
 Equipment control is false; equipment authority is none; no automated drilling clearance or independent field qualification is provided.
